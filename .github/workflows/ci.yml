@@ -15,5 +15,9 @@ jobs:
           node-version: '22'
       - name: Testar inicialização e gerar prévia
         run: npm test
+      - name: Testar Chrome real com HTTP prefixado, falha de CDN e arquivo offline
+        run: |
+          npm install --no-save playwright-core@1.58.0
+          node tests/browser-smoke.mjs
       - name: Conferir HTML gerado sem divergências
         run: git diff --exit-code -- riviera-showdown.html
