@@ -110,5 +110,74 @@ else if(action==='override'&&isHost()){const id=$('#override-player').value;cons
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
 document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value});
-async function init(){try{const response=await fetch('./data.json');DATA=await response.json();if(!configured){err='Para habilitar salas online, configure firebase-config.js e as regras do Realtime Database. Veja o README.';render();return}const fapp=initializeApp(firebaseConfig);db=getDatabase(fapp);auth=getAuth(fapp);onAuthStateChanged(auth,async user=>{if(user){uid=user.uid;status();const roomCode=new URLSearchParams(location.search).get('room');if(roomCode&&roomCode.length===6&&!roomId){const snap=await get(ref(db,'rooms/'+roomCode));if(snap.exists()&&snap.val().members?.[uid])await connectRoom(roomCode);else render()}else render()}});await signInAnonymously(auth)}catch(e){error('Não foi possível iniciar: '+e.message)}}
+async function loadData(){
+  if(STANDALONE){
+    const embedded=window.RIVIERA_EMBEDDED_DATA;
+    if(embedded&&Array.isArray(embedded.puzzles)&&embedded.puzzles.length&&Array.isArray(embedded.rankings)){
+      DATA=embedded;dataReady=true;dataProblem="";
+    }else{
+      DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]};dataReady=false;dataProblem="Não foi possível ler os dados da prévia";
+    }
+    render();return;
+  }
+  dataProblem="";
+  try{
+    const response=await fetch("./data.json");
+    if(!response.ok)throw Error("HTTP "+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data.puzzles)||!data.puzzles.length||!Array.isArray(data.rankings))throw Error("Catálogo inválido");
+    DATA=data;dataReady=true;
+  }catch(e){
+    DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]};
+    dataReady=false;dataProblem="Os desafios completos não carregaram ("+(e?.message||"erro desconhecido")+")";
+  }
+  render();
+}
+async function bootNetwork(){
+  if(STANDALONE){connectionState="local";render();return}
+  let config;
+  try{
+    const module=await import("./firebase-config.js");
+    config=module.firebaseConfig;
+  }catch(e){
+    connectionState="unavailable";connectionProblem="Falha ao carregar as configurações do Firebase.";render();return;
+  }
+  configured=!!(config&&config.apiKey&&config.apiKey!=="COLE_AQUI"&&config.databaseURL?.startsWith("https://"));
+  if(!configured){connectionState="unconfigured";render();return}
+  connectionState="connecting";render();
+  try{
+    const [fa,au,da]=await Promise.all([
+      import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js")
+    ]);
+    ({initializeApp}=fa);
+    ({getAuth,signInAnonymously,onAuthStateChanged}=au);
+    ({getDatabase,ref,set,update,onValue,get,remove}=da);
+    const fapp=initializeApp(config);
+    db=getDatabase(fapp);auth=getAuth(fapp);
+    onAuthStateChanged(auth,async user=>{
+      try{
+        if(!user){uid=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
+        uid=user.uid;connectionState="online";connectionProblem="";
+        const roomCode=new URLSearchParams(location.search).get("room");
+        if(roomCode&&roomCode.length===6&&!roomId&&!localDemo){
+          const snap=await get(ref(db,"rooms/"+roomCode));
+          if(snap.exists()&&snap.val().members?.[uid]){await connectRoom(roomCode);return}
+        }
+        render();
+      }catch(e){connectionProblem="Falha ao recuperar a sala: "+e.message;render()}
+    });
+    await signInAnonymously(auth);
+  }catch(e){
+    uid=null;db=null;connectionState="unavailable";
+    connectionProblem="Serviço de salas indisponível: "+(e?.message||"erro de rede");
+    render();
+  }
+}
+async function init(){
+  render(); // mostra a interface antes de acessar a rede
+  await loadData();
+  await bootNetwork();
+}
 init();
