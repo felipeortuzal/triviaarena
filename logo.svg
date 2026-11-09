@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 142" role="img" aria-labelledby="brandTitle brandDesc">
+<title id="brandTitle">Riviera Showdown</title><desc id="brandDesc">Logotipo com coroa e letras brilhantes.</desc>
+<defs><linearGradient id="river" x1="0" x2="1"><stop stop-color="#3fe3cc"/><stop offset=".48" stop-color="#ba65ff"/><stop offset="1" stop-color="#8b57f2"/></linearGradient><linearGradient id="fire" x1="0" x2="1"><stop stop-color="#c6ff46"/><stop offset="1" stop-color="#ffe67b"/></linearGradient></defs>
+<path d="M27 52 L39 20 L59 35 L77 10 L96 35 L116 20 L126 52 Z" fill="url(#fire)" stroke="#fff3b9" stroke-width="3" stroke-linejoin="round"/>
+<path d="M28 56 H125 L119 68 H34 Z" fill="#f0ff91"/>
+<circle cx="39" cy="17" r="6" fill="#edff87"/><circle cx="77" cy="8" r="6" fill="#edff87"/><circle cx="116" cy="17" r="6" fill="#edff87"/>
+<text x="143" y="63" font-family="Arial,Helvetica,sans-serif" font-size="53" font-style="italic" font-weight="900" letter-spacing="-2.2" fill="url(#river)">RIVIERA</text>
+<text x="143" y="111" font-family="Arial,Helvetica,sans-serif" font-size="47" font-style="italic" font-weight="900" letter-spacing="2.1" fill="#f6f4ff">SHOWDOWN</text>
+<path d="M141 121 H533" stroke="url(#river)" stroke-width="5" stroke-linecap="round"/>
+</svg>
