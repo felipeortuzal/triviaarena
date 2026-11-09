@@ -10,8 +10,8 @@ A versão antiga em `/rooms` é preservada fisicamente, mas não aceita novas le
 
 | Caminho | Conteúdo | Exposição |
 | --- | --- | --- |
-| `roomRegistry/{code}` | `version: 2`, `host` (UID anônimo), `phase: open/closed`, `createdAt`, `members: {uid: true}` | Leitura somente de usuário autenticado **com o código exato**. Não contém apelidos, rodada, pontuação ou palpites. Necessário para transações. |
-| `roomPublic/{code}` | `host`, `mode`, `phase`, `number`, `profiles/{uid}` com apelido, `scores/{uid}`; futura `round` | Leitura por membros da registry. Escrita estrutural somente pelo anfitrião; membro pode criar/atualizar somente o próprio perfil. |
+| `roomRegistry/{code}` | `version: 2`, `host` (UID anônimo), `phase: open/closed`, `createdAt` | Leitura somente de usuário autenticado **com o código exato**. Não contém apelidos, rodada, pontuação ou palpites. Necessário para transações. |
+| `roomSeats/{code}/{slot}` | 20 posições fixas, numeradas de 0 a 19, com UID anônimo do ocupante | Leitura de quem conhece o código e está autenticado; somente cada UID pode ocupar um slot vazio, que não pode ser sobrescrito. |\n| `roomMembers/{code}/{uid}` | Prova de admissão, `{slot, joined}` | Raiz somente para membros; próprio UID pode consultar e registrar seu slot comprovado. |\n| `roomPublic/{code}` | `host`, `mode`, `phase`, `number`, `profiles/{uid}` com apelido, `scores/{uid}`; futura `round` | Leitura por membros da registry. Escrita estrutural somente pelo anfitrião; membro pode criar/atualizar somente o próprio perfil. |
 | `roomPrivateGuesses/{code}/{round}/{uid}` | Palpite individual (texto) | Apenas o próprio jogador pode ler/enviar durante uma rodada não revelada; anfitrião só pode ler **depois** da revelação. O nó pai não é legível. |
 | `roomPresence/{code}/{uid}` | `connected`, `updatedAt` | Membros leem. Cada UID altera apenas sua presença; `onDisconnect` a remove. |
 | `rooms` | legado V1, se houver | Bloqueado pelas novas regras; nenhuma exclusão automática. |
@@ -30,14 +30,14 @@ A versão antiga em `/rooms` é preservada fisicamente, mas não aceita novas le
 | Ler palpite próprio ou de terceiro revelado | ✕ | ✕ | Próprio | Anfitrião, após revelação |
 | Encerrar admissão de novos jogadores | ✕ | ✕ | ✕ | ✓ |
 
-O registry não é uma lista pública consultável na raiz: a regra só concede leitura por **código exato**. O código possui seis caracteres sem símbolos ambíguos. UIDs anônimos ficam visíveis a quem conhece o código, mas **nenhum perfil/placar** antes da admissão. Como todo convite por código, devem ser planejados rate limiting, expiração e monitoramento antes de escalar.
+Os registros de descoberta não podem ser listados na raiz: as regras permitem a leitura apenas quando se conhece o código específico. O código possui seis caracteres sem símbolos ambíguos. As identidades anônimas nos slots ficam visíveis a quem conhece o código, mas nenhum apelido/placar é exposto antes da admissão. Cada slot torna-se imutável depois da reserva e o vínculo UID–slot é validado pelo servidor. Como todo convite por código, devem ser planejados rate limiting, expiração e monitoramento antes de escalar.
 
 ## Fluxo de admissão concorrente
 
-1. Usuário entra com Firebase Authentication **Anonymous**. `runTransaction(roomRegistry/{code})` reivindica código livre; colisão **não sobrescreve** nada e gera outro código.
+1. Usuário entra com Firebase Authentication **Anonymous**. `runTransaction(roomRegistry/{code})` reivindica código livre; colisão **não sobrescreve** nada e gera outro código. Em seguida, anfitrião ocupa um slot.
 2. Anfitrião cria `roomPublic/{code}`, com perfil inicial e pontuação inicial.
-3. Convidado acessa `?room=CODIGO`, escolhe apelido e executa `runTransaction` no registry. A regra autoriza só **uma inclusão de UID** por operação, sem mudar metadados, até 20 participantes. Duas gravações pela vigésima vaga são serializadas pelo banco.
-4. Depois de entrar no registry, o UID grava **seu próprio perfil** no lobby privado. Se houver falha após a reserva, repetir a entrada mantém a mesma vaga. Login anônimo persistido no mesmo navegador permite voltar ao mesmo UID e ao mesmo placar.
+3. Convidado acessa `?room=CODIGO`, escolhe apelido e executa `runTransaction` no registry. O cliente reivindica via transação um dos **20 slots fixos**, com gravação permitida apenas quando o slot está vazio e o valor é o próprio UID. Depois, registra `roomMembers/{code}/{uid}` apresentando o slot que realmente ocupa. Duas gravações pela vigésima vaga são serializadas pelo banco. A raiz da sala e os demais slots nunca recebem permissão ampla de escrita.
+4. Depois de reservar seu slot, o UID cria **seu próprio registro de membro** e grava **seu próprio perfil** no lobby privado. Se houver falha após a reserva, repetir a entrada usa o mesmo slot, sem consumir outra vaga. Login anônimo persistido no mesmo navegador permite voltar ao mesmo UID e ao mesmo placar.
 5. Assinaturas de registry/lobby/presença atualizam o grupo. Na desconexão, `onDisconnect` retira apenas o indicador de presença — a vaga continua reservada até o anfitrião fechar ou uma regra futura liberar vagas.
 
 A transação não exige leitura de `roomPublic` antes da admissão; a registry tem **apenas dados mínimos**, sem palpites. A UI bloqueia duplo clique enquanto uma operação está em andamento, e o servidor lida com pedidos simultâneos.
@@ -73,3 +73,5 @@ Os testes usam clientes reais do Firebase JS SDK, duas contas anônimas independ
 4. Testar o projeto real em modo restrito. Não usar `?emulator=1` em ambiente remoto. Publicação, rodada e dois celulares físicos são responsabilidades das etapas 3–4.
 
 **Limite atual:** os convites podem preparar lobby e presença, mas botões de iniciar rodada online estão desabilitados até a etapa 3 (Frases) e 5 (Rankings/Misto). O modo local offline permanece jogável sem Firebase.
+
+**Limite conhecido:** duas abas simultâneas com o **mesmo UID** podem disputar slots diferentes antes de a primeira confirmar o vínculo em `roomMembers`; como os slots são imutáveis, pode haver vaga ocupada sem perfil. A interface bloqueia o clique duplo e novas entradas reutilizam o primeiro slot encontrado, mas o tratamento transacional entre abas distintas ainda exige um mecanismo de reserva por UID para garantir uma vaga por identidade sob concorrência adversarial. Essa condição deve ser testada antes de liberar salas de produção. Nenhum UID consegue reservar um 21º slot, mesmo com esse limite.
