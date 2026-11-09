@@ -48,7 +48,7 @@ function waiting(){
     <div class="cardline row between"><div><h3>Jogadores conectados</h3><p class="tiny">${count} participante(s) registrado(s)</p></div><span class="pill">● Lobby</span></div>
     ${roster()}
     <div class="cardline"><h3>${modeName}</h3><p class="tiny">${room.closed?"Esta sala foi encerrada pelo anfitrião.":"Sala criada com segurança. As partidas online serão habilitadas após a etapa de jogo e pontuação."}</p>
-    ${isHost()?`${btn("Iniciar partida — em desenvolvimento","next","primary",true)} ${btn("Encerrar sala","close-room","ghost")}`:"<p class='tiny'>Aguardando o anfitrião preparar a partida…</p>"}
+    ${isHost()?`${btn("Iniciar partida — em desenvolvimento","next","primary",true)} ${btn(room.closed?"Sala encerrada":"Encerrar sala","close-room","ghost",room.closed)}`:"<p class='tiny'>Aguardando o anfitrião preparar a partida…</p>"}
     <div class="row" style="margin-top:16px">${btn("Voltar ao início","leave-room","ghost")}</div></div></section>`;
 }
 function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined||0)-(b.joined||0));}
@@ -76,7 +76,7 @@ function render(){
   status();
   const banner=err?`<div role="alert" class="status error">${esc(err)}</div>`:"";
   err="";
-  app.innerHTML=banner+(!room?home():room.round?(room.round.type==="letters"?letters():ranking()):roomHeader()+waiting());
+  app.innerHTML=banner+(!room?home():room.round?(room.round.type==="letters"?letters():ranking()):waiting());
 }
 function connectRoom(id){
   if(!roomGateway)throw Error("A conexão da sala ainda não está pronta.");
