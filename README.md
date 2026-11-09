@@ -2,7 +2,7 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Dois jogos: **Decifre a Frase** e **Estimativa de Ranking**, com convite por link, apelidos e estado sincronizado entre dispositivos.
+Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia local de Frases é jogável; o **lobby online V2** já tem código de convite, autenticação anônima, controle de vagas e presença, mas rodadas online só serão liberadas após a etapa 3 (Frases) e etapa 5 (Ranking/Misto).
 
 ## Começar agora
 
@@ -25,21 +25,33 @@ O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.j
 - `logo.svg` — marca oficial Riviera Showdown; `logo.png` permanece como arte legada
 - `riviera-showdown.html` — arquivo único offline (gerado, não edite manualmente)
 - `firebase-config.js` — **preencher com a configuração do seu projeto**
-- `database.rules.json` — regras iniciais para Firebase Realtime Database
+- `rooms-v2.js` — admissão via slots transacionais, perfis e reconexão com mesmo UID
+- `database.rules.json` — regras de acesso por papéis e isolamento de palpites V2
+- `firebase.json` e `.firebaserc` — emuladores de Auth e Realtime Database com projeto `demo-riviera-showdown`
+- `docs/arquitetura-salas-v2.md` — matriz de permissões, formato de dados e configuração segura
+
+## Testar lobby com os emuladores (sem credenciais de produção)
+
+```bash
+npm install
+npm run test:rooms
+```
+
+Para testar manualmente: inicie `npx firebase emulators:start --only auth,database --project demo-riviera-showdown`, sirva o site com `python -m http.server 8000` e abra `http://localhost:8000/?emulator=1`. A configuração de emulador só é ativada quando você opta pelo parâmetro em `localhost`/`127.0.0.1`. Isso **não liga Firebase de produção**. Ver [arquitetura de salas](docs/arquitetura-salas-v2.md).
 
 ## Publicar online (GitHub Pages + Firebase)
 
 1. Crie um projeto em https://console.firebase.google.com/.
 2. Em **Authentication > Sign-in method**, habilite **Anonymous**.
 3. Em **Build > Realtime Database**, crie um banco e copie a URL do banco.
-4. Em **Realtime Database > Rules**, cole o conteúdo de `database.rules.json` e publique as regras. Revise as regras para seu uso antes de abrir o site ao público.
+4. Em **Realtime Database > Rules**, publique as regras de `database.rules.json` **antes de habilitar salas**. O caminho V1 `/rooms` fica bloqueado, os caminhos V2 têm autorização por UID.
 5. Em **Project settings > Your apps**, registre um **Web app** e copie os campos para `firebase-config.js`. `databaseURL` deve ser a URL do Realtime Database, não do Firestore.
 6. Crie um repositório público no GitHub e envie todos os arquivos para a raiz. Em **Settings > Pages**, selecione **Deploy from a branch**, `main`, `/ (root)`.
-7. Aguarde o GitHub Pages publicar e abra a URL. Crie uma sala, copie o convite e abra em outro navegador/celular.
+7. Confira o deploy do GitHub Pages e o link HTTPS. Em seguida, valide lobby online em dois navegadores/perfis distintos. Rodadas e aprovação final entre dois celulares são etapas 3 e 4.
 
-**Atenção:** só fazer upload do HTML **não ativa multiplayer**; é obrigatório configurar o Firebase. O arquivo de configuração web do Firebase pode ficar público; as regras de acesso ao banco são indispensáveis. O anfitrião deve manter a aba aberta para conduzir a partida. Os participantes não precisam criar contas.
+**Atenção:** o HTML offline **não ativa multiplayer**. A configuração pública do app Web Firebase não substitui as regras de acesso e não deve incluir credenciais administrativas. Em produção, só habilite as salas depois de validar o banco e autenticação anônima. Convites para uma sala existente não expõem apelidos ou placar antes da admissão.
 
-## Jogos
+## Catálogo e próximos jogos
 
 - **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e pontuação opcional.
 - **Rankings:** sorteio de categoria, posição e recorte Top 25/50/75/100; palpites enviados individualmente e revelados juntos. Distâncias e pódio automáticos; o anfitrião pode corrigir posições de nomes alternativos antes de pontuar.
