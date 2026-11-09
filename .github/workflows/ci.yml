@@ -4,6 +4,9 @@ on:
     branches: [main, "feat/**"]
   pull_request:
     branches: [main]
+concurrency:
+  group: riviera-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   regressao:
     runs-on: ubuntu-latest
