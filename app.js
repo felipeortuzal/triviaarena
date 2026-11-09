@@ -168,42 +168,55 @@ async function loadData(){
 }
 async function bootNetwork(){
   if(STANDALONE){connectionState="local";render();return}
+  emulatorMode=(location.hostname==="localhost"||location.hostname==="127.0.0.1")&&new URLSearchParams(location.search).get("emulator")==="1";
   let config;
   try{
-    const module=await import("./firebase-config.js");
-    config=module.firebaseConfig;
-  }catch(e){
-    connectionState="unavailable";connectionProblem="Falha ao carregar as configurações do Firebase.";render();return;
+    config=(await import("./firebase-config.js")).firebaseConfig;
+  }catch(e){connectionState="unavailable";connectionProblem="Falha ao carregar as configurações do Firebase.";render();return}
+  if(emulatorMode){
+    config={apiKey:"demo-riviera-web",authDomain:"demo-riviera-showdown.firebaseapp.com",
+      databaseURL:"https://demo-riviera-showdown-default-rtdb.firebaseio.com",
+      projectId:"demo-riviera-showdown",appId:"1:123456789:web:demo"};
   }
   configured=!!(config&&config.apiKey&&config.apiKey!=="COLE_AQUI"&&config.databaseURL?.startsWith("https://"));
   if(!configured){connectionState="unconfigured";render();return}
   connectionState="connecting";render();
   try{
-    const [fa,au,da]=await Promise.all([
+    const [fa,au,da,gatewayModule]=await Promise.all([
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"),
-      import("https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js")
+      import("https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"),
+      import("./rooms-v2.js")
     ]);
     ({initializeApp}=fa);
     ({getAuth,signInAnonymously,onAuthStateChanged}=au);
     ({getDatabase,ref,set,update,onValue,get,remove}=da);
     const fapp=initializeApp(config);
     db=getDatabase(fapp);auth=getAuth(fapp);
+    if(emulatorMode){
+      // Só localhost + ?emulator=1. Nunca aponta a produção para um emulador.
+      au.connectAuthEmulator(auth,"http://127.0.0.1:9099",{disableWarnings:true});
+      da.connectDatabaseEmulator(db,"127.0.0.1",9000);
+    }
     onAuthStateChanged(auth,async user=>{
       try{
-        if(!user){uid=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
-        uid=user.uid;connectionState="online";connectionProblem="";
-        const roomCode=new URLSearchParams(location.search).get("room");
-        if(roomCode&&roomCode.length===6&&!roomId&&!localDemo){
-          const snap=await get(ref(db,"rooms/"+roomCode));
-          if(snap.exists()&&snap.val().members?.[uid]){await connectRoom(roomCode);return}
+        if(!user){uid=null;roomGateway=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
+        uid=user.uid;
+        roomGateway=gatewayModule.makeRoomGateway({
+          db,uid,api:{ref:da.ref,get:da.get,set:da.set,runTransaction:da.runTransaction,
+            onValue:da.onValue,onDisconnect:da.onDisconnect,serverTimestamp:da.serverTimestamp}
+        });
+        connectionState="online";connectionProblem="";
+        const pending=new URLSearchParams(location.search).get("room")?.toUpperCase();
+        if(pending&&roomGateway.validateCode(pending)&&!roomId&&!localDemo){
+          if(await roomGateway.resumeRoom(pending)){connectRoom(pending);return}
         }
         render();
       }catch(e){connectionProblem="Falha ao recuperar a sala: "+e.message;render()}
     });
     await signInAnonymously(auth);
   }catch(e){
-    uid=null;db=null;connectionState="unavailable";
+    uid=null;db=null;roomGateway=null;connectionState="unavailable";
     connectionProblem="Serviço de salas indisponível: "+(e?.message||"erro de rede");
     render();
   }
