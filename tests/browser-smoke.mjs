@@ -31,7 +31,10 @@ async function browserChecks(){
     await page.locator('[data-action="stop-demo"]').click();
     await page.locator('[data-action="demo"]').waitFor();
     const extraWidth=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-window.innerWidth));
-    assert.ok(extraWidth<=1,"overflow horizontal na tela móvel: "+extraWidth+"px");
+    const overflowNodes=await page.evaluate(()=>Array.from(document.querySelectorAll("*"))
+      .map(el=>({tag:el.tagName,cls:el.className,txt:el.textContent?.slice(0,45),left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right}))
+      .filter(el=>el.right>window.innerWidth+1||el.left<-1).slice(0,12));
+    assert.ok(extraWidth<=1,"overflow horizontal na tela móvel: "+extraWidth+"px; nós: "+JSON.stringify(overflowNodes));
     assert.deepEqual(errors,[],"exceções fatais no console");
   }
   try{
