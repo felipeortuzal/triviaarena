@@ -18,3 +18,13 @@
 - Abrir o HTML baixado por `file://`, com a rede desligada, e jogar a rodada de demonstração. Em uma janela estreita, alcançar todos os controles sem rolagem horizontal da página.
 - Simular configuração ausente e indisponibilidade da dependência externa. Registrar o comportamento e confirmar que o modo local continua acessível.
 - Entregar o HTML testado, o commit e o resultado de cada cenário. O milestone é a inicialização e a prévia local.
+
+## Registro de execução — 09/11/2026
+
+**Estado: Validada** na branch de implementação, após o CI. A versão corrigiu a falha sintática do renderizador, passou a exibir a interface antes das tentativas de rede, tornou Firebase e seus módulos opcionais, adicionou uma rodada de demonstração offline com duas dicas, resposta e avanço, e aplicou a marca Riviera Showdown com logo SVG. O arquivo `riviera-showdown.html` deriva dos mesmos arquivos de interface e dados, via `npm run build`.
+
+**Evidências:** [GitHub Actions #42717663362](https://github.com/felipeortuzal/triviaarena/actions/runs/42717663362) — 3/3 testes Node aprovados; Chrome headless verificou início em HTTP com prefixo `/triviaarena/`, ausência de erro fatal, `file://` em contexto sem conexão, ações de dicas/revelação/próximo desafio, viewport móvel de 375 px sem overflow horizontal, fallback quando `data.json` falha e quando a CDN falha com configuração de teste. O CI também regenerou o HTML e confirmou que está idêntico à cópia versionada.
+
+**Ambiente:** Node.js 22, GitHub Actions Ubuntu com Google Chrome headless e Playwright Core. **Não é** um teste em dois aparelhos físicos, nem aprovação do Firebase em produção ou publicação do GitHub Pages. Essas verificações são previstas para as etapas 2, 3 e 4. As ações de sala online permanecem desativadas enquanto `firebase-config.js` contiver marcadores de exemplo. Não foram alteradas regras de produção ou contratado serviço.
+
+**Retomada:** executar a etapa 2 para modelar e testar salas, permissões, autenticação anônima e regras no emulador antes de disponibilizar multiplayer.
