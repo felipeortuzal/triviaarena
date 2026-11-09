@@ -29,46 +29,51 @@ export const makeRoomGateway=function makeRoomGateway({db,uid,api,now=()=>Date.n
     return e instanceof Error?e:Error("Não foi possível acessar a sala.");
   }
   async function claimSeat(code){
-    const prior=await get(at(p.member(code,uid)));
-    if(prior.exists())return prior.val().slot;
-    let seats=await get(at(p.seats(code)));
-    let all=seats.val()||{};
-    let own=Object.keys(all).find(k=>all[k]===uid);
-    if(own!==undefined){
-      const slot=Number(own);
-      try{await set(at(p.member(code,uid)),{slot,joined:now()})}catch(e){
-        // Se outra aba já inscreveu o mesmo UID, reutilize sua inscrição.
-        const current=await get(at(p.member(code,uid)));
-        if(!current.exists())throw niceError(e);
-        return current.val().slot;
-      }
+  const memberRef=at(p.member(code,uid));
+  const prior=await get(memberRef);
+  if(prior.exists())return prior.val().slot;
+  const claimRef=at(`roomClaims/${code}/${uid}`);
+  async function finalize(slot){
+    const registration={slot,joined:now()};
+    try{
+      await set(memberRef,registration);
       return slot;
+    }catch(e){
+      const existing=await get(memberRef);
+      if(existing.exists())return existing.val().slot; // segunda aba concluiu primeiro
+      throw niceError(e);
     }
-    for(let index=0;index<20;index++){
-      if(all[String(index)]!==undefined)continue;
-      let claimed;
-      try{
-        claimed=await runTransaction(at(p.seats(code)+"/"+index),x=>x===null?uid:undefined,{applyLocally:false});
-      }catch(e){
-        // Pode haver outro cliente reivindicando este slot. Revalide a situação.
-        if(String(e?.code||"").includes("permission"))continue;
-        throw niceError(e);
-      }
-      if(!claimed.committed)continue;
-      try{await set(at(p.member(code,uid)),{slot:index,joined:now()})}catch(e){
-        const current=await get(at(p.member(code,uid)));
-        if(!current.exists())throw niceError(e);
-        return current.val().slot;
-      }
-      return index;
-    }
-    seats=await get(at(p.seats(code)));
-    all=seats.val()||{};
-    own=Object.keys(all).find(k=>all[k]===uid);
-    if(own!==undefined)return claimSeat(code);
-    throw Error("A sala está cheia (20 jogadores).");
   }
-  async function createRoom({nick,mode}){
+  for(let attempt=0;attempt<65;attempt++){
+    const member=await get(memberRef);
+    if(member.exists())return member.val().slot;
+    const seats=(await get(at(p.seats(code)))).val()||{};
+    const own=Object.keys(seats).find(s=>seats[s]===uid);
+    if(own!==undefined)return finalize(Number(own));
+    const available=Array.from({length:20},(_,i)=>i).filter(i=>seats[i]===undefined);
+    if(!available.length)throw Error("A sala está cheia (20 jogadores).");
+    const claimed=(await get(claimRef)).val();
+    if(claimed===null){
+      const chosen=available[0];
+      const transaction=await runTransaction(claimRef,x=>x===null?chosen:undefined,{applyLocally:false});
+      if(!transaction.committed)continue;
+      continue;
+    }
+    if(seats[claimed]!==undefined&&seats[claimed]!==uid){
+      const newSlot=available[0];
+      const transaction=await runTransaction(claimRef,x=>x===claimed?newSlot:undefined,{applyLocally:false});
+      // Somente uma revisão por UID prevalece. Não altere slot vazio/em negociação.
+      if(!transaction.committed)continue;
+      continue;
+    }
+    const seatRef=at(p.seats(code)+"/"+claimed);
+    const transaction=await runTransaction(seatRef,x=>x===null?uid:undefined,{applyLocally:false});
+    if(transaction.committed)return finalize(claimed);
+    // Outra aba com mesmo UID pode ter ocupado; a próxima leitura recupera.
+  }
+  throw Error("Muitas entradas simultâneas. Reabra o convite e tente novamente.");
+}
+async function createRoom({nick,mode}){
     const name=checkName(nick);
     if(!["letters","rank","mixed"].includes(mode))throw Error("Modo de jogo inválido.");
     for(let i=0;i<16;i++){
