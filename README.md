@@ -1,15 +1,29 @@
-# TriviaArena — Sala de Jogos V2
+# Riviera Showdown — plataforma de jogos com amigos
 
-**Desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
+**Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
 Dois jogos: **Decifre a Frase** e **Estimativa de Ranking**, com convite por link, apelidos e estado sincronizado entre dispositivos.
 
+## Começar agora
+
+Abra `riviera-showdown.html` por duplo clique para experimentar **Decifre a Frase** no próprio aparelho, mesmo sem internet. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
+
+Para reconstruir e testar a prévia local, com Node.js 22 ou superior:
+
+```bash
+npm run build
+npm test
+```
+
+O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.json` e `logo.svg`, sem manter outra implementação do jogo. O teste de navegador `node tests/browser-smoke.mjs` exige `playwright-core` e Chrome/Chromium instalados; ele é executado no GitHub Actions. Não confunda uma demonstração local com sala multiplayer validada.
+
 ## Arquivos
 
-- `index.html` — interface responsiva
+- `index.html` — interface responsiva com carregamento progressivo
 - `app.js` — regras, sorteios e multiplayer
 - `data.json` — 104 frases e 4 rankings-base de 100 itens
-- `logo.png` — identidade visual integrada
+- `logo.svg` — marca oficial Riviera Showdown; `logo.png` permanece como arte legada
+- `riviera-showdown.html` — arquivo único offline (gerado, não edite manualmente)
 - `firebase-config.js` — **preencher com a configuração do seu projeto**
 - `database.rules.json` — regras iniciais para Firebase Realtime Database
 
