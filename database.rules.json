@@ -33,7 +33,7 @@
       "$code": {
         ".read": "auth != null",
         "$slot": {
-          ".write": "auth != null && $slot.matches(/^([0-9]|1[0-9])$/) && !data.exists() && newData.val() === auth.uid && root.child('roomRegistry').child($code).child('phase').val() === 'open' && !root.child('roomMembers').child($code).child(auth.uid).exists()",
+          ".write": "auth != null && $slot.matches(/^([0-9]|1[0-9])$/) && !data.exists() && newData.val() === auth.uid && root.child('roomRegistry').child($code).child('phase').val() === 'open' && !root.child('roomMembers').child($code).child(auth.uid).exists() && root.child('roomClaims').child($code).child(auth.uid).val() + '' === $slot",
           ".validate": "newData.isString() && newData.val() === auth.uid"
         }
       }
@@ -137,6 +137,15 @@
           "$other": {
             ".validate": false
           }
+        }
+      }
+    },
+    "roomClaims": {
+      "$code": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && newData.exists() && newData.isNumber() && newData.val() >= 0 && newData.val() <= 19 && !root.child('roomMembers').child($code).child(auth.uid).exists() && (!data.exists() || (data.val() !== newData.val() && root.child('roomSeats').child($code).child(data.val() + '').exists() && root.child('roomSeats').child($code).child(data.val() + '').val() !== auth.uid))",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 19"
         }
       }
     }
