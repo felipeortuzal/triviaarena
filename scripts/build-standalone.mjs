@@ -7,7 +7,7 @@ const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 let html=read('index.html');
 const code=read('app.js');
 const data=JSON.parse(read('data.json'));
-const logo='data:image/svg+xml;base64,'+Buffer.from(read('logo.svg')).toString('base64');
+const logo='data:image/svg+xml,'+encodeURIComponent(read('logo.svg'));
 const escapedData=JSON.stringify(data).replace(/</g,'\\u003c');
 const boot='<script>window.RIVIERA_STANDALONE=true;window.RIVIERA_EMBEDDED_DATA='+escapedData+';<\/script>';
 const inline='<script type="module">\n'+code.replace(/<\/script/gi,'<\\/script')+'\n<\/script>';
