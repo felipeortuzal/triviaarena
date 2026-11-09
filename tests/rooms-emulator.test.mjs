@@ -5,6 +5,10 @@ import {initializeAuth,connectAuthEmulator,signInAnonymously,inMemoryPersistence
 import {getDatabase,connectDatabaseEmulator,ref,get,set,update,runTransaction,onValue,onDisconnect,serverTimestamp} from "firebase/database";
 import {makeRoomGateway} from "../rooms-v2.js";
 
+// Um erro de conexão nunca pode deixar o CI preso indefinidamente.
+const watchdog=setTimeout(()=>{console.error("EMULATOR_TEST_WATCHDOG: execução excedeu 150 s");process.exit(1)},150000);
+watchdog.unref();
+console.log("EMULATOR_TEST_START");
 const projectId="demo-riviera-showdown";
 const base={apiKey:"demo-riviera-web",projectId,authDomain:projectId+".firebaseapp.com",databaseURL:"https://demo-riviera-showdown-default-rtdb.firebaseio.com",appId:"1:123456789:web:demo"};
 const sdk={ref,get,set,update,runTransaction,onValue,onDisconnect,serverTimestamp};
@@ -32,15 +36,19 @@ async function unauthenticated(){
 }
 const rejected=async promise=>assert.rejects(promise,/permission|denied|PERMISSION|rejeitad/i);
 test.after(async ()=>{
+  console.log("EMULATOR_TEST_CLEANUP");
   for(const c of clients)await deleteApp(c.app).catch(()=>{});
 });
 
 test('isolamento, 2 usuários, permissões, palpites privados e reconexão',async function testMain(){
+  console.log("TEST_MAIN_START");
   const h=await client("host",()=> "RVAB23");
   const g=await client("guest");
   const out=await client("outsider");
   const unauth=await unauthenticated();
+  console.log("MAIN_CLIENTS_READY");
   const created=await h.gateway.createRoom({mode:"letters",nick:"Anfitrião"});
+  console.log("MAIN_ROOM_CREATED");
   assert.equal(created.code,"RVAB23");
   const url="roomRegistry/RVAB23";
   await rejected(get(ref(unauth.db,url)));
@@ -50,6 +58,7 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   assert.equal(invite.val().phase,"open");
   assert.equal(JSON.stringify(invite.val()).includes("Anfitrião"),false,"convite não revela apelidos");
   const first=await g.gateway.joinRoom({code:"RVAB23",nick:"Convidado"});
+  console.log("MAIN_GUEST_JOINED");
   assert.equal(first.alreadyMember,false);
   const rejoined=await g.gateway.joinRoom({code:"RVAB23",nick:"Convidado"});
   assert.equal(rejoined.alreadyMember,true);
@@ -85,10 +94,12 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   await rejected(set(ref(out.db,"roomPublic/RVAB23/round/revealed"),true));
   await rejected(get(ref(g.db,"roomPublic")));
   await h.gateway.closeRoom("RVAB23");
+  console.log("MAIN_AUTHORIZATION_PASSED");
   await assert.rejects(out.gateway.joinRoom({code:"RVAB23",nick:"Intruso"}),/encerrada/);
   assert.equal((await get(ref(g.db,"roomRegistry/RVAB23/phase"))).val(),"closed");
 });
 test('colisão de código preserva a sala original',async function testCollision(){
+  console.log("TEST_COLLISION_START");
   const first=await client("creator1",()=> "RVCD34");
   const second=await client("creator2",()=> "RVCD34");
   await first.gateway.createRoom({mode:"mixed",nick:"Criador A"});
@@ -97,10 +108,11 @@ test('colisão de código preserva a sala original',async function testCollision
   assert.equal((await get(ref(first.db,"roomPublic/RVCD34/mode"))).val(),"mixed");
 });
 test('disputa pela vigésima vaga admite somente um',async function testRace(){
+  console.log("TEST_RACE_START");
   const host=await client("racehost",()=> "RVEF56");
   const code="RVEF56";
   await host.gateway.createRoom({mode:"letters",nick:"Host"});
-  for(let i=0;i<18;i++){
+  for(let i=0;i<18;i++){ if(i%5===0)console.log("RACE_FILL_"+i);
     const c=await client("seed"+i);
     await c.gateway.joinRoom({code,nick:"P"+i});
   }
