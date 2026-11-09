@@ -78,7 +78,19 @@ async function browserChecks(){
     await fallback.locator('[data-action="demo"]').click();
     await fallback.getByText("7 M D M",{exact:true}).waitFor();
     await fallbackCtx.close();
-    console.log("PASS: HTTP prefixado, file:// offline, dicas/revelação/avanço, mobile 375px e falha de dados");
+    // Configuração válida, mas CDN indisponível: o bootstrap não trava.
+    const cdnCtx=await browser.newContext({viewport:{width:375,height:812}});
+    const cdnPage=await cdnCtx.newPage();
+    await cdnPage.route("**/firebase-config.js",route=>route.fulfill({
+      status:200,contentType:"text/javascript",
+      body:'export const firebaseConfig={apiKey:"test",databaseURL:"https://fake.firebaseio.com",projectId:"test",authDomain:"test",appId:"test"};'
+    }));
+    await cdnPage.route("https://www.gstatic.com/**",route=>route.abort());
+    await cdnPage.goto(base);
+    await cdnPage.getByText("Não foi possível conectar às salas.",{exact:false}).waitFor();
+    await verifyDemo(cdnPage);
+    await cdnCtx.close();
+    console.log("PASS: HTTP prefixado, file:// offline, dicas/revelação/avanço, mobile 375px, falha de dados e falha de CDN");
   }catch(error){failures.push(error);throw error}
   finally{
     if(server)await new Promise(resolve=>server.close(resolve));
