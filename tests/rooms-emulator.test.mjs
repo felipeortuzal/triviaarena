@@ -132,3 +132,19 @@ test('disputa pela vigésima vaga admite somente um',async function testRace(){
   const denied=results.find(r=>r.status==="rejected");
   assert.match(denied.reason.message,/cheia|recusada|possível entrar/i);
 });
+
+test('duas solicitações simultâneas do mesmo UID ocupam só um slot',async function testDuplicateTabs(){
+  console.log("TEST_DUPLICATE_TABS_START");
+  const host=await client("tabs-host",()=> "RVGH67");
+  const player=await client("tabs-player");
+  await host.gateway.createRoom({nick:"Host",mode:"letters"});
+  const two=await Promise.allSettled([
+    player.gateway.joinRoom({code:"RVGH67",nick:"Mesmo UID"}),
+    player.gateway.joinRoom({code:"RVGH67",nick:"Mesmo UID"})
+  ]);
+  assert.equal(two.filter(r=>r.status==="fulfilled").length,2,"duas abas reutilizam a mesma admissão");
+  const seats=(await get(ref(host.db,"roomSeats/RVGH67"))).val();
+  assert.equal(Object.values(seats).filter(v=>v===player.uid).length,1,"o mesmo UID não consome duas vagas");
+  const members=(await get(ref(host.db,"roomMembers/RVGH67"))).val();
+  assert.equal(Object.keys(members).length,2);
+});
