@@ -53,7 +53,7 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   assert.equal(first.alreadyMember,false);
   const rejoined=await g.gateway.joinRoom({code:"RVAB23",nick:"Convidado"});
   assert.equal(rejoined.alreadyMember,true);
-  const snap=await get(ref(h.db,url+"/members"));
+  const snap=await get(ref(h.db,"roomMembers/RVAB23"));
   assert.equal(Object.keys(snap.val()).length,2,"reentrada mesma identidade não duplica vaga");
   const board=await get(ref(g.db,"roomPublic/RVAB23"));
   assert.equal(board.val().profiles[g.uid].nick,"Convidado");
@@ -64,9 +64,10 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   await rejected(set(ref(g.db,"roomPublic/RVAB23/scores/"+g.uid),500));
   await rejected(set(ref(g.db,"roomPublic/RVAB23/profiles/"+h.uid+"/nick"),"Ataque"));
   await rejected(set(ref(g.db,"roomPublic/RVAB23/profiles/"+g.uid+"/nick"),42));
-  await rejected(set(ref(g.db,"roomRegistry/RVAB23/members/another-id"),true));
+  await rejected(set(ref(g.db,"roomMembers/RVAB23/another-id"),{slot:10,joined:Date.now()}));
+  await rejected(set(ref(g.db,"roomSeats/RVAB23/10"),"another-id"));
   await rejected(set(ref(g.db,"roomRegistry/RVAB23/host"),g.uid));
-  await rejected(set(ref(g.db,"roomRegistry/RVAB23/members/"+g.uid),false));
+  await rejected(set(ref(g.db,"roomMembers/RVAB23/"+g.uid),null));
   await rejected(get(ref(g.db,"roomPrivateGuesses/RVAB23")));
   await update(ref(h.db,"roomPublic/RVAB23"),{phase:"playing",number:1,round:{id:"r1",type:"rank",revealed:false}});
   await set(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid),"Meu palpite");
@@ -103,7 +104,7 @@ test('disputa pela vigésima vaga admite somente um',async function testRace(){
     const c=await client("seed"+i);
     await c.gateway.joinRoom({code,nick:"P"+i});
   }
-  const before=await get(ref(host.db,"roomRegistry/"+code+"/members"));
+  const before=await get(ref(host.db,"roomMembers/"+code));
   assert.equal(Object.keys(before.val()).length,19);
   const a=await client("race-a"),b=await client("race-b");
   const results=await Promise.allSettled([
@@ -112,9 +113,9 @@ test('disputa pela vigésima vaga admite somente um',async function testRace(){
   ]);
   const successes=results.filter(r=>r.status==="fulfilled").length;
   assert.equal(successes,1,"apenas um reivindica a última vaga");
-  const after=await get(ref(host.db,"roomRegistry/"+code+"/members"));
+  const after=await get(ref(host.db,"roomMembers/"+code));
   assert.equal(Object.keys(after.val()).length,20);
-  const admitted=[a.uid,b.uid].filter(x=>after.val()[x]===true);
+  const admitted=[a.uid,b.uid].filter(x=>after.val()[x]!==undefined);
   assert.equal(admitted.length,1);
   const denied=results.find(r=>r.status==="rejected");
   assert.match(denied.reason.message,/cheia|recusada|possível entrar/i);
