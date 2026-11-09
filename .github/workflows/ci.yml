@@ -1,0 +1,19 @@
+name: Riviera Showdown · Etapa 1
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+jobs:
+  regressao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar inicialização e gerar prévia
+        run: npm test
+      - name: Conferir HTML gerado sem divergências
+        run: git diff --exit-code -- riviera-showdown.html
