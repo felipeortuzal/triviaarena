@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {initializeApp,deleteApp} from "firebase/app";
 import {initializeAuth,connectAuthEmulator,signInAnonymously,inMemoryPersistence,signOut} from "firebase/auth";
-import {getDatabase,connectDatabaseEmulator,ref,get,set,update,runTransaction,onValue,onDisconnect,serverTimestamp} from "firebase/database";
+import {getDatabase,connectDatabaseEmulator,goOffline,ref,get,set,update,runTransaction,onValue,onDisconnect,serverTimestamp} from "firebase/database";
 import {makeRoomGateway} from "../rooms-v2.js";
 
 // Um erro de conexão nunca pode deixar o CI preso indefinidamente.
@@ -37,7 +37,8 @@ async function unauthenticated(){
 const rejected=async promise=>assert.rejects(promise,/permission|denied|PERMISSION|rejeitad/i);
 test.after(async ()=>{
   console.log("EMULATOR_TEST_CLEANUP");
-  for(const c of clients)await deleteApp(c.app).catch(()=>{});
+  for(const c of clients){try{if(c.db)goOffline(c.db)}catch{};try{if(c.auth)await signOut(c.auth)}catch{};await deleteApp(c.app).catch(()=>{})}
+  console.log("EMULATOR_TEST_CLEANUP_DONE");
 });
 
 test('isolamento, 2 usuários, permissões, palpites privados e reconexão',async function testMain(){
