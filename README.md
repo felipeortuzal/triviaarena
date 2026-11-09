@@ -1,5 +1,7 @@
 # TriviaArena — Sala de Jogos V2
 
+**Desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
+
 Dois jogos: **Decifre a Frase** e **Estimativa de Ranking**, com convite por link, apelidos e estado sincronizado entre dispositivos.
 
 ## Arquivos
