@@ -1,0 +1,11 @@
+{
+  "name": "riviera-showdown",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prévia offline e interface Riviera Showdown",
+  "scripts": {
+    "build": "node scripts/build-standalone.mjs",
+    "test": "npm run build && node --test tests/startup.test.mjs"
+  }
+}
