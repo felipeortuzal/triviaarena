@@ -74,9 +74,32 @@ function usedKey(type){return type==='letters'?'usedLetters':'usedRanks'}
 function nextChoice(){const current=room.round;let type=room.mode==='mixed'?(current?.type==='letters'?'rank':'letters'):room.mode;if(type==='letters'){const used=room.usedLetters||[];let available=DATA.puzzles.map((_,i)=>i).filter(i=>!used.includes(i));if(!available.length)available=DATA.puzzles.map((_,i)=>i);const index=pick(available);return {type:'letters',index,hints:0,revealed:false,usedLetters:available.length===DATA.puzzles.length&&used.length? [index]:[...used,index]}}
  const pool=[...DATA.rankings,...(room.customRankings||[])];if(!pool.length)throw Error('Não há rankings cadastrados.');const used=room.usedRanks||[];let choices=pool.filter(x=>!used.includes(x.id));if(!choices.length)choices=pool;let c=pick(choices);const limits=[25,50,75,100,250,500,1000].filter(n=>n<=c.items.length);if(!limits.includes(c.items.length))limits.push(c.items.length);const limit=pick(limits);const history=room.targetHistory?.[c.id+'-'+limit]||[];let positions=Array.from({length:limit},(_,i)=>i+1).filter(i=>!history.includes(i));if(!positions.length)positions=Array.from({length:limit},(_,i)=>i+1);const target=pick(positions);const id='r'+Date.now().toString(36)+random(9999);return {type:'rank',categoryId:c.id,custom:room.customRankings?.find(x=>x.id===c.id)||null,limit,target,id,revealed:false,usedRanks:choices.length===pool.length&&used.length?[c.id]:[...used,c.id],targetHistory:{...(room.targetHistory||{}),[c.id+'-'+limit]:positions.length===limit&&history.length?[target]:[...history,target]}}}
 async function nextRound(){if(localDemo){nextLocalRound();return}if(!isHost())return;let add=nextChoice();const updateData={number:(room.number||0)+1,round:add};if(add.usedLetters)updateData.usedLetters=add.usedLetters;if(add.usedRanks)updateData.usedRanks=add.usedRanks;if(add.targetHistory)updateData.targetHistory=add.targetHistory;delete add.usedLetters;delete add.usedRanks;delete add.targetHistory;if(room.round?.type==='letters'&&room.round.revealed){const winner=$('#letter-winner')?.value;if(winner){updateData[`scores/${winner}`]=(room.scores?.[winner]||0)+1}}if(room.round?.type==='rank'&&room.round.revealed&&!room.round.scored){const ranked=scoreRank(room.round);const scores={...room.scores};ranked.forEach(x=>{if(x.place&&x.place<=3)scores[x.uid]=(scores[x.uid]||0)+({1:5,2:3,3:1}[x.place]||0)});updateData.scores=scores}await update(ref(db,'rooms/'+roomId),updateData)}
-async function handle(action){if(busy)return;busy=true;try{if(action==='choose-letters'||action==='choose-rank'){modeChoice=action==='choose-letters'?'letters':'rank';render();$('#mode').value=modeChoice;$('#nick').focus()}
-else if(action==='create'){if(!uid)throw Error('Conexão ainda não pronta. Configure o Firebase e tente novamente.');const name=getNick();let id=code();while((await get(ref(db,'rooms/'+id))).exists())id=code();await set(ref(db,'rooms/'+id),{host:uid,mode:selectedMode(),created:Date.now(),number:0,members:{[uid]:{uid,nick:name,joined:Date.now()}},scores:{[uid]:0}});await connectRoom(id)}
-else if(action==='join'){if(!uid)throw Error('Conexão ainda não pronta.');const name=getNick();const id=($('#join-code')?.value||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
+function startDemo(){
+  unsubRoom?.();unsubRoom=null;
+  localDemo=true;roomId="LOCAL";
+  const index=DATA.puzzles.length>1?random(DATA.puzzles.length):0;
+  room={host:"local",mode:"letters",number:1,members:{local:{uid:"local",nick:"Jogador",joined:Date.now()}},scores:{local:0},usedLetters:[index],round:{type:"letters",index,hints:0,revealed:false}};
+  render();
+}
+function nextLocalRound(){
+  if(!localDemo||!room?.round?.revealed)return;
+  const used=room.usedLetters||[],all=DATA.puzzles.map((_,i)=>i);
+  let available=all.filter(i=>!used.includes(i));
+  if(!available.length)available=all;
+  const index=available[random(available.length)];
+  room.usedLetters=available.length===all.length&&used.length?[index]:[...used,index];
+  room.number++;
+  room.round={type:"letters",index,hints:0,revealed:false};
+  render();
+}
+async function handle(action){if(busy)return;busy=true;try{if(action==="demo"){startDemo()}
+else if(action==="stop-demo"){localDemo=false;room=null;roomId=null;render()}
+else if(action==="retry-data"){await loadData()}
+else if(action==="hint"&&localDemo){room.round.hints=Math.min(2,room.round.hints+1);render()}
+else if(action==="reveal"&&localDemo){room.round.revealed=true;render()}
+else if(action==='choose-letters'||action==='choose-rank'){modeChoice=action==='choose-letters'?'letters':'rank';render();$('#mode').value=modeChoice;$('#nick').focus()}
+else if(action==='create'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();let id=code();while((await get(ref(db,'rooms/'+id))).exists())id=code();await set(ref(db,'rooms/'+id),{host:uid,mode:selectedMode(),created:Date.now(),number:0,members:{[uid]:{uid,nick:name,joined:Date.now()}},scores:{[uid]:0}});await connectRoom(id)}
+else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
 else if(action==='copy'){const url=location.origin+location.pathname+'?room='+roomId;await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
 else if(action==='import'&&isHost()){const title=$('#custom-title')?.value.trim();const source=$('#custom-source')?.value.trim();const items=$('#custom-items')?.value.split('\n').map(x=>x.trim().replace(/^\d+[º.)-]?\s*/, '')).filter(Boolean)||[];if(!title||items.length<10||items.length>1000)throw Error('Informe um título e de 10 a 1.000 itens, um por linha.');if(source&&!/^https:\/\//i.test(source))throw Error('A fonte precisa começar com https://');const c={id:'custom-'+Date.now(),title,description:'Ranking personalizado fornecido pelo anfitrião',source:source||'',items};await update(ref(db,'rooms/'+roomId),{customRankings:[...(room.customRankings||[]),c]});}
 else if(action==='next')await nextRound();
