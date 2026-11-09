@@ -29,7 +29,7 @@ A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos.
 | Etapa | Estado | Evidência, pendência e ponto de retomada |
 |---|---|---|
 | 1 | Validada | [CI aprovada em Chrome e Node](https://github.com/felipeortuzal/triviaarena/actions/runs/42717663362): 3/3 testes Node; HTTP em `/triviaarena/`, `file://` sem rede, duas dicas, revelação, avanço, responsividade em 375 px, falhas de dados e de CDN. [HTML autônomo](../../riviera-showdown.html). Publicação Pages e salas reais são etapas 4 e 2–3. |
-| 2 | A executar | — |
+| 2 | Validada | [CI com Emulator Suite e Chrome](https://github.com/felipeortuzal/triviaarena/actions/runs/42722841443): 4/4 testes com Auth + Realtime Database reais no projeto demo e 3/3 regressões Node. Provados acesso negado, nickname/placar imutáveis a convidados, palpites isolados, choque de código, reconexão por UID, concorrência pela 20ª vaga e duas operações simultâneas do mesmo UID. Lobby premium e prévia HTML atualizados. [Matriz e comandos](../arquitetura-salas-v2.md). Configuração Firebase de produção e dois aparelhos físicos continuam fora desta etapa. |
 | 3 | A executar | — |
 | 4 | A executar | — |
 | 5 | A executar | — |
