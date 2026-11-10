@@ -157,3 +157,26 @@ test("partida de 3 rodadas termina sozinha, aceita aproximação +0,5 e congela 
  assert.equal(fromGuest.phase,"finished");
  assert.equal(fromGuest.scores[guest.uid],1);
 });
+
+test("gabarito de sala iniciada não muda quando o catálogo é editado depois",async()=>{
+ const host=await client("snapshot-host","RVSP25");
+ await host.gateway.createRoom({nick:"Host",mode:"mixed",roundLimit:5});
+ let state=await host.game.start("RVSP25");
+ const initialAnswer=state.round.content.answer;
+ const index=state.round.index;
+ const previous=puzzles[index].answer;
+ try{
+   puzzles[index].answer="Novo conteúdo publicado posteriormente";
+   const preserved=(await get(ref(host.db,"roomPublic/RVSP25/round/content/answer"))).val();
+   assert.equal(preserved,initialAnswer,"partida em andamento tem que preservar a resposta que começou");
+ }finally{puzzles[index].answer=previous}
+ await host.game.revealPhrase("RVSP25");
+ state=await host.game.advance("RVSP25",{winner:""});
+ const first=fixture.items[0];
+ try{
+   const original=state.round.catalog.items[0];
+   fixture.items[0]="Mudança posterior do ranking";
+   const preserved=(await get(ref(host.db,"roomPublic/RVSP25/round/catalog/items/0"))).val();
+   assert.equal(preserved,original,"lista da rodada não pode se alterar com deploy novo");
+ }finally{fixture.items[0]=first}
+});
