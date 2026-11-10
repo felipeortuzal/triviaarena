@@ -7,9 +7,11 @@
       "topic": "Cultura geral",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a cultura geral.",
-        "É uma lista clássica de grande fama."
-      ]
+        "É uma lista clássica da Antiguidade.",
+        "A Grande Pirâmide de Gizé é a única sobrevivente."
+      ],
+      "id": "fact-001",
+      "enabled": true
     },
     {
       "code": "28 P em um J de D D",
@@ -18,9 +20,11 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto é um jogo de mesa.",
-        "As peças têm dois lados com pontos."
-      ]
+        "É um conjunto utilizado em jogos de mesa.",
+        "O conjunto tradicional vai do zero–zero ao seis–seis."
+      ],
+      "id": "fact-002",
+      "enabled": true
     },
     {
       "code": "27 E na B do B",
@@ -29,8 +33,13 @@
       "topic": "Brasil",
       "level": "Médio",
       "hints": [
-        "É um símbolo nacional.",
-        "Cada unidade da federação está representada."
+        "O assunto é um símbolo nacional brasileiro.",
+        "Cada estrela representa um estado ou o Distrito Federal."
+      ],
+      "id": "fact-003",
+      "enabled": true,
+      "acceptedAnswers": [
+        "27 estrelas na bandeira brasileira"
       ]
     },
     {
@@ -40,9 +49,11 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "É um espaço quadriculado para um jogo de estratégia.",
+        "São oito linhas cruzadas com oito colunas."
+      ],
+      "id": "fact-004",
+      "enabled": true
     },
     {
       "code": "32 P no I de uma P de X",
@@ -51,9 +62,11 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "Uma partida envolve dois adversários.",
+        "Cada jogador começa com dezesseis peças."
+      ],
+      "id": "fact-005",
+      "enabled": true
     },
     {
       "code": "52 C em um B S C",
@@ -62,9 +75,11 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "Você costuma embaralhá-las antes de jogar.",
+        "Há quatro naipes com treze cartas cada."
+      ],
+      "id": "fact-006",
+      "enabled": true
     },
     {
       "code": "4 N em um B T",
@@ -73,9 +88,11 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "É uma classificação presente em cartas de baralho.",
+        "Copas, ouros, paus e espadas."
+      ],
+      "id": "fact-007",
+      "enabled": true
     },
     {
       "code": "13 C em cada N de um B T",
@@ -84,9 +101,11 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "A contagem é dentro de cada naipe.",
+        "Há valores de ás a rei."
+      ],
+      "id": "fact-008",
+      "enabled": true
     },
     {
       "code": "9 C em um T de J da V",
@@ -95,9 +114,11 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+        "É um jogo simples de lápis e papel.",
+        "Seu tabuleiro tem três linhas por três colunas."
+      ],
+      "id": "fact-009",
+      "enabled": true
     },
     {
       "code": "361 I em um T de G",
@@ -106,9 +127,11 @@
       "topic": "Jogos",
       "level": "Difícil",
       "hints": [
-        "É um jogo de estratégia oriental.",
-        "Seu tabuleiro tem 19 linhas em cada direção."
-      ]
+        "É um jogo de estratégia originado na Ásia.",
+        "O tabuleiro padrão tem 19 linhas em cada direção."
+      ],
+      "id": "fact-010",
+      "enabled": true
     },
     {
       "code": "6 F em um D T",
@@ -117,9 +140,11 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "Pense em um objeto com formato de cubo.",
+        "Cada superfície plana conta uma face."
+      ],
+      "id": "fact-011",
+      "enabled": true
     },
     {
       "code": "21 P na S das F de um D",
@@ -128,9 +153,11 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "São os pontos mostrados em todas as faces.",
+        "Some os números de um até seis."
+      ],
+      "id": "fact-012",
+      "enabled": true
     },
     {
       "code": "7 P na S de F O de um D",
@@ -139,9 +166,11 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "Depende do par de lados opostos de um dado padrão.",
+        "Os lados opostos sempre somam o mesmo número."
+      ],
+      "id": "fact-013",
+      "enabled": true
     },
     {
       "code": "6 F em um C",
@@ -150,9 +179,11 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "É um dos sólidos platônicos.",
+        "Suas superfícies são quadrados iguais."
+      ],
+      "id": "fact-014",
+      "enabled": true
     },
     {
       "code": "8 V em um C",
@@ -161,9 +192,11 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "Onde duas ou mais arestas se encontram.",
+        "É um cubo: cada canto é contado."
+      ],
+      "id": "fact-015",
+      "enabled": true
     },
     {
       "code": "12 A em um C",
@@ -172,9 +205,11 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "São os segmentos que ligam os vértices.",
+        "Cada uma das seis faces é quadrada."
+      ],
+      "id": "fact-016",
+      "enabled": true
     },
     {
       "code": "20 F em um I",
@@ -183,9 +218,11 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "Trata-se de um dos cinco sólidos platônicos.",
+        "Ele é composto por faces triangulares."
+      ],
+      "id": "fact-017",
+      "enabled": true
     },
     {
       "code": "360 G em uma V C",
@@ -194,9 +231,11 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "Pense no giro completo de uma roda.",
+        "Uma meia-volta equivale à metade."
+      ],
+      "id": "fact-018",
+      "enabled": true
     },
     {
       "code": "180 G na S dos Â de um T",
@@ -205,9 +244,11 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "O assunto é geometria plana.",
+        "Desenhe qualquer triângulo euclidiano e some os ângulos."
+      ],
+      "id": "fact-019",
+      "enabled": true
     },
     {
       "code": "540 G na S dos Â I de um P",
@@ -216,9 +257,11 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+        "É uma figura plana com cinco lados.",
+        "Pode ser dividida em três triângulos."
+      ],
+      "id": "fact-020",
+      "enabled": true
     },
     {
       "code": "8 B em um B",
@@ -227,9 +270,11 @@
       "topic": "Tecnologia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+        "Unidade de informação em tecnologia.",
+        "Um byte convencional reúne essa quantidade de bits."
+      ],
+      "id": "fact-021",
+      "enabled": true
     },
     {
       "code": "1024 B em um K",
@@ -238,9 +283,11 @@
       "topic": "Tecnologia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+        "Uma unidade binária de armazenamento.",
+        "Kibibyte, não kilobyte decimal."
+      ],
+      "id": "fact-022",
+      "enabled": true
     },
     {
       "code": "1024 K em um M",
@@ -249,9 +296,11 @@
       "topic": "Tecnologia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+        "É uma potência de base dois em informática.",
+        "Um mebibyte é formado por kibibytes."
+      ],
+      "id": "fact-023",
+      "enabled": true
     },
     {
       "code": "118 E na T P",
@@ -260,9 +309,13 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "É uma referência da química.",
-        "Ela organiza átomos por número atômico."
-      ]
+        "É um catálogo de substâncias fundamentais da química.",
+        "O último elemento reconhecido tem número atômico 118."
+      ],
+      "id": "fact-024",
+      "enabled": true,
+      "sourceName": "IUPAC — tabela periódica",
+      "sourceUrl": "https://iupac.org/what-we-do/periodic-table-of-elements/"
     },
     {
       "code": "3 L do M de N",
@@ -271,9 +324,11 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "São princípios fundamentais da física clássica.",
+        "Inércia, força/aceleração e ação/reação."
+      ],
+      "id": "fact-025",
+      "enabled": true
     },
     {
       "code": "3 L de K",
@@ -282,9 +337,11 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "Essas leis descrevem órbitas.",
+        "Elas têm o nome do astrônomo Johannes Kepler."
+      ],
+      "id": "fact-026",
+      "enabled": true
     },
     {
       "code": "8 P no S S",
@@ -293,9 +350,11 @@
       "topic": "Espaço",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a espaço.",
-        "A resposta é reconhecida pela astronomia moderna."
-      ]
+        "Olhe para a classificação atual da astronomia.",
+        "Plutão é hoje chamado planeta anão."
+      ],
+      "id": "fact-027",
+      "enabled": true
     },
     {
       "code": "88 C O na A",
@@ -304,9 +363,13 @@
       "topic": "Espaço",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a espaço.",
-        "A resposta é reconhecida pela astronomia moderna."
-      ]
+        "A organização oficial da astronomia estabeleceu o número.",
+        "As regiões do céu foram padronizadas pela IAU."
+      ],
+      "id": "fact-028",
+      "enabled": true,
+      "sourceName": "União Astronômica Internacional (IAU)",
+      "sourceUrl": "https://www.iau.org/IAU/Astronomy-FAQs/Constellations.aspx"
     },
     {
       "code": "24 H em um D",
@@ -317,7 +380,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-029",
+      "enabled": true
     },
     {
       "code": "60 M em uma H",
@@ -328,7 +393,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-030",
+      "enabled": true
     },
     {
       "code": "60 S em um M",
@@ -339,7 +406,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-031",
+      "enabled": true
     },
     {
       "code": "365 D em um A C",
@@ -350,7 +419,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-032",
+      "enabled": true
     },
     {
       "code": "366 D em um A B",
@@ -361,7 +432,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-033",
+      "enabled": true
     },
     {
       "code": "12 M em um A",
@@ -372,7 +445,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-034",
+      "enabled": true
     },
     {
       "code": "7 D em uma S",
@@ -383,18 +458,23 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "fact-035",
+      "enabled": true
     },
     {
       "code": "24 F H T da T",
       "answer": "24 Fusos Horários Teóricos da Terra",
-      "explain": "O modelo ideal divide os 360 graus terrestres em faixas de 15 graus.",
+      "explain": "O modelo teórico divide a circunferência de 360° em 24 setores de 15°; os fusos civis reais não obedecem exatamente a esse modelo.",
       "topic": "Geografia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+        "Trata-se de uma divisão teórica da Terra.",
+        "Uma volta completa de 360° dividida por setores de 15°."
+      ],
+      "id": "fact-036",
+      "enabled": true,
+      "convention": "A divisão em 24 fusos é um modelo teórico; o número real de offsets civis difere."
     },
     {
       "code": "100 C em um M",
@@ -405,7 +485,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "fact-037",
+      "enabled": true
     },
     {
       "code": "1000 M em um Q",
@@ -416,7 +498,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "fact-038",
+      "enabled": true
     },
     {
       "code": "1000 M em um L",
@@ -427,7 +511,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "fact-039",
+      "enabled": true
     },
     {
       "code": "1852 M em uma M N",
@@ -438,7 +524,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "fact-040",
+      "enabled": true
     },
     {
       "code": "1609 M A em uma M T",
@@ -449,7 +537,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "fact-041",
+      "enabled": true
     },
     {
       "code": "299792458 M por S para a V da L no V",
@@ -458,9 +548,13 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "É uma constante fundamental da física.",
-        "Ela determina um limite de velocidade no Universo."
-      ]
+        "Uma constante física do Sistema Internacional.",
+        "O metro é definido usando a velocidade da luz no vácuo."
+      ],
+      "id": "fact-042",
+      "enabled": true,
+      "sourceName": "BIPM — Definição SI do metro",
+      "sourceUrl": "https://www.bipm.org/en/si-base-units/metre"
     },
     {
       "code": "206 O no C H A",
@@ -471,7 +565,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "fact-043",
+      "enabled": true
     },
     {
       "code": "32 D na D P C",
@@ -482,7 +578,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "fact-044",
+      "enabled": true
     },
     {
       "code": "4 C no C H",
@@ -491,20 +589,29 @@
       "topic": "Corpo humano",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "É um órgão do sistema circulatório.",
+        "Duas dessas cavidades são átrios, e duas são ventrículos."
+      ],
+      "id": "fact-045",
+      "enabled": true,
+      "acceptedAnswers": [
+        "4 câmaras do coração humano",
+        "4 câmaras no coração",
+        "4 cavidades do coração humano"
       ]
     },
     {
       "code": "46 C em uma C H S",
       "answer": "46 Cromossomos em uma Célula Humana Somática",
-      "explain": "O número típico das células somáticas humanas é 46.",
+      "explain": "A maioria das células somáticas nucleadas humanas possui 46 cromossomos; há exceções, como hemácias maduras.",
       "topic": "Corpo humano",
       "level": "Difícil",
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "fact-046",
+      "enabled": true
     },
     {
       "code": "23 P de C H",
@@ -515,7 +622,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "fact-047",
+      "enabled": true
     },
     {
       "code": "5 S T do C H",
@@ -524,9 +633,12 @@
       "topic": "Corpo humano",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
-      ]
+        "É uma classificação clássica, não todos os sentidos da neurociência.",
+        "Visão e audição são dois deles."
+      ],
+      "id": "fact-048",
+      "enabled": true,
+      "convention": "Cinco é a classificação tradicional; outras modalidades sensoriais também existem."
     },
     {
       "code": "26 L no A P",
@@ -537,7 +649,9 @@
       "hints": [
         "O assunto está ligado a língua.",
         "Está relacionada às regras de escrita."
-      ]
+      ],
+      "id": "fact-049",
+      "enabled": true
     },
     {
       "code": "5 L em uma P M",
@@ -548,7 +662,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-050",
+      "enabled": true
     },
     {
       "code": "7 N M N",
@@ -559,7 +675,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-051",
+      "enabled": true
     },
     {
       "code": "12 S em uma O M",
@@ -570,7 +688,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-052",
+      "enabled": true
     },
     {
       "code": "88 T em um P P",
@@ -581,7 +701,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-053",
+      "enabled": true
     },
     {
       "code": "4 C em um V",
@@ -592,7 +714,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-054",
+      "enabled": true
     },
     {
       "code": "6 C em um V T",
@@ -603,7 +727,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "fact-055",
+      "enabled": true
     },
     {
       "code": "11 J por E no F",
@@ -612,9 +738,13 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
-      ]
+        "É uma regra de uma partida profissional.",
+        "Uma das posições é o goleiro."
+      ],
+      "id": "fact-056",
+      "enabled": true,
+      "sourceName": "IFAB — Leis do Futebol, Regra 3",
+      "sourceUrl": "https://www.theifab.com/laws/latest/the-players/"
     },
     {
       "code": "90 M em uma P de F",
@@ -623,9 +753,13 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
-      ]
+        "Considere apenas o tempo regulamentar.",
+        "São dois tempos de 45 minutos, sem acréscimos."
+      ],
+      "id": "fact-057",
+      "enabled": true,
+      "sourceName": "IFAB — Leis do Futebol, Regra 7",
+      "sourceUrl": "https://www.theifab.com/laws/latest/the-duration-of-the-match/"
     },
     {
       "code": "6 J por E no V",
@@ -636,7 +770,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "fact-058",
+      "enabled": true
     },
     {
       "code": "5 J por E no B",
@@ -647,7 +783,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "fact-059",
+      "enabled": true
     },
     {
       "code": "18 B em um C de G P",
@@ -658,7 +796,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "fact-060",
+      "enabled": true
     },
     {
       "code": "10 P em uma P de B",
@@ -669,7 +809,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "fact-061",
+      "enabled": true
     },
     {
       "code": "5 A no S O",
@@ -678,9 +820,13 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
-      ]
+        "É parte do símbolo de um evento esportivo global.",
+        "Os círculos entrelaçados representam a união dos continentes."
+      ],
+      "id": "fact-062",
+      "enabled": true,
+      "sourceName": "Comitê Olímpico Internacional — Símbolo olímpico",
+      "sourceUrl": "https://www.olympics.com/ioc/olympic-rings"
     },
     {
       "code": "42195 M em uma M",
@@ -691,7 +837,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "fact-063",
+      "enabled": true
     },
     {
       "code": "50 E nos E U",
@@ -702,7 +850,9 @@
       "hints": [
         "É uma divisão administrativa de um país.",
         "O país fica na América do Norte."
-      ]
+      ],
+      "id": "fact-064",
+      "enabled": true
     },
     {
       "code": "27 U F no B",
@@ -713,7 +863,9 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "fact-065",
+      "enabled": true
     },
     {
       "code": "26 E no B",
@@ -724,7 +876,9 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "fact-066",
+      "enabled": true
     },
     {
       "code": "3 P da R B",
@@ -735,18 +889,23 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "fact-067",
+      "enabled": true
     },
     {
       "code": "5 O na C M",
       "answer": "5 Oceanos na Classificação Moderna",
-      "explain": "Pacífico, Atlântico, Índico, Ártico e Austral.",
+      "explain": "Na classificação moderna de cinco oceanos, contam-se Pacífico, Atlântico, Índico, Ártico e Austral.",
       "topic": "Geografia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+        "Depende de uma classificação geográfica em cinco grupos.",
+        "O Oceano Austral também é contado."
+      ],
+      "id": "fact-068",
+      "enabled": true,
+      "convention": "Contagem sob a classificação moderna de cinco oceanos, incluindo o Oceano Austral."
     },
     {
       "code": "27 P na U E",
@@ -755,9 +914,11 @@
       "topic": "Geografia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+        "É um bloco político-econômico europeu.",
+        "O Reino Unido deixou o bloco em 2020."
+      ],
+      "id": "fact-069",
+      "enabled": true
     },
     {
       "code": "193 E M da O",
@@ -766,9 +927,13 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
-      ]
+        "São países com assento na Assembleia Geral.",
+        "A instituição foi fundada após a Segunda Guerra Mundial."
+      ],
+      "id": "fact-070",
+      "enabled": true,
+      "sourceName": "ONU — Estados membros",
+      "sourceUrl": "https://ask.un.org/faq/14345"
     },
     {
       "code": "5 M P do C de S da O",
@@ -779,7 +944,11 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "fact-071",
+      "enabled": true,
+      "sourceName": "ONU — Conselho de Segurança",
+      "sourceUrl": "https://www.un.org/securitycouncil/content/current-members"
     },
     {
       "code": "15 M no C de S da O",
@@ -790,7 +959,11 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "fact-072",
+      "enabled": true,
+      "sourceName": "ONU — Conselho de Segurança",
+      "sourceUrl": "https://www.un.org/securitycouncil/content/current-members"
     },
     {
       "code": "17 O de D S da O",
@@ -799,9 +972,13 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
-      ]
+        "São metas globais para uma agenda internacional.",
+        "A agenda é planejada para 2030."
+      ],
+      "id": "fact-073",
+      "enabled": true,
+      "sourceName": "ONU — Objetivos de Desenvolvimento Sustentável",
+      "sourceUrl": "https://sdgs.un.org/goals"
     },
     {
       "code": "4 C do A",
@@ -812,7 +989,9 @@
       "hints": [
         "O assunto está ligado a cultura geral.",
         "É uma lista clássica de grande fama."
-      ]
+      ],
+      "id": "fact-074",
+      "enabled": true
     },
     {
       "code": "12 T de H",
@@ -823,7 +1002,9 @@
       "hints": [
         "O assunto está ligado a mitologia.",
         "Pense em personagens e histórias da Grécia antiga."
-      ]
+      ],
+      "id": "fact-075",
+      "enabled": true
     },
     {
       "code": "9 M da M G",
@@ -834,7 +1015,9 @@
       "hints": [
         "O assunto está ligado a mitologia.",
         "Pense em personagens e histórias da Grécia antiga."
-      ]
+      ],
+      "id": "fact-076",
+      "enabled": true
     },
     {
       "code": "12 D O da M G",
@@ -843,9 +1026,12 @@
       "topic": "Mitologia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a mitologia.",
-        "Pense em personagens e histórias da Grécia antiga."
-      ]
+        "É uma classificação tradicional da mitologia grega.",
+        "Os olímpicos aparecem no panteão de Zeus."
+      ],
+      "id": "fact-077",
+      "enabled": true,
+      "convention": "Lista tradicional de doze, cujos integrantes variam entre versões do mito."
     },
     {
       "code": "7 A na H da B de N",
@@ -856,7 +1042,9 @@
       "hints": [
         "O assunto está ligado a cultura pop.",
         "É algo presente em uma história conhecida há gerações."
-      ]
+      ],
+      "id": "fact-078",
+      "enabled": true
     },
     {
       "code": "3 P no C T",
@@ -867,7 +1055,9 @@
       "hints": [
         "O assunto está ligado a cultura pop.",
         "É algo presente em uma história conhecida há gerações."
-      ]
+      ],
+      "id": "fact-079",
+      "enabled": true
     },
     {
       "code": "4 E C no N T",
@@ -878,7 +1068,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "fact-080",
+      "enabled": true
     },
     {
       "code": "5 L do P",
@@ -889,7 +1081,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "fact-081",
+      "enabled": true
     },
     {
       "code": "66 L na B P",
@@ -898,9 +1092,11 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
-      ]
+        "Trata-se de uma versão de cânon bíblico.",
+        "O número é o adotado na tradição protestante."
+      ],
+      "id": "fact-082",
+      "enabled": true
     },
     {
       "code": "73 L na B C",
@@ -909,9 +1105,11 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
-      ]
+        "Trata-se de uma versão de cânon bíblico.",
+        "Inclui livros deuterocanônicos da tradição católica."
+      ],
+      "id": "fact-083",
+      "enabled": true
     },
     {
       "code": "4 E do A na A",
@@ -920,9 +1118,12 @@
       "topic": "Ciência",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "É uma divisão convencional do ciclo anual.",
+        "Primavera, verão, outono e inverno."
+      ],
+      "id": "fact-084",
+      "enabled": true,
+      "convention": "Estações como convenção climática/astronômica em regiões temperadas."
     },
     {
       "code": "3 C P da L",
@@ -931,9 +1132,11 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "Pense em mistura aditiva de luz.",
+        "As luzes vermelha, verde e azul são a base do RGB."
+      ],
+      "id": "fact-085",
+      "enabled": true
     },
     {
       "code": "3 C P S da I",
@@ -942,9 +1145,11 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "Pense em tintas usadas na impressão.",
+        "O sistema CMY usa ciano, magenta e amarelo."
+      ],
+      "id": "fact-086",
+      "enabled": true
     },
     {
       "code": "2 P em um Í",
@@ -955,7 +1160,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "fact-087",
+      "enabled": true
     },
     {
       "code": "4 N no D",
@@ -964,9 +1171,11 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+        "Pense nas bases nitrogenadas do DNA.",
+        "Adenina, timina, guanina e citosina."
+      ],
+      "id": "fact-088",
+      "enabled": true
     },
     {
       "code": "14 V em um S",
@@ -977,7 +1186,9 @@
       "hints": [
         "Forma clássica de poesia.",
         "Possui dois quartetos e dois tercetos."
-      ]
+      ],
+      "id": "fact-089",
+      "enabled": true
     },
     {
       "code": "26 L no A I",
@@ -988,7 +1199,9 @@
       "hints": [
         "Pense em linguagem escrita.",
         "É usado no inglês."
-      ]
+      ],
+      "id": "fact-090",
+      "enabled": true
     },
     {
       "code": "4 C no D H",
@@ -999,7 +1212,11 @@
       "hints": [
         "Anatomia humana.",
         "São dois átrios e dois ventrículos."
-      ]
+      ],
+      "id": "fact-091",
+      "enabled": false,
+      "exclusionReason": "Duplicata exata do fato 45, com sigla incompatível (D H).",
+      "duplicateOf": "fact-045"
     },
     {
       "code": "5 A nos A O",
@@ -1010,7 +1227,11 @@
       "hints": [
         "Símbolo esportivo internacional.",
         "Os círculos são entrelaçados."
-      ]
+      ],
+      "id": "fact-092",
+      "enabled": false,
+      "exclusionReason": "Duplicata semântica do fato 62 sobre cinco anéis olímpicos.",
+      "duplicateOf": "fact-062"
     },
     {
       "code": "11 J em um T de F",
@@ -1021,7 +1242,11 @@
       "hints": [
         "Esporte coletivo.",
         "Há um goleiro."
-      ]
+      ],
+      "id": "fact-093",
+      "enabled": false,
+      "exclusionReason": "Duplicata semântica do fato 56 (11 jogadores por equipe de futebol).",
+      "duplicateOf": "fact-056"
     },
     {
       "code": "12 S no Z O",
@@ -1030,20 +1255,26 @@
       "topic": "Cultura geral",
       "level": "Médio",
       "hints": [
-        "Astrologia.",
-        "Áries e Peixes estão na lista."
-      ]
+        "É uma classificação astrológica ocidental.",
+        "Áries, Touro e Gêmeos são os três primeiros."
+      ],
+      "id": "fact-094",
+      "enabled": true,
+      "convention": "Doze signos na astrologia ocidental, não constelações físicas iguais."
     },
     {
       "code": "7 C no A-Í",
       "answer": "7 Cores no Arco-Íris",
-      "explain": "7 Cores no Arco-Íris.",
+      "explain": "A tradição popular distingue sete cores no arco-íris; o espectro visível, contudo, é contínuo.",
       "topic": "Natureza",
       "level": "Fácil",
       "hints": [
-        "Fenômeno óptico.",
-        "Aparece com sol e chuva."
-      ]
+        "Uma divisão tradicional de um fenômeno óptico.",
+        "O espectro visível é contínuo, mas a tradição escolhe sete cores."
+      ],
+      "id": "fact-095",
+      "enabled": true,
+      "convention": "Sete cores é a convenção tradicional popular; o espectro óptico é contínuo."
     },
     {
       "code": "3 E P da M",
@@ -1052,9 +1283,12 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "Física e química.",
+        "São os estados estudados primeiro na escola.",
         "Sólido, líquido e gasoso."
-      ]
+      ],
+      "id": "fact-096",
+      "enabled": true,
+      "convention": "São os três estados mais comuns apresentados introdutoriamente; plasma também existe."
     },
     {
       "code": "46 C nos C H",
@@ -1065,7 +1299,11 @@
       "hints": [
         "Genética.",
         "São 23 pares."
-      ]
+      ],
+      "id": "fact-097",
+      "enabled": false,
+      "exclusionReason": "Duplicata do fato 46; além disso, 46 cromossomos não se aplicam a toda célula humana.",
+      "duplicateOf": "fact-046"
     },
     {
       "code": "24 L no A G",
@@ -1076,7 +1314,9 @@
       "hints": [
         "Escrita antiga.",
         "Alfa e ômega."
-      ]
+      ],
+      "id": "fact-098",
+      "enabled": true
     },
     {
       "code": "13 F na B dos E U",
@@ -1085,9 +1325,11 @@
       "topic": "História",
       "level": "Médio",
       "hints": [
-        "Símbolo nacional.",
-        "Representam as colônias originais."
-      ]
+        "O assunto é um símbolo dos Estados Unidos.",
+        "As faixas lembram as colônias originais."
+      ],
+      "id": "fact-099",
+      "enabled": true
     },
     {
       "code": "5 O nos J O",
@@ -1098,7 +1340,11 @@
       "hints": [
         "Geografia física.",
         "Atlântico e Pacífico são dois deles."
-      ]
+      ],
+      "id": "fact-100",
+      "enabled": false,
+      "exclusionReason": "Duplicata semântica dos cinco oceanos no fato 68; enunciado circular/ambíguo.",
+      "duplicateOf": "fact-068"
     },
     {
       "code": "6 C em um H",
@@ -1109,7 +1355,11 @@
       "hints": [
         "Instrumento musical.",
         "Usado com acordes."
-      ]
+      ],
+      "id": "fact-101",
+      "enabled": false,
+      "exclusionReason": "Duplicata do fato 55 sobre seis cordas do violão.",
+      "duplicateOf": "fact-055"
     },
     {
       "code": "88 T em um P T",
@@ -1120,7 +1370,11 @@
       "hints": [
         "Instrumento de teclas.",
         "Tem teclas brancas e pretas."
-      ]
+      ],
+      "id": "fact-102",
+      "enabled": false,
+      "exclusionReason": "Duplicata do fato 53 sobre 88 teclas do piano.",
+      "duplicateOf": "fact-053"
     },
     {
       "code": "7 N M na E D",
@@ -1131,7 +1385,11 @@
       "hints": [
         "Teoria musical.",
         "Dó, ré, mi..."
-      ]
+      ],
+      "id": "fact-103",
+      "enabled": false,
+      "exclusionReason": "Duplicata do fato 51 sobre as sete notas naturais.",
+      "duplicateOf": "fact-051"
     },
     {
       "code": "9 M de G em uma G",
@@ -1142,6 +1400,89 @@
       "hints": [
         "Ciclo da vida.",
         "Duração aproximada de uma gravidez humana."
+      ],
+      "id": "fact-104",
+      "enabled": false,
+      "exclusionReason": "A gestação não dura exatamente nove meses; aproximação sem critério e sem período de referência."
+    },
+    {
+      "id": "fact-105",
+      "enabled": true,
+      "code": "3600 S em uma H",
+      "answer": "3600 Segundos em uma Hora",
+      "explain": "Uma hora reúne 60 minutos, cada minuto com 60 segundos: 60 × 60 = 3600.",
+      "topic": "Tempo",
+      "level": "Médio",
+      "hints": [
+        "É uma conversão de unidades de tempo.",
+        "São dois grupos sucessivos de 60."
+      ],
+      "sourceName": "Sistema Internacional (segundo)",
+      "sourceUrl": "https://www.bipm.org/en/si-base-units/second"
+    },
+    {
+      "id": "fact-106",
+      "enabled": true,
+      "code": "5 S P R",
+      "answer": "5 Sólidos Platônicos Regulares",
+      "explain": "Os cinco sólidos platônicos convexos regulares são tetraedro, cubo, octaedro, dodecaedro e icosaedro.",
+      "topic": "Matemática",
+      "level": "Difícil",
+      "hints": [
+        "É uma classificação de poliedros convexos.",
+        "Inclui cubo, tetraedro e icosaedro."
+      ]
+    },
+    {
+      "id": "fact-107",
+      "enabled": true,
+      "code": "6 A em um T",
+      "answer": "6 Arestas em um Tetraedro",
+      "explain": "O tetraedro é a pirâmide triangular com seis arestas, quatro faces e quatro vértices.",
+      "topic": "Matemática",
+      "level": "Médio",
+      "hints": [
+        "É um sólido geométrico com faces triangulares.",
+        "Cada uma das quatro faces é um triângulo."
+      ]
+    },
+    {
+      "id": "fact-108",
+      "enabled": true,
+      "code": "4 F em um T",
+      "answer": "4 Faces em um Tetraedro",
+      "explain": "O tetraedro é um poliedro com quatro faces triangulares.",
+      "topic": "Matemática",
+      "level": "Fácil",
+      "hints": [
+        "Trata-se de um sólido formado por triângulos.",
+        "Sua forma é a de uma pirâmide de base triangular."
+      ]
+    },
+    {
+      "id": "fact-109",
+      "enabled": true,
+      "code": "8 P em uma A",
+      "answer": "8 Pernas em uma Aranha",
+      "explain": "Aranhas são aracnídeos e, quando adultas, possuem quatro pares de pernas.",
+      "topic": "Biologia",
+      "level": "Fácil",
+      "hints": [
+        "É um animal aracnídeo.",
+        "Seu corpo tem quatro pares de pernas."
+      ]
+    },
+    {
+      "id": "fact-110",
+      "enabled": true,
+      "code": "6 P em um I",
+      "answer": "6 Pernas em um Inseto",
+      "explain": "Insetos adultos normalmente possuem três pares de pernas articuladas.",
+      "topic": "Biologia",
+      "level": "Fácil",
+      "hints": [
+        "É um grupo de artrópodes.",
+        "Há três pares de pernas ligados ao tórax."
       ]
     }
   ],
@@ -1317,7 +1658,118 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "revision": "area-total-2026-11",
+      "verifiedPrefix": 9,
+      "observedAt": "2026-11-10",
+      "verificationNote": "Primeiras 9 posições confrontadas com Worldometer; Top 25+ requer conferência integral.",
+      "origin": "official",
+      "category": "Geografia",
+      "itemIds": [
+        "area-0001",
+        "area-0002",
+        "area-0003",
+        "area-0004",
+        "area-0005",
+        "area-0006",
+        "area-0007",
+        "area-0008",
+        "area-0009",
+        "area-0010",
+        "area-0011",
+        "area-0012",
+        "area-0013",
+        "area-0014",
+        "area-0015",
+        "area-0016",
+        "area-0017",
+        "area-0018",
+        "area-0019",
+        "area-0020",
+        "area-0021",
+        "area-0022",
+        "area-0023",
+        "area-0024",
+        "area-0025",
+        "area-0026",
+        "area-0027",
+        "area-0028",
+        "area-0029",
+        "area-0030",
+        "area-0031",
+        "area-0032",
+        "area-0033",
+        "area-0034",
+        "area-0035",
+        "area-0036",
+        "area-0037",
+        "area-0038",
+        "area-0039",
+        "area-0040",
+        "area-0041",
+        "area-0042",
+        "area-0043",
+        "area-0044",
+        "area-0045",
+        "area-0046",
+        "area-0047",
+        "area-0048",
+        "area-0049",
+        "area-0050",
+        "area-0051",
+        "area-0052",
+        "area-0053",
+        "area-0054",
+        "area-0055",
+        "area-0056",
+        "area-0057",
+        "area-0058",
+        "area-0059",
+        "area-0060",
+        "area-0061",
+        "area-0062",
+        "area-0063",
+        "area-0064",
+        "area-0065",
+        "area-0066",
+        "area-0067",
+        "area-0068",
+        "area-0069",
+        "area-0070",
+        "area-0071",
+        "area-0072",
+        "area-0073",
+        "area-0074",
+        "area-0075",
+        "area-0076",
+        "area-0077",
+        "area-0078",
+        "area-0079",
+        "area-0080",
+        "area-0081",
+        "area-0082",
+        "area-0083",
+        "area-0084",
+        "area-0085",
+        "area-0086",
+        "area-0087",
+        "area-0088",
+        "area-0089",
+        "area-0090",
+        "area-0091",
+        "area-0092",
+        "area-0093",
+        "area-0094",
+        "area-0095",
+        "area-0096",
+        "area-0097",
+        "area-0098",
+        "area-0099",
+        "area-0100"
+      ],
+      "edition": "Consulta em novembro de 2026",
+      "ties": "Empates, quando existentes, seguem a ordem numerada da fonte; não presumir ordem em valores iguais sem referência.",
+      "method": "Ordem de classificação do instantâneo indicado pela fonte; sem reordenar ou recalcular valores no cliente."
     },
     {
       "id": "population",
@@ -1498,7 +1950,118 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "revision": "un-population-2026",
+      "verifiedPrefix": 12,
+      "observedAt": "2026-11-10",
+      "verificationNote": "Primeiras 12 posições confrontadas com Worldometer (estimativas ONU 2026).",
+      "origin": "official",
+      "category": "Geografia",
+      "itemIds": [
+        "population-0001",
+        "population-0002",
+        "population-0003",
+        "population-0004",
+        "population-0005",
+        "population-0006",
+        "population-0007",
+        "population-0008",
+        "population-0009",
+        "population-0010",
+        "population-0011",
+        "population-0012",
+        "population-0013",
+        "population-0014",
+        "population-0015",
+        "population-0016",
+        "population-0017",
+        "population-0018",
+        "population-0019",
+        "population-0020",
+        "population-0021",
+        "population-0022",
+        "population-0023",
+        "population-0024",
+        "population-0025",
+        "population-0026",
+        "population-0027",
+        "population-0028",
+        "population-0029",
+        "population-0030",
+        "population-0031",
+        "population-0032",
+        "population-0033",
+        "population-0034",
+        "population-0035",
+        "population-0036",
+        "population-0037",
+        "population-0038",
+        "population-0039",
+        "population-0040",
+        "population-0041",
+        "population-0042",
+        "population-0043",
+        "population-0044",
+        "population-0045",
+        "population-0046",
+        "population-0047",
+        "population-0048",
+        "population-0049",
+        "population-0050",
+        "population-0051",
+        "population-0052",
+        "population-0053",
+        "population-0054",
+        "population-0055",
+        "population-0056",
+        "population-0057",
+        "population-0058",
+        "population-0059",
+        "population-0060",
+        "population-0061",
+        "population-0062",
+        "population-0063",
+        "population-0064",
+        "population-0065",
+        "population-0066",
+        "population-0067",
+        "population-0068",
+        "population-0069",
+        "population-0070",
+        "population-0071",
+        "population-0072",
+        "population-0073",
+        "population-0074",
+        "population-0075",
+        "population-0076",
+        "population-0077",
+        "population-0078",
+        "population-0079",
+        "population-0080",
+        "population-0081",
+        "population-0082",
+        "population-0083",
+        "population-0084",
+        "population-0085",
+        "population-0086",
+        "population-0087",
+        "population-0088",
+        "population-0089",
+        "population-0090",
+        "population-0091",
+        "population-0092",
+        "population-0093",
+        "population-0094",
+        "population-0095",
+        "population-0096",
+        "population-0097",
+        "population-0098",
+        "population-0099",
+        "population-0100"
+      ],
+      "edition": "2026",
+      "ties": "Empates, quando existentes, seguem a ordem numerada da fonte; não presumir ordem em valores iguais sem referência.",
+      "method": "Ordem de classificação do instantâneo indicado pela fonte; sem reordenar ou recalcular valores no cliente."
     },
     {
       "id": "gdp",
@@ -1676,7 +2239,118 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "revision": "weo-2026-oct-est-2025",
+      "verifiedPrefix": 20,
+      "observedAt": "2026-11-10",
+      "verificationNote": "Top 20 confrontado com Worldometer/FMI WEO out/2026 para 2025.",
+      "origin": "official",
+      "category": "Economia",
+      "itemIds": [
+        "gdp-0001",
+        "gdp-0002",
+        "gdp-0003",
+        "gdp-0004",
+        "gdp-0005",
+        "gdp-0006",
+        "gdp-0007",
+        "gdp-0008",
+        "gdp-0009",
+        "gdp-0010",
+        "gdp-0011",
+        "gdp-0012",
+        "gdp-0013",
+        "gdp-0014",
+        "gdp-0015",
+        "gdp-0016",
+        "gdp-0017",
+        "gdp-0018",
+        "gdp-0019",
+        "gdp-0020",
+        "gdp-0021",
+        "gdp-0022",
+        "gdp-0023",
+        "gdp-0024",
+        "gdp-0025",
+        "gdp-0026",
+        "gdp-0027",
+        "gdp-0028",
+        "gdp-0029",
+        "gdp-0030",
+        "gdp-0031",
+        "gdp-0032",
+        "gdp-0033",
+        "gdp-0034",
+        "gdp-0035",
+        "gdp-0036",
+        "gdp-0037",
+        "gdp-0038",
+        "gdp-0039",
+        "gdp-0040",
+        "gdp-0041",
+        "gdp-0042",
+        "gdp-0043",
+        "gdp-0044",
+        "gdp-0045",
+        "gdp-0046",
+        "gdp-0047",
+        "gdp-0048",
+        "gdp-0049",
+        "gdp-0050",
+        "gdp-0051",
+        "gdp-0052",
+        "gdp-0053",
+        "gdp-0054",
+        "gdp-0055",
+        "gdp-0056",
+        "gdp-0057",
+        "gdp-0058",
+        "gdp-0059",
+        "gdp-0060",
+        "gdp-0061",
+        "gdp-0062",
+        "gdp-0063",
+        "gdp-0064",
+        "gdp-0065",
+        "gdp-0066",
+        "gdp-0067",
+        "gdp-0068",
+        "gdp-0069",
+        "gdp-0070",
+        "gdp-0071",
+        "gdp-0072",
+        "gdp-0073",
+        "gdp-0074",
+        "gdp-0075",
+        "gdp-0076",
+        "gdp-0077",
+        "gdp-0078",
+        "gdp-0079",
+        "gdp-0080",
+        "gdp-0081",
+        "gdp-0082",
+        "gdp-0083",
+        "gdp-0084",
+        "gdp-0085",
+        "gdp-0086",
+        "gdp-0087",
+        "gdp-0088",
+        "gdp-0089",
+        "gdp-0090",
+        "gdp-0091",
+        "gdp-0092",
+        "gdp-0093",
+        "gdp-0094",
+        "gdp-0095",
+        "gdp-0096",
+        "gdp-0097",
+        "gdp-0098",
+        "gdp-0099",
+        "gdp-0100"
+      ],
+      "edition": "2025, vintage FMI outubro de 2026",
+      "ties": "Empates, quando existentes, seguem a ordem numerada da fonte; não presumir ordem em valores iguais sem referência.",
+      "method": "Ordem de classificação do instantâneo indicado pela fonte; sem reordenar ou recalcular valores no cliente."
     },
     {
       "id": "movies",
@@ -1839,7 +2513,118 @@
         "The Lord of the Rings: The Two Towers": [
           "O Senhor dos Anéis: As Duas Torres"
         ]
-      }
+      },
+      "revision": "imdb-top250-2026-11-01",
+      "verifiedPrefix": 30,
+      "observedAt": "2026-11-10",
+      "verificationNote": "Top 30 confrontado por títulos equivalentes com snapshot 01/11/2026; posição 34 alterável; auditoria completa pendente.",
+      "origin": "official",
+      "category": "Cinema",
+      "itemIds": [
+        "movies-0001",
+        "movies-0002",
+        "movies-0003",
+        "movies-0004",
+        "movies-0005",
+        "movies-0006",
+        "movies-0007",
+        "movies-0008",
+        "movies-0009",
+        "movies-0010",
+        "movies-0011",
+        "movies-0012",
+        "movies-0013",
+        "movies-0014",
+        "movies-0015",
+        "movies-0016",
+        "movies-0017",
+        "movies-0018",
+        "movies-0019",
+        "movies-0020",
+        "movies-0021",
+        "movies-0022",
+        "movies-0023",
+        "movies-0024",
+        "movies-0025",
+        "movies-0026",
+        "movies-0027",
+        "movies-0028",
+        "movies-0029",
+        "movies-0030",
+        "movies-0031",
+        "movies-0032",
+        "movies-0033",
+        "movies-0034",
+        "movies-0035",
+        "movies-0036",
+        "movies-0037",
+        "movies-0038",
+        "movies-0039",
+        "movies-0040",
+        "movies-0041",
+        "movies-0042",
+        "movies-0043",
+        "movies-0044",
+        "movies-0045",
+        "movies-0046",
+        "movies-0047",
+        "movies-0048",
+        "movies-0049",
+        "movies-0050",
+        "movies-0051",
+        "movies-0052",
+        "movies-0053",
+        "movies-0054",
+        "movies-0055",
+        "movies-0056",
+        "movies-0057",
+        "movies-0058",
+        "movies-0059",
+        "movies-0060",
+        "movies-0061",
+        "movies-0062",
+        "movies-0063",
+        "movies-0064",
+        "movies-0065",
+        "movies-0066",
+        "movies-0067",
+        "movies-0068",
+        "movies-0069",
+        "movies-0070",
+        "movies-0071",
+        "movies-0072",
+        "movies-0073",
+        "movies-0074",
+        "movies-0075",
+        "movies-0076",
+        "movies-0077",
+        "movies-0078",
+        "movies-0079",
+        "movies-0080",
+        "movies-0081",
+        "movies-0082",
+        "movies-0083",
+        "movies-0084",
+        "movies-0085",
+        "movies-0086",
+        "movies-0087",
+        "movies-0088",
+        "movies-0089",
+        "movies-0090",
+        "movies-0091",
+        "movies-0092",
+        "movies-0093",
+        "movies-0094",
+        "movies-0095",
+        "movies-0096",
+        "movies-0097",
+        "movies-0098",
+        "movies-0099",
+        "movies-0100"
+      ],
+      "edition": "01/11/2026",
+      "ties": "Empates, quando existentes, seguem a ordem numerada da fonte; não presumir ordem em valores iguais sem referência.",
+      "method": "Ordem de classificação do instantâneo indicado pela fonte; sem reordenar ou recalcular valores no cliente."
     }
   ]
 }
