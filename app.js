@@ -12,7 +12,7 @@ const STANDALONE=window.RIVIERA_STANDALONE===true;
 const FALLBACK_PUZZLE={code:'7 M D M',answer:'7 Maravilhas do Mundo',level:'Demonstração',explain:'Sete monumentos famosos para experimentar o jogo.',hints:['São construções ou monumentos mundialmente conhecidos.','O número indica a quantidade de maravilhas.']};
 const safeNick=()=>{try{return localStorage.getItem('riviera-nick')||localStorage.getItem('trivia-nick')||''}catch{return ''}};
 const saveNick=n=>{try{localStorage.setItem('riviera-nick',n)}catch{}};
-let DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]},db=null,auth=null,uid=null,roomId=null,room=null,unsubRoom=null,modeChoice='mixed',nick=safeNick(),view='home',busy=false,err='',imported=[],localHints=0;
+let DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]},db=null,auth=null,uid=null,roomId=null,room=null,unsubRoom=null,modeChoice='letters',nick=safeNick(),view='home',busy=false,err='',imported=[],localHints=0;
 let localDemo=false,configured=false,dataReady=false,dataProblem='',connectionState=STANDALONE?'local':'checking',connectionProblem='';
 let roomGateway=null,phraseGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,selectedWinner='',pendingJoinCode='';
 const onlineReady=()=>!!(uid&&db&&dataReady&&!localDemo);
@@ -35,8 +35,8 @@ function home(){
   return wrap(`<div class="grid"><button class="panel mode" data-action="choose-letters"><div class="emoji">🧩</div><h2>Decifre a Frase</h2><p>Descubra expressões e curiosidades com números e iniciais. Duas dicas e revelação da resposta.</p></button><button class="panel mode orange" data-action="choose-rank"><div class="emoji">🏆</div><h2>Estimativa de Ranking</h2><p>Estime posições em listas de diferentes tamanhos. O modo multiplayer precisa da conexão online.</p></button></div>
 <section class="panel homejoin" aria-label="Jogar neste aparelho"><div class="row between"><div><div class="eyebrow">PRÉVIA LOCAL • SEM CADASTRO</div><h2>Jogar neste aparelho</h2></div><span class="pill">🧩 Demonstração</span></div><p>Experimente <strong>Decifre a Frase</strong> agora: abra duas dicas, revele a resposta e avance. Funciona mesmo sem internet ou Firebase.</p><div class="actions">${btn("▶ Jogar neste aparelho","demo","lime")}${dataProblem?btn("↻ Tentar carregar conteúdo","retry-data","ghost"):""}</div>${dataProblem?`<p class="notice" role="status">${esc(dataProblem)}. Uma rodada de reserva está disponível.</p>`:""}</section>
 <section class="panel homejoin" aria-label="Salas online"><div class="row between"><div><div class="eyebrow">SALA ONLINE</div><h2>Crie ou entre com um convite</h2></div><span class="pill">${online?"● Disponível":"○ Indisponível"}</span></div><p class="tiny" role="status">${esc(help)}</p>${connectionProblem?`<p class="notice tiny">${esc(connectionProblem)}</p>`:""}
-<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><label><span class="label">Modo da sala</span><select class="field" id="mode"><option value="mixed" ${modeChoice==="mixed"?"selected":""}>🎲 Misturado (alternando jogos)</option><option value="letters" ${modeChoice==="letters"?"selected":""}>🧩 Só frases</option><option value="rank" ${modeChoice==="rank"?"selected":""}>🏆 Só rankings</option></select></label>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
-<div class="stack"><label><span class="label">Código de convite</span><input class="field" id="join-code" maxlength="10" placeholder="Ex.: TRV7XK" value="${esc(new URLSearchParams(location.search).get("room")||"")}"></label><p class="tiny">Quem recebe o link abre o site, escolhe um nick e entra na sala.</p>${btn("Entrar na sala →","join","primary",!online)}</div></div></section>
+<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><label><span class="label">Modo da sala</span><select class="field" id="mode"><option value="letters" selected>🧩 Decifre a Frase · Jogável</option><option value="rank" disabled>🏆 Ranking · Em breve</option><option value="mixed" disabled>🎲 Misturado · Em breve</option></select></label>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
+<div class="stack"><label><span class="label">Código de convite</span><input class="field" id="join-code" maxlength="10" placeholder="Ex.: TRV7XK" value="${esc(pendingJoinCode||new URLSearchParams(location.search).get("room")||"")}"></label><p class="tiny">Quem recebe o link abre o site, escolhe um nick e entra na sala.</p>${btn("Entrar na sala →","join","primary",!online)}</div></div></section>
 <p class="footer">🎲 Desafios com sorteio sem repetição • 📱 Celular e computador • 🔒 Sem cadastro pessoal</p>`);
 }
 function waiting(){
@@ -145,19 +145,26 @@ else if(action==="retry-data"){await loadData()}
 else if(action==="hint"&&localDemo){room.round.hints=Math.min(2,room.round.hints+1);render()}
 else if(action==="reveal"&&localDemo){room.round.revealed=true;render()}
 else if(action==='choose-letters'||action==='choose-rank'){modeChoice=action==='choose-letters'?'letters':'rank';render();$('#mode').value=modeChoice;$('#nick').focus()}
-else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode()});connectRoom(result.code)}
-else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
-else if(action==='copy'){const url=location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':'');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
+else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:'letters'});connectRoom(result.code)}
+else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||pendingJoinCode||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
+else if(action==='copy'){
+ const url=location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':'');
+ try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
+ catch{const field=$('#invite');if(field){field.focus();field.select()}else throw Error('Copie o convite manualmente: '+url)}
+}
 else if(action==='import'&&isHost()){const title=$('#custom-title')?.value.trim();const source=$('#custom-source')?.value.trim();const items=$('#custom-items')?.value.split('\n').map(x=>x.trim().replace(/^\d+[º.)-]?\s*/, '')).filter(Boolean)||[];if(!title||items.length<10||items.length>1000)throw Error('Informe um título e de 10 a 1.000 itens, um por linha.');if(source&&!/^https:\/\//i.test(source))throw Error('A fonte precisa começar com https://');const c={id:'custom-'+Date.now(),title,description:'Ranking personalizado fornecido pelo anfitrião',source:source||'',items};await update(ref(db,'rooms/'+roomId),{customRankings:[...(room.customRankings||[]),c]});}
+else if(action==='start-game'){if(!isHost()||!phraseGame)throw Error('Somente o anfitrião pode iniciar.');await phraseGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
-else if(action==='next')await nextRound();
-else if(action==='hint'&&isHost()){await update(ref(db,'rooms/'+roomId+'/round'),{hints:Math.min(2,(room.round.hints||0)+1)})}
-else if(action==='reveal'&&isHost()){await update(ref(db,'rooms/'+roomId+'/round'),{revealed:true})}
-else if(action==='guess'){const g=$('#guess')?.value.trim();if(!g)throw Error('Escreva seu palpite.');await set(ref(db,`rooms/${roomId}/guesses/${room.round.id}/${uid}`),g)}
+else if(action==='next'){if(!phraseGame||!isHost())throw Error('Somente o anfitrião avança.');await phraseGame.transition(roomId,{winner:$('#letter-winner')?.value||selectedWinner||''});selectedWinner=''}
+else if(action==='finish-game'){if(!phraseGame||!isHost())throw Error('Somente o anfitrião encerra.');await phraseGame.transition(roomId,{winner:$('#letter-winner')?.value||selectedWinner||'',finish:true});selectedWinner=''}
+else if(action==='hint'&&isHost()&&phraseGame){await phraseGame.hint(roomId)}
+else if(action==='reveal'&&isHost()&&phraseGame){await phraseGame.reveal(roomId)}
+else if(action==='guess'&&room?.round?.type==='rank'){const g=$('#guess')?.value.trim();if(!g)throw Error('Escreva seu palpite.');await set(ref(db,`rooms/${roomId}/guesses/${room.round.id}/${uid}`),g)}
 else if(action==='override'&&isHost()){const id=$('#override-player').value;const v=Number($('#override-pos').value);if(!Number.isInteger(v)||v<0||v>room.round.limit)throw Error('Digite uma posição entre 0 e '+room.round.limit);await update(ref(db,'rooms/'+roomId+'/round/overrides'),{[id]:v})}
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
-document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value});
+document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='letter-winner')selectedWinner=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value});
 async function loadData(){
   if(STANDALONE){
     const embedded=window.RIVIERA_EMBEDDED_DATA;
