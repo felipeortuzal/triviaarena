@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {chromium} from 'playwright-core';
 const base=process.env.RIVIERA_PUBLIC_URL||'https://felipeortuzal.github.io/triviaarena/';
-const assets=['','app.js','data.json','logo.svg','firebase-config.js','rooms-v2.js','party-game-v5.js','rank-tools-v5.js','phrase-tools.js','riviera-showdown.html','release.json'];
+const assets=['','app.js','data.json','logo.svg','firebase-config.js','rooms-v2.js','party-game-v5.js','rank-tools-v5.js','phrase-tools.js','catalog-v6.js','riviera-showdown.html','release.json'];
 for(const name of assets){
  const response=await fetch(new URL(name,base));
  assert.equal(response.status,200,`${name||'index.html'}: HTTP ${response.status}`);
