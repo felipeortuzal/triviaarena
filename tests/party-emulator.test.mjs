@@ -168,3 +168,52 @@ test('cinco rodadas, reconexão, empate e revanche sem reaproveitar respostas ou
  await host.gateway.closeRoom(code);
  await assert.rejects(host.game.rematch(code),/encerrada/);
 });
+
+test("3 rodadas finitas, revisão de aproximação +0,5, gabarito congelado e revanche",async()=>{
+ const host=await client("v6-host","RVVT25"),guest=await client("v6-guest"),code="RVVT25";
+ await host.gateway.createRoom({nick:"Host",mode:"letters",roundLimit:3});
+ await guest.gateway.joinRoom({code,nick:"Convidado"});
+ let state=await host.game.start(code);
+ assert.equal(state.roundLimit,3);
+ const answer=state.round.content.answer;
+ const previous=puzzles[state.round.index].answer;
+ const index=state.round.index;
+ puzzles[index].answer="O catálogo mudou depois da rodada";
+ try{assert.equal((await get(ref(host.db,"roomPublic/"+code+"/round/content/answer"))).val(),answer);}
+ finally{puzzles[index].answer=previous;}
+ await assert.rejects(set(ref(host.db,"roomPublic/"+code+"/roundLimit"),10),/permission/i);
+ await guest.game.submitGuess(code,"aproximação incompleta");
+ state=await host.game.revealPhrase(code);
+ assert.equal(state.round.review[guest.uid].points,0);
+ await assert.rejects(guest.game.correctPhrase(code,{player:guest.uid,points:0.5,reason:"Ideia central correta, sem complemento"}),/Somente/);
+ await assert.rejects(host.game.correctPhrase(code,{player:guest.uid,points:0.5,reason:"curto"}),/Justifique/);
+ state=await host.game.correctPhrase(code,{player:guest.uid,points:0.5,reason:"Ideia central correta, mas sem complemento"});
+ assert.equal(state.round.review[guest.uid].points,0.5);
+ await host.game.advance(code);
+ state=(await get(ref(host.db,"roomPublic/"+code))).val();
+ assert.equal(state.scores[guest.uid],0.5);
+ for(let n=2;n<=3;n++){
+   await host.game.revealPhrase(code);
+   state=await host.game.advance(code);
+ }
+ assert.equal(state.phase,"finished");
+ assert.equal(state.number,3);
+ assert.equal(state.scores[guest.uid],0.5);
+ assert.equal(Object.keys(state.roundHistory).length,3);
+ assert.equal(state.roundHistory["partida-1-frase-1"].awarded[guest.uid],0.5);
+ await host.game.advance(code);
+ assert.equal((await get(ref(host.db,"roomPublic/"+code+"/scores/"+guest.uid))).val(),0.5);
+ state=await host.game.rematch(code);
+ assert.equal(state.roundLimit,3);
+ assert.equal(state.phase,"lobby");
+});
+test("ranking da rodada conserva versão iniciada depois de mudança editorial",async()=>{
+ const host=await client("catalog-host","RVCT25"),code="RVCT25";
+ await host.gateway.createRoom({nick:"Host",mode:"rank",roundLimit:5});
+ const state=await host.game.start(code);
+ const title=state.round.catalog.items[0],previous=fixture.items[0];
+ try{
+   fixture.items[0]="Valor editorial atualizado";
+   assert.equal((await get(ref(host.db,"roomPublic/"+code+"/round/catalog/items/0"))).val(),title);
+ }finally{fixture.items[0]=previous}
+});
