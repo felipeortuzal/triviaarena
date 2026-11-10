@@ -9,6 +9,14 @@ import {makePhraseGame} from "../phrases-v3.js";
 const base={apiKey:"demo-riviera-web",projectId:"demo-riviera-showdown",authDomain:"demo-riviera-showdown.firebaseapp.com",databaseURL:"https://demo-riviera-showdown-default-rtdb.firebaseio.com",appId:"1:123456789:web:demo"};
 const api={ref,get,set,onValue,runTransaction,update,onDisconnect,serverTimestamp};
 const active=[];
+async function eventually(read,predicate,message){
+ for(let attempt=0;attempt<60;attempt++){
+   const snap=await read();
+   if(predicate(snap))return snap;
+   await new Promise(r=>setTimeout(r,50));
+ }
+ throw Error(message||"Os clientes não sincronizaram a tempo.");
+}
 const puzzles=[
   {code:"4 E do A",answer:"4 Estações do Ano",level:"Fácil",topic:"Ciência",hints:["Clima e tempo","Primavera, verão, outono e inverno"]},
   {code:"7 M do M",answer:"7 Maravilhas do Mundo",level:"Médio",topic:"História",hints:["Monumentos","Lista famosa"]},
@@ -44,7 +52,7 @@ test("3 rodadas compartilhadas, dicas, convite, reconexão e pontos uma vez",asy
   const state=await host.game.start("RVJH82");
   assert.equal(state.round.id,"frase-1");
   assert.equal(state.round.hints,0);
-  assert.equal((await get(ref(guest.db,"roomPublic/RVJH82/round/id"))).val(),"frase-1");
+  await eventually(()=>get(ref(guest.db,"roomPublic/RVJH82/round/id")),s=>s.val()==="frase-1","convidado não recebeu início de partida");
   assert.equal((await get(ref(host.db,"roomRegistry/RVJH82/phase"))).val(),"locked");
   await assert.rejects(stranger.gateway.joinRoom({code:"RVJH82",nick:"Late"}),/começou/);
   await assert.rejects(guest.game.start("RVJH82"),/Somente/);
@@ -55,7 +63,7 @@ test("3 rodadas compartilhadas, dicas, convite, reconexão e pontos uma vez",asy
     host.game.transition("RVJH82",{winner:guest.uid}),
     host.game.transition("RVJH82",{winner:guest.uid})
   ]);
-  const afterFirst=await get(ref(guest.db,"roomPublic/RVJH82"));
+  const afterFirst=await eventually(()=>get(ref(guest.db,"roomPublic/RVJH82")),s=>s.val()?.number===2,"convidado não recebeu a segunda rodada");
   assert.equal(afterFirst.val().number,2,"duas chamadas não pulam rodadas");
   assert.equal(afterFirst.val().scores[guest.uid],1);
   assert.equal(Object.keys(afterFirst.val().roundHistory).length,1);
@@ -67,7 +75,7 @@ test("3 rodadas compartilhadas, dicas, convite, reconexão e pontos uma vez",asy
   const reloadedHost=makePhraseGame({db:host.db,uid:host.uid,api,getPuzzles:()=>puzzles,randomIndex:()=>0});
   await reloadedHost.reveal("RVJH82");
   await reloadedHost.transition("RVJH82",{winner:""});
-  const afterSecond=(await get(ref(guest.db,"roomPublic/RVJH82"))).val();
+  const afterSecond=(await eventually(()=>get(ref(guest.db,"roomPublic/RVJH82")),s=>s.val()?.number===3,"convidado não recebeu a terceira rodada")).val();
   assert.equal(afterSecond.number,3);
   assert.equal(afterSecond.round.hints,0);
   assert.equal(afterSecond.scores[guest.uid],1,"rodada sem vencedor não pontua");
@@ -80,7 +88,7 @@ test("3 rodadas compartilhadas, dicas, convite, reconexão e pontos uma vez",asy
     reloadedHost.transition("RVJH82",{winner:guest.uid,finish:true})
   ]);
   const finalHost=(await get(ref(host.db,"roomPublic/RVJH82"))).val();
-  const finalGuest=(await get(ref(guest.db,"roomPublic/RVJH82"))).val();
+  const finalGuest=(await eventually(()=>get(ref(guest.db,"roomPublic/RVJH82")),s=>s.val()?.phase==="finished","convidado não recebeu resultado final")).val();
   assert.deepEqual(finalHost,finalGuest,"placar idêntico nos dois clientes");
   assert.equal(finalHost.phase,"finished");
   assert.equal(finalGuest.scores[guest.uid],2);
