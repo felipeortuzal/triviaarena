@@ -73,7 +73,8 @@ export const makeRoomGateway=function makeRoomGateway({db,uid,api,now=()=>Date.n
   }
   throw Error("Muitas entradas simultâneas. Reabra o convite e tente novamente.");
 }
-async function createRoom({nick,mode}){
+async function createRoom({nick,mode,totalRounds=5}){
+    if(![3,5,7].includes(totalRounds))throw Error("Escolha 3, 5 ou 7 rodadas por partida.");
     const name=checkName(nick);
     if(!["letters","rank","mixed"].includes(mode))throw Error("Modo de jogo inválido.");
     for(let i=0;i<16;i++){
@@ -90,7 +91,7 @@ async function createRoom({nick,mode}){
         const member=await get(at(p.member(code,uid)));
         const joined=member.val()?.joined||timestamp;
         await set(at(p.public(code)),{version:2,host:uid,mode,phase:"lobby",createdAt:timestamp,number:0,
-          profiles:{[uid]:{uid,nick:name,joined}},scores:{[uid]:0}});
+          profiles:{[uid]:{uid,nick:name,joined}},scores:{[uid]:0},totalRounds});
         return {code,slot,created:true};
       }catch(e){
         throw Error("O código foi reservado, mas o lobby não pôde iniciar. Tente criar outra sala. "+(e?.message||""));
