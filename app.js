@@ -185,7 +185,7 @@ function nextChoice(){const current=room.round;let type=room.mode==='mixed'?(cur
 async function nextRound(){if(localDemo){nextLocalRound();return}throw Error('Partidas online serão habilitadas na etapa 3.');if(!isHost())return;let add=nextChoice();const updateData={number:(room.number||0)+1,round:add};if(add.usedLetters)updateData.usedLetters=add.usedLetters;if(add.usedRanks)updateData.usedRanks=add.usedRanks;if(add.targetHistory)updateData.targetHistory=add.targetHistory;delete add.usedLetters;delete add.usedRanks;delete add.targetHistory;if(room.round?.type==='letters'&&room.round.revealed){const winner=$('#letter-winner')?.value;if(winner){updateData[`scores/${winner}`]=(room.scores?.[winner]||0)+1}}if(room.round?.type==='rank'&&room.round.revealed&&!room.round.scored){const ranked=scoreRank(room.round);const scores={...room.scores};ranked.forEach(x=>{if(x.place&&x.place<=3)scores[x.uid]=(scores[x.uid]||0)+({1:5,2:3,3:1}[x.place]||0)});updateData.scores=scores}await update(ref(db,'rooms/'+roomId),updateData)}
 function startDemo(){
   if(modeChoice!=="letters"){startDemoLobby();startDemoFromLobby();return}
-  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();
+  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
   unsubRoom?.();unsubRoom=null;
   localDemo=true;roomId="LOCAL";
   const index=DATA.puzzles.length>1?random(DATA.puzzles.length):0;
@@ -325,17 +325,27 @@ else if(action==='copy'){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
  catch{const field=$('#invite');if(field){field.focus();field.select()}else throw Error('Copie o convite manualmente: '+url)}
 }
-else if(action==='import'&&isHost()){const title=$('#custom-title')?.value.trim();const source=$('#custom-source')?.value.trim();const items=$('#custom-items')?.value.split('\n').map(x=>x.trim().replace(/^\d+[º.)-]?\s*/, '')).filter(Boolean)||[];if(!title||items.length<10||items.length>1000)throw Error('Informe um título e de 10 a 1.000 itens, um por linha.');if(source&&!/^https:\/\//i.test(source))throw Error('A fonte precisa começar com https://');const c={id:'custom-'+Date.now(),title,description:'Ranking personalizado fornecido pelo anfitrião',source:source||'',items};await update(ref(db,'rooms/'+roomId),{customRankings:[...(room.customRankings||[]),c]});}
+else if(action==='import'&&isHost()){throw Error('Importação de rankings estará disponível após a curadoria das fontes.')}
 else if(action==='start-game'&&localDemo){startDemoFromLobby()}
-else if(action==='start-game'){if(!isHost()||!phraseGame)throw Error('Somente o anfitrião pode iniciar.');await phraseGame.start(roomId)}
+else if(action==='start-game'){if(!isHost()||!partyGame)throw Error('Somente o anfitrião pode iniciar.');await partyGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
-else if(action==='next'){if(!phraseGame||!isHost())throw Error('Somente o anfitrião avança.');await phraseGame.transition(roomId,{winner:$('#letter-winner')?.value||selectedWinner||''});selectedWinner=''}
+else if(action==='next'){if(!partyGame||!isHost())throw Error('Somente o anfitrião avança.');await partyGame.advance(roomId,{winner:room.round?.type==='letters'?($('#letter-winner')?.value||selectedWinner||''):''});selectedWinner=''}
 else if(action==='finish-game'&&localDemo){finishLocalDemo()}
-else if(action==='finish-game'){if(!phraseGame||!isHost())throw Error('Somente o anfitrião encerra.');await phraseGame.transition(roomId,{winner:$('#letter-winner')?.value||selectedWinner||'',finish:true});selectedWinner=''}
-else if(action==='hint'&&isHost()&&phraseGame){await phraseGame.hint(roomId)}
-else if(action==='reveal'&&isHost()&&phraseGame){await phraseGame.reveal(roomId)}
-else if(action==='guess'&&room?.round?.type==='rank'){const g=$('#guess')?.value.trim();if(!g)throw Error('Escreva seu palpite.');await set(ref(db,`rooms/${roomId}/guesses/${room.round.id}/${uid}`),g)}
-else if(action==='override'&&isHost()){const id=$('#override-player').value;const v=Number($('#override-pos').value);if(!Number.isInteger(v)||v<0||v>room.round.limit)throw Error('Digite uma posição entre 0 e '+room.round.limit);await update(ref(db,'rooms/'+roomId+'/round/overrides'),{[id]:v})}
+else if(action==='finish-game'){if(!partyGame||!isHost())throw Error('Somente o anfitrião encerra.');await partyGame.advance(roomId,{winner:room.round?.type==='letters'?($('#letter-winner')?.value||selectedWinner||''):'',finish:true});selectedWinner=''}
+else if(action==='hint'&&isHost()&&partyGame){await partyGame.hint(roomId)}
+else if(action==='reveal'&&isHost()&&partyGame){if(room.round?.type==='rank')await partyGame.revealRanking(roomId);else await partyGame.revealPhrase(roomId)}
+else if(action==='guess'&&room?.round?.type==='rank'){
+ const guess=($('#guess')?.value||guessDrafts[roomId+':'+room.round.id]||'').trim();
+ if(localDemo)localSubmitGuess(guess);
+ else{if(!partyGame)throw Error('Partida indisponível.');ownGuess=await partyGame.submitGuess(roomId,guess);delete guessDrafts[roomId+':'+room.round.id];render()}
+}
+else if(action==='override'&&isHost()&&room?.round?.type==='rank'){
+ const player=$('#override-player')?.value,position=Number($('#override-pos')?.value);
+ const reason=($('#override-reason')?.value||rankOverrideReason||'').trim();
+ if(localDemo)localCorrectRanking({player,position,reason});
+ else{if(!partyGame)throw Error('Partida indisponível.');await partyGame.correctRanking(roomId,{player,position,reason})}
+ rankOverrideReason='';
+}
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
 document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='letter-winner')selectedWinner=e.target.value});
