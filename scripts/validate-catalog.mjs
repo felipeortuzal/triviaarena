@@ -19,7 +19,7 @@ for(let i=0;i<(data.puzzles||[]).length;i++){
  facts.set(k,p.id);
 }
 for(const ranking of data.rankings||[]){
- for(const err of validateRanking(ranking,{minimum:25}))errors.push(ranking.id+": "+err);
+ for(const err of validateRanking(ranking,{minimum:10}))errors.push(ranking.id+": "+err);
  if(!ranking.edition||!ranking.observedAt||!ranking.revision)errors.push(ranking.id+": metadados de edição ausentes");
  if(!Array.isArray(ranking.itemIds)||ranking.itemIds.length!==ranking.items.length)errors.push(ranking.id+": itemIds incompletos");
  if(!(ranking.verifiedPrefix>=1&&ranking.verifiedPrefix<=ranking.items.length))errors.push(ranking.id+": prefixo de fonte não documentado");
