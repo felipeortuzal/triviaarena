@@ -67,19 +67,54 @@ function roomHeader(){
   if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1} DE ${room?.totalRounds||5}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
   return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0} DE ${room?.totalRounds||5}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
 }
+function phraseReview(r){
+ if(!r.resultReady)return `<div class="notice">🔎 ${isHost()?"Preparando as respostas. Tente revelar novamente se necessário.":"O anfitrião está avaliando as respostas."}</div>${isHost()?btn("Atualizar avaliação","reveal","ghost"):""}`;
+ const rows=members().map(m=>{
+   const result=r.review?.[m.uid]||{status:"empty",points:0,reason:"Sem resposta",guess:""};
+   const status=result.status==="exact"?"✓ Exata":result.status==="approx"?"≈ Aproximada":result.status==="reviewed"?"✎ Revisada":result.status==="review"?"? Revisão sugerida":"— Incorreta";
+   return `<tr><td>${esc(m.nick)}</td><td>${esc(result.guess||"Sem resposta")}</td><td>${status}${result.reason?`<div class="tiny">${esc(result.reason)}</div>`:""}</td><td class="highlight">+${result.points||0}</td></tr>`;
+ }).join("");
+ const controls=isHost()?`<div class="round-decision"><div class="eyebrow">REVISÃO DO ANFITRIÃO</div>
+ <p class="tiny">Aceite respostas semanticamente equivalentes. Cada correção fica registrada com o motivo.</p>
+ <div class="grid"><label><span class="label">Jogador</span><select class="field" id="phrase-correct-player">${members().map(m=>`<option value="${esc(m.uid)}">${esc(m.nick)}</option>`).join("")}</select></label>
+ <label><span class="label">Pontos</span><select class="field" id="phrase-correct-points"><option value="2">2 · Exata</option><option value="1">1 · Aproximada</option><option value="0">0 · Incorreta</option></select></label></div>
+ <label><span class="label">Justificativa</span><input class="field" id="phrase-correct-reason" maxlength="180" placeholder="Ex.: usou sinônimo equivalente sem alterar o número"></label>
+ ${btn("Aplicar revisão","phrase-override","ghost")}</div>`:"";
+ return `<div class="cardline"><div class="eyebrow">REVISÃO DA FRASE · EXATA +2 / APROXIMADA +1</div>
+ <div class="tablewrap"><table class="board"><thead><tr><th>Jogador</th><th>Resposta</th><th>Resultado</th><th>Pontos</th></tr></thead><tbody>${rows}</tbody></table></div>${controls}</div>`;
+}
+function roundAdvanceControls(){
+ if(!isHost())return "";
+ const last=room.number>=(room.totalRounds||5);
+ return `<div class="actions">${btn(last?"🏆 Finalizar e ver pódio":"Próxima rodada →","next","lime")}
+ ${!last?btn("Encerrar antecipadamente","finish-game","ghost"):""}</div>`;
+}
 function letters(){
-const r=room.round,p=DATA.puzzles[r.index];
-if(!p)return roomHeader()+'<p>Desafio não encontrado. Atualize a página.</p>';
-const hints=r.hints>0?`<div class="status" role="status"><b>💡 Dica 1:</b> ${esc(p.hints?.[0]||'Sem dica')}${r.hints>1?`<p><b>💡 Dica 2:</b> ${esc(p.hints?.[1]||'Sem dica')}</p>`:''}</div>`:'<p class="tiny muted" style="text-align:center">Aguardando a primeira dica do anfitrião.</p>';
-const answer=`<div class="result" role="status"><div class="eyebrow">RESPOSTA REVELADA</div><strong>${esc(p.answer)}</strong><p>${esc(p.explain||'')}</p></div>`;
-const host=isHost()?`<div class="actions">${btn('💡 Liberar dica '+Math.min(2,r.hints+1)+'/2','hint','ghost',r.hints>=2||r.revealed)}${btn('👁 Revelar resposta','reveal','primary',r.revealed)}</div>`:'<p class="tiny">O anfitrião controla as dicas e a revelação. Combinem as respostas em voz alta.</p>';
-const scoring=r.revealed&&isHost()?(localDemo&&Object.keys(room.members||{}).length<2?btn('Próximo desafio →','next','lime'):`<div class="round-decision"><label class="label" for="letter-winner">Quem acertou? (+1 ponto)</label><select class="field" id="letter-winner"><option value="">Ninguém / sem pontuação</option>${members().map(m=>`<option value="${esc(m.uid)}" ${selectedWinner===m.uid?'selected':''}>${esc(m.nick)}</option>`).join('')}</select><div class="actions">${btn('Próxima rodada →','next','lime')}${btn('🏁 Finalizar partida','finish-game','ghost')}</div></div>`):'';
-return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack"><div class="row between"><span class="pill">🧩 RODADA ${room.number}</span><span class="pill">${r.hints}/2 dicas</span></div>
-<div class="options"><span class="pill">${esc(p.topic||'Cultura geral')}</span><span class="pill">${esc(p.level||'Geral')}</span></div>
-<div class="largecode">${esc(p.code)}</div><p class="muted" style="text-align:center">O que significam os números e as iniciais?</p>
-${r.revealed?answer:hints}${!r.revealed?host:''}${scoring}
-${!localDemo&&!room.members?.[room.host]?.online?'<div class="notice">⚠ O anfitrião está offline. A rodada continuará quando ele voltar.</div>':''}
-</section>${localDemo&&Object.keys(room.members||{}).length<2?'':`<aside class="panel scoreboard"><div class="eyebrow">PLACAR</div><h3>Quem está liderando?</h3>${roster()}<p class="tiny">${Object.keys(room.roundHistory||{}).length} rodada(s) concluída(s).</p></aside>`}</div>`;
+ const r=room.round,p=r.puzzleSnapshot||DATA.puzzles[r.index];
+ if(!p)return roomHeader()+"<div class='notice'>Esta pergunta não está disponível no catálogo.</div>";
+ const key=roomId+":"+r.id,guess=guessDrafts[key]??(localDemo?room.localGuesses?.local||"":ownGuess||"");
+ const sent=localDemo?Object.keys(room.localGuesses||{}).length:Object.values(submitted||{}).filter(Boolean).length;
+ const hints=r.hints>0?`<div class="status" role="status"><b>💡 Dica 1:</b> ${esc(p.hints?.[0]||"Sem dica")}${r.hints>1?`<p><b>💡 Dica 2:</b> ${esc(p.hints?.[1]||"Sem dica")}</p>`:""}</div>`:
+ '<p class="tiny muted" style="text-align:center">As dicas serão liberadas pelo anfitrião.</p>';
+ const source=p.sourceUrl&&p.sourceUrl.startsWith("https://")?`<p class="tiny"><a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">↗ Fonte: ${esc(p.sourceName||"Referência")}</a></p>`:"";
+ const answer=`<div class="result" role="status"><div class="eyebrow">RESPOSTA REVELADA</div><strong>${esc(p.answer)}</strong><p>${esc(p.explain||"")}</p>${source}</div>`;
+ const host=!r.revealed&&isHost()?`<div class="actions">${btn("💡 Liberar dica "+Math.min(2,(r.hints||0)+1)+"/2","hint","ghost",r.hints>=2)}
+ ${btn("👁 Revelar respostas","reveal","primary")}</div>`:"";
+ const guessArea=!r.revealed?`<div class="round-decision">
+ <label><span class="label">Sua interpretação da frase</span><input class="field" id="phrase-answer" maxlength="120" autocomplete="off" placeholder="Ex.: 27 estrelas na bandeira brasileira" value="${esc(guess)}"></label>
+ ${btn(ownGuess||localDemo&&room.localGuesses?.local?"✓ Atualizar resposta":"Enviar resposta 🔒","phrase-guess","lime")}
+ <p class="tiny">🔒 ${sent}/${members().length} enviaram. Ninguém vê as respostas dos outros antes da revelação.</p></div>`:"";
+ const legacy=!r.resultReady&&isHost()&&r.revealed&&(!r.review||Object.keys(r.guesses||{}).length===0)?
+ `<label><span class="label">Acerto por voz (sem resposta digitada): +1</span><select class="field" id="letter-winner"><option value="">Ninguém acertou</option>${members().map(m=>`<option value="${esc(m.uid)}" ${selectedWinner===m.uid?"selected":""}>${esc(m.nick)}</option>`).join("")}</select></label>`:"";
+ const legacyFallback=r.revealed&&r.resultReady&&Object.keys(r.guesses||{}).length===0&&isHost()?
+ `<label><span class="label">Acerto por voz, sem resposta digitada (+1)</span><select class="field" id="letter-winner"><option value="">Ninguém / sem pontos</option>${members().map(m=>`<option value="${esc(m.uid)}" ${selectedWinner===m.uid?"selected":""}>${esc(m.nick)}</option>`).join("")}</select></label>`:"";
+ return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack">
+ <div class="row between"><span class="pill">🧩 RODADA ${room.number}/${room.totalRounds||5}</span><span class="pill">${r.hints||0}/2 dicas</span></div>
+ <div class="options"><span class="pill">${esc(p.topic||"Cultura geral")}</span><span class="pill">${esc(p.level||"Geral")}</span></div>
+ <div class="largecode">${esc(p.code)}</div><p class="muted" style="text-align:center">Decifre a frase usando os números e as iniciais.</p>
+ ${r.revealed?answer:hints}${guessArea}${host}
+ ${r.revealed?phraseReview(r)+legacy+legacyFallback+roundAdvanceControls():""}
+ </section>${localDemo&&Object.keys(room.members||{}).length<2?"":`<aside class="panel scoreboard"><div class="eyebrow">PLACAR DA PARTIDA</div>${roster()}<p class="tiny">${Object.keys(room.roundHistory||{}).length} de ${room.totalRounds||5} rodadas concluídas.</p></aside>`}</div>`;
 }
 function rankData(r){return r.listSnapshot||room?.customRankings?.[r.categoryId]||DATA.rankings.find(x=>x.id===r.categoryId)}
 
