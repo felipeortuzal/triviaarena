@@ -7,8 +7,8 @@
       "topic": "Cultura geral",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a cultura geral.",
-        "É uma lista clássica de grande fama."
+        "Um conjunto clássico de construções da Antiguidade.",
+        "A pirâmide de Quéops é a única sobrevivente."
       ],
       "id": "frase-0001",
       "status": "active"
@@ -20,8 +20,8 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto é um jogo de mesa.",
-        "As peças têm dois lados com pontos."
+        "Um jogo de mesa com peças retangulares.",
+        "A versão duplo-seis combina todos os pares de 0 a 6."
       ],
       "id": "frase-0002",
       "status": "active"
@@ -33,8 +33,8 @@
       "topic": "Brasil",
       "level": "Médio",
       "hints": [
-        "É um símbolo nacional.",
-        "Cada unidade da federação está representada."
+        "Pense na bandeira nacional de um país da América do Sul.",
+        "O total representa estados e Distrito Federal."
       ],
       "id": "frase-0003",
       "status": "active"
@@ -46,8 +46,8 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "Um tabuleiro de estratégia quadriculado.",
+        "São oito colunas e oito linhas."
       ],
       "id": "frase-0004",
       "status": "active"
@@ -59,8 +59,8 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "Um jogo com dois exércitos de peças.",
+        "Cada lado começa com 16 peças."
       ],
       "id": "frase-0005",
       "status": "active"
@@ -72,8 +72,8 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "Baralho usado em vários jogos de cartas.",
+        "São quatro naipes com 13 cartas cada, sem curingas."
       ],
       "id": "frase-0006",
       "status": "active"
@@ -85,8 +85,8 @@
       "topic": "Jogos",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "Um baralho tradicional tem grupos de cartas.",
+        "Copas, paus, ouros e espadas."
       ],
       "id": "frase-0007",
       "status": "active"
@@ -98,8 +98,8 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "Pense num dos quatro naipes de cartas.",
+        "Do ás ao rei, incluindo figuras."
       ],
       "id": "frase-0008",
       "status": "active"
@@ -111,8 +111,8 @@
       "topic": "Jogos",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a jogos.",
-        "Pense nos componentes ou nas regras de um jogo de mesa."
+        "É um tabuleiro com três linhas.",
+        "Três colunas e três linhas formam o jogo."
       ],
       "id": "frase-0009",
       "status": "active"
@@ -124,8 +124,8 @@
       "topic": "Jogos",
       "level": "Difícil",
       "hints": [
-        "É um jogo de estratégia oriental.",
-        "Seu tabuleiro tem 19 linhas em cada direção."
+        "Tabuleiro oriental de estratégia.",
+        "Uma grade de 19 por 19 cruzamentos."
       ],
       "id": "frase-0010",
       "status": "active"
@@ -137,8 +137,8 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Objeto usado para sorteio em jogos.",
+        "O modelo cúbico tem faces de 1 a 6."
       ],
       "id": "frase-0011",
       "status": "active"
@@ -150,8 +150,8 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Some as marcas de um dado comum.",
+        "Os valores vão de 1 a 6."
       ],
       "id": "frase-0012",
       "status": "active"
@@ -163,8 +163,8 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Pense em faces opostas de um dado padrão.",
+        "Os pares são 1–6, 2–5 e 3–4."
       ],
       "id": "frase-0013",
       "status": "active"
@@ -176,8 +176,8 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Um sólido geométrico comum.",
+        "Todas as suas superfícies são quadradas."
       ],
       "id": "frase-0014",
       "status": "active"
@@ -189,8 +189,8 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Conte os cantos de um dado cúbico.",
+        "Cada vértice une três arestas."
       ],
       "id": "frase-0015",
       "status": "active"
@@ -202,8 +202,8 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Conte segmentos de um sólido com seis faces quadradas.",
+        "Há quatro na face de cima, quatro embaixo e quatro verticais."
       ],
       "id": "frase-0016",
       "status": "active"
@@ -215,8 +215,8 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Um dos sólidos platônicos.",
+        "É formado por faces triangulares."
       ],
       "id": "frase-0017",
       "status": "active"
@@ -228,8 +228,8 @@
       "topic": "Matemática",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Pense numa rotação completa.",
+        "Uma circunferência representa uma volta."
       ],
       "id": "frase-0018",
       "status": "active"
@@ -241,8 +241,8 @@
       "topic": "Matemática",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Propriedade básica da geometria plana.",
+        "Os três ângulos internos de um triângulo somados."
       ],
       "id": "frase-0019",
       "status": "active"
@@ -254,8 +254,8 @@
       "topic": "Matemática",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a matemática.",
-        "É uma propriedade geométrica ou uma contagem de elementos."
+        "Polígono com cinco lados.",
+        "Use a fórmula (n − 2) × 180°."
       ],
       "id": "frase-0020",
       "status": "active"
@@ -267,8 +267,8 @@
       "topic": "Tecnologia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
+        "Unidade básica da computação.",
+        "Um byte é formado por algarismos binários."
       ],
       "id": "frase-0021",
       "status": "active"
@@ -280,8 +280,8 @@
       "topic": "Tecnologia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
+        "Uma unidade binária de armazenamento.",
+        "Não é o quilobyte decimal: prefixo kibi-."
       ],
       "id": "frase-0022",
       "status": "active"
@@ -293,8 +293,8 @@
       "topic": "Tecnologia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a tecnologia.",
-        "Está relacionado a unidades usadas no armazenamento digital."
+        "Múltiplos binários de informação.",
+        "Há 1.024 kibibytes nessa unidade."
       ],
       "id": "frase-0023",
       "status": "active"
@@ -306,8 +306,8 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "É uma referência da química.",
-        "Ela organiza átomos por número atômico."
+        "Pense nos elementos químicos reconhecidos.",
+        "Uma tabela organiza elementos por número atômico."
       ],
       "id": "frase-0024",
       "status": "active",
@@ -320,8 +320,8 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Movimento dos corpos na física clássica.",
+        "Inércia, dinâmica e ação/reação."
       ],
       "id": "frase-0025",
       "status": "active"
@@ -333,8 +333,8 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Leis que descrevem órbitas planetárias.",
+        "Foram formuladas pelo astrônomo Johannes Kepler."
       ],
       "id": "frase-0026",
       "status": "active"
@@ -346,8 +346,8 @@
       "topic": "Espaço",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a espaço.",
-        "A resposta é reconhecida pela astronomia moderna."
+        "O sistema planetário do Sol.",
+        "Plutão é classificado como planeta anão."
       ],
       "id": "frase-0027",
       "status": "active"
@@ -359,8 +359,8 @@
       "topic": "Espaço",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a espaço.",
-        "A resposta é reconhecida pela astronomia moderna."
+        "Um padrão para mapear o céu.",
+        "São regiões oficiais definidas pela União Astronômica Internacional."
       ],
       "id": "frase-0028",
       "status": "active"
@@ -372,8 +372,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Uma unidade de tempo do cotidiano.",
+        "Dois ciclos de doze horas completam um dia civil."
       ],
       "id": "frase-0029",
       "status": "active"
@@ -385,8 +385,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Relógios dividem o tempo.",
+        "Cada hora é composta de sessenta partes menores."
       ],
       "id": "frase-0030",
       "status": "active"
@@ -398,8 +398,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Unidade de tempo abaixo do minuto.",
+        "Um minuto contém esse total de segundos."
       ],
       "id": "frase-0031",
       "status": "active"
@@ -411,8 +411,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Um tipo de ano do calendário gregoriano.",
+        "Não possui o dia extra de fevereiro."
       ],
       "id": "frase-0032",
       "status": "active"
@@ -424,8 +424,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Uma exceção periódica no calendário gregoriano.",
+        "Fevereiro tem 29 dias nesses anos."
       ],
       "id": "frase-0033",
       "status": "active"
@@ -437,8 +437,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Calendário usado no mundo todo.",
+        "De janeiro a dezembro."
       ],
       "id": "frase-0034",
       "status": "active"
@@ -450,8 +450,8 @@
       "topic": "Tempo",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a tempo.",
-        "Pense no funcionamento do relógio ou do calendário."
+        "Divisão cotidiana do calendário.",
+        "De segunda a domingo."
       ],
       "id": "frase-0035",
       "status": "active"
@@ -463,8 +463,8 @@
       "topic": "Geografia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
+        "Modelo teórico de fusos globais.",
+        "Cada faixa corresponde aproximadamente a 15 graus de longitude."
       ],
       "id": "frase-0036",
       "status": "active"
@@ -476,8 +476,8 @@
       "topic": "Medidas",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a medidas.",
-        "É uma relação entre unidades de medida."
+        "Conversão do sistema métrico.",
+        "Um metro contém cem unidades menores."
       ],
       "id": "frase-0037",
       "status": "active"
@@ -489,8 +489,8 @@
       "topic": "Medidas",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a medidas.",
-        "É uma relação entre unidades de medida."
+        "Conversão de distância no sistema métrico.",
+        "O prefixo quilo- significa mil."
       ],
       "id": "frase-0038",
       "status": "active"
@@ -502,8 +502,8 @@
       "topic": "Medidas",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a medidas.",
-        "É uma relação entre unidades de medida."
+        "Conversão de capacidade.",
+        "Um litro tem mil unidades menores."
       ],
       "id": "frase-0039",
       "status": "active"
@@ -515,8 +515,8 @@
       "topic": "Medidas",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a medidas.",
-        "É uma relação entre unidades de medida."
+        "Unidade de distância usada na navegação.",
+        "Equivale ao comprimento aproximado de um minuto de latitude."
       ],
       "id": "frase-0040",
       "status": "active"
@@ -528,8 +528,8 @@
       "topic": "Medidas",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a medidas.",
-        "É uma relação entre unidades de medida."
+        "Conversão aproximada de milha terrestre.",
+        "O valor exato é 1.609,344 metros."
       ],
       "id": "frase-0041",
       "status": "active"
@@ -541,8 +541,8 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "É uma constante fundamental da física.",
-        "Ela determina um limite de velocidade no Universo."
+        "Uma constante fundamental da física.",
+        "No vácuo, a luz percorre quase 300 mil km em um segundo."
       ],
       "id": "frase-0042",
       "status": "active"
@@ -554,8 +554,8 @@
       "topic": "Corpo humano",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Anatomia de um adulto típico.",
+        "O total de ossos pode variar entre pessoas."
       ],
       "id": "frase-0043",
       "status": "active"
@@ -567,8 +567,8 @@
       "topic": "Corpo humano",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Dentição de um adulto sem extrações.",
+        "Inclui normalmente quatro terceiros molares."
       ],
       "id": "frase-0044",
       "status": "active"
@@ -580,8 +580,8 @@
       "topic": "Corpo humano",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Órgão responsável pelo bombeamento do sangue.",
+        "São dois átrios e dois ventrículos."
       ],
       "id": "frase-0045",
       "status": "active"
@@ -593,8 +593,8 @@
       "topic": "Corpo humano",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Células somáticas humanas usuais.",
+        "São 23 pares de cromossomos."
       ],
       "id": "frase-0046",
       "status": "active"
@@ -606,8 +606,8 @@
       "topic": "Corpo humano",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Organização dos cromossomos humanos.",
+        "O conjunto é usualmente representado por 22 pares autossômicos e um par sexual."
       ],
       "id": "frase-0047",
       "status": "active"
@@ -619,8 +619,8 @@
       "topic": "Corpo humano",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a corpo humano.",
-        "Pense em estruturas do organismo ou em genética."
+        "Classificação tradicional da percepção.",
+        "Visão, audição, tato, paladar e olfato."
       ],
       "id": "frase-0048",
       "status": "active"
@@ -632,8 +632,8 @@
       "topic": "Língua",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a língua.",
-        "Está relacionada às regras de escrita."
+        "Sistema oficial de escrita do português.",
+        "O acordo ortográfico inclui K, W e Y."
       ],
       "id": "frase-0049",
       "status": "active"
@@ -645,8 +645,8 @@
       "topic": "Música",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Notação musical escrita.",
+        "O pentagrama é composto por linhas paralelas."
       ],
       "id": "frase-0050",
       "status": "active"
@@ -658,8 +658,8 @@
       "topic": "Música",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Fundamentos da música tonal.",
+        "Dó, ré, mi, fá, sol, lá e si."
       ],
       "id": "frase-0051",
       "status": "active"
@@ -671,8 +671,8 @@
       "topic": "Música",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Uma oitava na música ocidental temperada.",
+        "Existem doze passos cromáticos."
       ],
       "id": "frase-0052",
       "status": "active"
@@ -684,8 +684,8 @@
       "topic": "Música",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Instrumento de teclas comum em concertos.",
+        "A configuração moderna usual inclui teclas brancas e pretas."
       ],
       "id": "frase-0053",
       "status": "active"
@@ -697,8 +697,8 @@
       "topic": "Música",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Instrumento de cordas friccionadas.",
+        "Cordas sol, ré, lá e mi."
       ],
       "id": "frase-0054",
       "status": "active"
@@ -710,8 +710,8 @@
       "topic": "Música",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a música.",
-        "Está relacionado à notação ou aos instrumentos musicais."
+        "Instrumento de cordas popular.",
+        "O modelo usual possui seis cordas."
       ],
       "id": "frase-0055",
       "status": "active"
@@ -723,8 +723,8 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Regra de um esporte coletivo.",
+        "Conte o goleiro e os jogadores de linha."
       ],
       "id": "frase-0056",
       "status": "active"
@@ -736,8 +736,8 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Tempo regulamentar do futebol.",
+        "São dois tempos de 45 minutos, sem acréscimos."
       ],
       "id": "frase-0057",
       "status": "active"
@@ -749,8 +749,8 @@
       "topic": "Esportes",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Equipes em quadra num esporte de rede.",
+        "A formação padrão do voleibol indoor."
       ],
       "id": "frase-0058",
       "status": "active"
@@ -762,8 +762,8 @@
       "topic": "Esportes",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Equipes em quadra num esporte de cesta.",
+        "A modalidade tradicional de basquete utiliza cinco atletas de cada lado."
       ],
       "id": "frase-0059",
       "status": "active"
@@ -775,8 +775,8 @@
       "topic": "Esportes",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Um esporte com tacos e campo extenso.",
+        "O percurso regulamentar usual é composto por buracos."
       ],
       "id": "frase-0060",
       "status": "active"
@@ -788,8 +788,8 @@
       "topic": "Esportes",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Esporte em pista com bola e pinos.",
+        "Os pinos formam um triângulo ao fundo da pista."
       ],
       "id": "frase-0061",
       "status": "active"
@@ -801,8 +801,8 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "É um símbolo associado a um evento esportivo mundial.",
-        "Seus círculos entrelaçados representam a união dos cinco continentes."
+        "Símbolo de evento esportivo mundial.",
+        "Cinco círculos entrelaçados representam a união dos continentes."
       ],
       "id": "frase-0062",
       "status": "active",
@@ -815,8 +815,8 @@
       "topic": "Esportes",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
+        "Distância oficial de uma prova de corrida.",
+        "É pouco mais de 42 quilômetros."
       ],
       "id": "frase-0063",
       "status": "active"
@@ -828,8 +828,8 @@
       "topic": "Geografia",
       "level": "Fácil",
       "hints": [
-        "É uma divisão administrativa de um país.",
-        "O país fica na América do Norte."
+        "Organização federativa norte-americana.",
+        "O total de estrelas na bandeira coincide com esse número."
       ],
       "id": "frase-0064",
       "status": "active"
@@ -841,8 +841,8 @@
       "topic": "Brasil",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a brasil.",
-        "A informação aparece em símbolos ou instituições brasileiras."
+        "Organização territorial do Brasil.",
+        "Some estados e Distrito Federal."
       ],
       "id": "frase-0065",
       "status": "active"
@@ -854,8 +854,8 @@
       "topic": "Brasil",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a brasil.",
-        "A informação aparece em símbolos ou instituições brasileiras."
+        "Organização federativa brasileira.",
+        "Não conte o Distrito Federal como estado."
       ],
       "id": "frase-0066",
       "status": "active"
@@ -867,8 +867,8 @@
       "topic": "Brasil",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a brasil.",
-        "A informação aparece em símbolos ou instituições brasileiras."
+        "Pilares do Estado moderno no Brasil.",
+        "Legislativo, Executivo e Judiciário."
       ],
       "id": "frase-0067",
       "status": "active"
@@ -894,8 +894,8 @@
       "topic": "Geografia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
+        "Integração regional europeia.",
+        "O total se refere aos países membros, não à zona do euro."
       ],
       "id": "frase-0069",
       "status": "active"
@@ -907,8 +907,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Organização internacional sediada em Nova York.",
+        "Há membros plenos e observadores; conte apenas os plenos."
       ],
       "id": "frase-0070",
       "status": "active",
@@ -921,8 +921,8 @@
       "topic": "História",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Órgão da ONU responsável por paz e segurança.",
+        "Os membros permanentes têm direito a veto."
       ],
       "id": "frase-0071",
       "status": "active"
@@ -934,8 +934,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Um conselho central das Nações Unidas.",
+        "São cinco permanentes e dez não permanentes."
       ],
       "id": "frase-0072",
       "status": "active"
@@ -947,8 +947,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Agenda global de desenvolvimento.",
+        "Metas adotadas para serem alcançadas até 2030."
       ],
       "id": "frase-0073",
       "status": "active"
@@ -960,8 +960,8 @@
       "topic": "Cultura geral",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a cultura geral.",
-        "É uma lista clássica de grande fama."
+        "Uma imagem simbólica de um texto religioso.",
+        "Guerra, fome, peste/conquista e morte aparecem nas interpretações."
       ],
       "id": "frase-0074",
       "status": "active"
@@ -973,8 +973,8 @@
       "topic": "Mitologia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a mitologia.",
-        "Pense em personagens e histórias da Grécia antiga."
+        "Mitologia grega e provas de um herói.",
+        "O herói é Héracles (Hércules)."
       ],
       "id": "frase-0075",
       "status": "active"
@@ -986,8 +986,8 @@
       "topic": "Mitologia",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a mitologia.",
-        "Pense em personagens e histórias da Grécia antiga."
+        "Divindades que inspiram artes e conhecimentos.",
+        "Filhas de Zeus e Mnemósine na tradição grega."
       ],
       "id": "frase-0076",
       "status": "active"
@@ -999,8 +999,8 @@
       "topic": "Mitologia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a mitologia.",
-        "Pense em personagens e histórias da Grécia antiga."
+        "Grupo de divindades da mitologia grega.",
+        "A lista dos olímpicos pode variar segundo a tradição."
       ],
       "id": "frase-0077",
       "status": "active"
@@ -1012,8 +1012,8 @@
       "topic": "Cultura pop",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a cultura pop.",
-        "É algo presente em uma história conhecida há gerações."
+        "Um conto de fadas famoso.",
+        "Personagens que acolhem a Branca de Neve."
       ],
       "id": "frase-0078",
       "status": "active"
@@ -1025,8 +1025,8 @@
       "topic": "Cultura pop",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a cultura pop.",
-        "É algo presente em uma história conhecida há gerações."
+        "Um conto infantil com animais.",
+        "Casas de palha, madeira e tijolos."
       ],
       "id": "frase-0079",
       "status": "active"
@@ -1038,8 +1038,8 @@
       "topic": "História",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Livros religiosos cristãos.",
+        "Mateus, Marcos, Lucas e João."
       ],
       "id": "frase-0080",
       "status": "active"
@@ -1051,8 +1051,8 @@
       "topic": "História",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Um conjunto dos textos iniciais da Bíblia.",
+        "Gênesis, Êxodo, Levítico, Números e Deuteronômio."
       ],
       "id": "frase-0081",
       "status": "active"
@@ -1064,8 +1064,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Uma convenção sobre o cânon bíblico.",
+        "O número corresponde à Bíblia protestante."
       ],
       "id": "frase-0082",
       "status": "active"
@@ -1077,8 +1077,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a história.",
-        "A informação vem de uma instituição ou tradição histórica."
+        "Uma convenção sobre o cânon bíblico.",
+        "O número corresponde à Bíblia católica."
       ],
       "id": "frase-0083",
       "status": "active"
@@ -1090,8 +1090,8 @@
       "topic": "Ciência",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Um fenômeno anual na Terra.",
+        "Primavera, verão, outono e inverno."
       ],
       "id": "frase-0084",
       "status": "active"
@@ -1103,8 +1103,8 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Mistura aditiva de luz.",
+        "Vermelho, verde e azul (RGB)."
       ],
       "id": "frase-0085",
       "status": "active"
@@ -1116,8 +1116,8 @@
       "topic": "Ciência",
       "level": "Difícil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Mistura subtrativa de impressão.",
+        "Ciano, magenta e amarelo (CMY)."
       ],
       "id": "frase-0086",
       "status": "active"
@@ -1129,8 +1129,8 @@
       "topic": "Ciência",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Propriedade básica de um ímã.",
+        "Normalmente chamados norte e sul."
       ],
       "id": "frase-0087",
       "status": "active"
@@ -1142,8 +1142,8 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a ciência.",
-        "A pista está em uma definição ou estrutura estudada nas ciências."
+        "Bases nitrogenadas do DNA.",
+        "Adenina, timina, citosina e guanina."
       ],
       "id": "frase-0088",
       "status": "active"
@@ -1155,8 +1155,8 @@
       "topic": "Literatura",
       "level": "Médio",
       "hints": [
-        "Forma clássica de poesia.",
-        "Possui dois quartetos e dois tercetos."
+        "Forma poética tradicional.",
+        "Geralmente se organiza em dois quartetos e dois tercetos."
       ],
       "id": "frase-0089",
       "status": "active"
@@ -1168,8 +1168,8 @@
       "topic": "Linguagem",
       "level": "Fácil",
       "hints": [
-        "Pense em linguagem escrita.",
-        "É usado no inglês."
+        "Alfabeto usado na língua inglesa.",
+        "De A até Z."
       ],
       "id": "frase-0090",
       "status": "active"
@@ -1223,8 +1223,8 @@
       "topic": "Cultura geral",
       "level": "Médio",
       "hints": [
-        "Astrologia.",
-        "Áries e Peixes estão na lista."
+        "Uma tradição astrológica ocidental.",
+        "O círculo do zodíaco é dividido em doze signos."
       ],
       "id": "frase-0094",
       "status": "active"
@@ -1236,8 +1236,8 @@
       "topic": "Natureza",
       "level": "Fácil",
       "hints": [
-        "Fenômeno óptico.",
-        "Aparece com sol e chuva."
+        "Fenômeno visual ligado à luz solar.",
+        "Uma divisão convencional de sete cores."
       ],
       "id": "frase-0095",
       "status": "active"
@@ -1249,7 +1249,7 @@
       "topic": "Ciência",
       "level": "Médio",
       "hints": [
-        "Física e química.",
+        "Estados clássicos ensinados na escola.",
         "Sólido, líquido e gasoso."
       ],
       "id": "frase-0096",
@@ -1276,8 +1276,8 @@
       "topic": "História",
       "level": "Difícil",
       "hints": [
-        "Escrita antiga.",
-        "Alfa e ômega."
+        "Uma escrita histórica usada na Grécia.",
+        "Vai de alfa até ômega."
       ],
       "id": "frase-0098",
       "status": "active"
@@ -1289,8 +1289,8 @@
       "topic": "História",
       "level": "Médio",
       "hints": [
-        "Símbolo nacional.",
-        "Representam as colônias originais."
+        "Símbolo da história dos Estados Unidos.",
+        "Representam as treze colônias originais."
       ],
       "id": "frase-0099",
       "status": "active"
@@ -1359,8 +1359,8 @@
       "topic": "Biologia",
       "level": "Fácil",
       "hints": [
-        "Ciclo da vida.",
-        "Duração aproximada de uma gravidez humana."
+        "Gestação humana em linguagem popular.",
+        "A idade gestacional é frequentemente medida em cerca de 40 semanas."
       ],
       "id": "frase-0104",
       "status": "active"
