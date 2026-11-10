@@ -1,12 +1,14 @@
+import {validateRanking} from "./catalog-v6.js";
 
 export function normalizeItem(value){
   return String(value??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
     .replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
 }
 export function isEligibleRanking(list){
-  if(!list||typeof list.id!=="string"||!Array.isArray(list.items)||list.items.length<25)return false;
+  if(!list||typeof list.id!=="string"||!Array.isArray(list.items)||list.items.length<(list.origin==="host"?10:25))return false;
   if(typeof list.source!=="string"||!list.source.trim()||typeof list.snapshot!=="string"||!list.snapshot.trim())return false;
   if(typeof list.url!=="string"||!/^https:\/\//.test(list.url))return false;
+  if(list.origin==="host"&&validateRanking(list).length)return false;
   return new Set(list.items.map(normalizeItem)).size===list.items.length;
 }
 export function resolveGuess(guess,list,limit){
