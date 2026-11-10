@@ -11,7 +11,7 @@ const catalog=read('catalog-v6.js').replace(/^export /gm,'');
 const logo='data:image/svg+xml,'+encodeURIComponent(read('logo.svg'));
 const escapedData=JSON.stringify(data).replace(/</g,'\\u003c');
 const boot='<script>window.RIVIERA_STANDALONE=true;window.RIVIERA_EMBEDDED_DATA='+escapedData+';<\/script>';
-const importer='<script>\n'+catalog.replace(/<\\/script/gi,'<\\\\/script')+'\nwindow.RIVIERA_IMPORTER=parseHostRanking;<\/script>';
+const importer='<script>\n'+catalog+'\nwindow.RIVIERA_IMPORTER=parseHostRanking;<\/script>';
 const inline='<script type="module">\n'+code.replace(/<\/script/gi,'<\\/script')+'\n<\/script>';
 const external='<script type="module" src="app.js"><\/script>';
 if(!html.includes(external))throw new Error('Tag app.js não encontrada');
