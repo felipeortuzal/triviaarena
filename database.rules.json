@@ -132,7 +132,7 @@
         },
         "customRankings": {
           "$list": {
-            ".validate": "newData.hasChildren(['id','title','source','url','snapshot','about','items','origin']) && newData.child('id').val() === $list && newData.child('origin').val() === 'host' && newData.child('title').isString() && newData.child('title').val().length >= 5 && newData.child('source').isString() && newData.child('source').val().length >= 4 && newData.child('url').isString() && newData.child('url').val().beginsWith('https://') && newData.child('snapshot').isString() && newData.child('snapshot').val().length >= 4 && newData.child('about').isString() && newData.child('about').val().length >= 12",
+            ".validate": "newData.hasChildren(['id','title','source','url','snapshot','about','items','origin']) && newData.child('id').val() === $list && newData.child('origin').val() === 'host' && newData.child('title').isString() && newData.child('title').val().length >= 5 && newData.child('source').isString() && newData.child('source').val().length >= 4 && newData.child('url').isString() && newData.child('url').val().matches(/^https:\\/\\//) && newData.child('snapshot').isString() && newData.child('snapshot').val().length >= 4 && newData.child('about').isString() && newData.child('about').val().length >= 12",
             "items": {
               "$i": {
                 ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 140"
