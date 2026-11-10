@@ -41,7 +41,7 @@ try{
    const pathname=new URL(req.url,"http://127.0.0.1").pathname;
    if(!pathname.startsWith("/triviaarena/")){res.writeHead(404);res.end();return}
    const name=pathname.slice("/triviaarena/".length)||"index.html";
-   if(!["index.html","app.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","data.json","logo.svg","firebase-config.js"].includes(name)){res.writeHead(404);res.end();return}
+   if(!["index.html","app.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","catalog-v6.js","data.json","logo.svg","firebase-config.js"].includes(name)){res.writeHead(404);res.end();return}
    const full=resolve(root,name);
    const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".svg":"image/svg+xml"};
    res.writeHead(200,{"content-type":mime[extname(full)]||"text/plain"});
