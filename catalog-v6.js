@@ -63,8 +63,8 @@ export function validatePuzzle(puzzle){
   const nrCode=String(puzzle?.code||"").match(/^\d+/)?.[0],nrAnswer=String(puzzle?.answer||"").match(/^\d+/)?.[0];
   if(nrCode!==nrAnswer)errors.push("Número da sigla difere da resposta");
   const words=canon(puzzle.answer).split(" ").slice(1);
-  const initials=canon(puzzle.code).split(" ").slice(1).filter(x=>x.length===1);
-  const initSet=new Set(words.filter(w=>w.length>2).map(w=>w[0]));
+  const initials=canon(puzzle.code).split(" ").slice(1).filter(x=>x.length===1&&!["a","o","e"].includes(x));
+  const initSet=new Set(words.filter(w=>w.length>=2).map(w=>w[0]));
   if(initials.length&&!initials.every(x=>initSet.has(x)))errors.push("Sigla não corresponde a conteúdo da resposta");
   if(puzzle.sourceUrl&&!/^https:\/\//.test(puzzle.sourceUrl))errors.push("Referência deve usar HTTPS");
   return [...new Set(errors)];
