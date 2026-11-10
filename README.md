@@ -2,7 +2,7 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Riviera Showdown reúne **Decifre a Frase, Estimativa de Ranking e Misturado**, com partidas de **cinco rodadas**, respostas privadas, pontuação automática, pódio e revanche na mesma sala. O HTML local usa as mesmas funções de sorteio e pontuação da versão online.
+Riviera Showdown reúne **Decifre a Frase, Estimativa de Ranking e Misturado**, com partidas de **3, 5 (padrão) ou 10 rodadas**, respostas privadas, pontuação automática, pódio e revanche na mesma sala. O HTML local usa as mesmas funções de sorteio e pontuação da versão online.
 
 **Estado em 10/11/2026:** [CI completa aprovada](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438), com HTML `file://` em Chrome e multiplayer em emulador. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
 
@@ -61,7 +61,7 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 
 ## Catálogo e próximos jogos
 
-- **Frases:** 104 desafios com duas dicas, envio privado e +1 automático para cada resposta correta. Acentos, caixa, artigos, números por extenso, aliases editoriais e uma transposição adjacente em palavra longa são aceitos. Números errados, negações e qualificadores diferentes são rejeitados.
+- **Frases:** 96 desafios elegíveis (mais 8 entradas duplicadas preservadas historicamente), com duas pistas progressivas; equivalências textuais +1, aproximação semântica aprovada pelo anfitrião +0,5 e erro 0. O catálogo inicial continha 104 desafios com duas dicas, envio privado e +1 automático para cada resposta correta. Acentos, caixa, artigos, números por extenso, aliases editoriais e uma transposição adjacente em palavra longa são aceitos. Números errados, negações e qualificadores diferentes são rejeitados.
 - **Rankings:** sorteio de categoria, alvo e Top 25/50/75/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
 - **Modo misturado:** alterna Frase → Ranking → Frase com um placar único e resultado final.
 - **Anti-repetição:** frases e combinações categoria/Top/alvo não se repetem até esgotar as opções. A política de distribuição entre categorias será refinada na Etapa 7.
@@ -69,7 +69,7 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 ## Limitações e melhorias possíveis
 
 - As quatro listas base têm 100 itens. Para Top 250, 500 ou 1.000, é necessário adicionar bases reais e verificadas. **O aplicativo não inventa posições.**
-- A importação de ranking pelo anfitrião permanece adiada até a Etapa 6 (curadoria): por enquanto usam-se as quatro listas verificáveis existentes no `data.json` com 100 itens cada e metadados `id,title,source,url,snapshot,about,items`.
+- O importador V6 aceita listas de 10 a 1.000 posições com fonte HTTPS, edição e metodologia, somente na demonstração local até revisão editorial. Quatro listas oficiais herdadas têm fontes identificadas, mas as 400 posições ainda não foram auditadas individualmente.
 - O reconhecimento ignora maiúsculas/acentos, usa aliases por lista, identifica ambiguidade/fora de recorte e aceita correção manual justificada pelo anfitrião após revelação. A lista inteira pode ser inspecionada no navegador: não há proteção contra quem consulta o catálogo para trapacear.
 - Não há reconexão com outro ID após apagar dados do navegador, nem troca automática de anfitrião.
 - Não há limite de uso/custo garantido para Firebase; consulte os limites e preços do seu projeto.
@@ -83,3 +83,9 @@ O anfitrião revela as respostas e confirma cada rodada. A quinta confirmação 
 ## Testes rápidos
 
 Servir os arquivos via HTTP (não `file://`): `python -m http.server 8000`. Testar em `http://localhost:8000` após configurar Firebase. Para testar multiplayer, abrir dois navegadores/perfis distintos e usar o convite. Verificar criação, entrada, palpites, revelação, pontuação e próxima rodada.
+
+## Curadoria V6 e duração da partida
+
+A sala usa **3, 5 ou 10 rodadas** (cinco por padrão), exibe o progresso, soma pontos de rankings 5/3/1 e respostas de frases 1/0,5/0, e termina automaticamente após a última rodada. A revanche conserva a duração e os jogadores, sem reutilizar palpites nem pontos. Respostas de frases são privadas até a revelação, com correções justificadas pelo anfitrião antes de fechar a rodada.
+
+O [inventário V6](docs/inventario-curadoria-v6.md) documenta os 104 IDs, 96 questões elegíveis, 8 duplicatas semânticas desativadas, fontes e limitações das listas. O [validador](catalog-v6.js) aplica regras de IDs, pistas, aliases, datas e importação; listas do anfitrião são candidatas locais, não publicadas automaticamente para os demais.
