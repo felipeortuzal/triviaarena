@@ -204,11 +204,12 @@ async function bootNetwork(){
   if(!configured){connectionState="unconfigured";render();return}
   connectionState="connecting";render();
   try{
-    const [fa,au,da,gatewayModule]=await Promise.all([
+    const [fa,au,da,gatewayModule,phraseModule]=await Promise.all([
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"),
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"),
-      import("./rooms-v2.js")
+      import("./rooms-v2.js"),
+      import("./phrases-v3.js")
     ]);
     ({initializeApp}=fa);
     ({getAuth,signInAnonymously,onAuthStateChanged}=au);
@@ -222,12 +223,13 @@ async function bootNetwork(){
     }
     onAuthStateChanged(auth,async user=>{
       try{
-        if(!user){uid=null;roomGateway=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
+        if(!user){uid=null;roomGateway=null;phraseGame=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
         uid=user.uid;
         roomGateway=gatewayModule.makeRoomGateway({
           db,uid,api:{ref:da.ref,get:da.get,set:da.set,runTransaction:da.runTransaction,
             onValue:da.onValue,onDisconnect:da.onDisconnect,serverTimestamp:da.serverTimestamp}
         });
+        phraseGame=phraseModule.makePhraseGame({db,uid,api:{ref:da.ref,get:da.get,runTransaction:da.runTransaction},getPuzzles:()=>DATA.puzzles,randomIndex:random});
         connectionState="online";connectionProblem="";
         const pending=new URLSearchParams(location.search).get("room")?.toUpperCase();
         if(pending&&roomGateway.validateCode(pending)&&!roomId&&!localDemo){
@@ -238,7 +240,7 @@ async function bootNetwork(){
     });
     await signInAnonymously(auth);
   }catch(e){
-    uid=null;db=null;roomGateway=null;connectionState="unavailable";
+    uid=null;db=null;roomGateway=null;phraseGame=null;connectionState="unavailable";
     connectionProblem="Serviço de salas indisponível: "+(e?.message||"erro de rede");
     render();
   }
