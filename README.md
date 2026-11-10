@@ -21,13 +21,17 @@ O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.j
 
 - `index.html` — interface responsiva com carregamento progressivo
 - `app.js` — regras, sorteios e multiplayer
-- `data.json` — 104 frases e 4 rankings-base de 100 itens
+- `data.json` — 110 fatos (101 habilitados) e 6 rankings (quatro Top100 históricos, IFPI Top10 e WIPO Top20)
 - `logo.svg` — marca oficial Riviera Showdown; `logo.png` permanece como arte legada
 - `riviera-showdown.html` — arquivo único offline (gerado, não edite manualmente)
 - `firebase-config.js` — **preencher com a configuração do seu projeto**
 - `rooms-v2.js` — admissão via slots transacionais, perfis e reconexão com mesmo UID
 - `party-game-v5.js` — jogo unificado Frases, Ranking e Misto com apuração atômica
 - `rank-tools-v5.js` — resolução de aliases, fontes elegíveis, distâncias e pontos 5/3/1
+- `catalog-v6.js` — validação editorial, IDs, importação e snapshots de gabaritos
+- `phrase-review-v6.js` — respostas exatas (+2), aproximadas (+1), inválidas (0) e revisão
+- `docs/catalog-audit-v6.md` — auditoria de fontes, limitações e candidatos
+- `scripts/validate-catalog.mjs` — validação reproduzível antes do build
 - `docs/arquitetura-ranking-v5.md` — regras do jogo, privacidade, testes e limites de confiança
 - `database.rules.json` — regras de acesso por papéis e isolamento de palpites V2
 - `firebase.json` e `.firebaserc` — emuladores de Auth e Realtime Database com projeto `demo-riviera-showdown`
@@ -57,20 +61,20 @@ O deploy oficial já está automatizado por `.github/workflows/deploy-pages.yml`
 
 As **etapas exatas, telas, verificações de segurança e roteiro para dois aparelhos físicos** estão em [Publicação piloto](docs/publicacao-piloto.md). Dois navegadores independentes no emulador não são substitutos de dois aparelhos físicos conectados ao serviço real.
 
-## Catálogo e próximos jogos
+## Partidas, pontuação e curadoria — Etapa 06
 
-- **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e +1 por acerto.
-- **Rankings:** sorteio de categoria, alvo e Top 25/50/75/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
-- **Modo misturado:** alterna Frase → Ranking → Frase com um placar único e resultado final.
-- **Anti-repetição:** frases e combinações categoria/Top/alvo não se repetem até esgotar as opções. A política de distribuição entre categorias será refinada na Etapa 7.
+**Uma partida não é um ranking eterno:** ao criar sala escolha **3, 5 ou 7 rodadas** (padrão: **5**). Cada rodada tem desafio, palpites, revelação e apuração; ao confirmar a última rodada o placar é acumulado **uma única vez** e a partida termina automaticamente com pódio. O modo Misturado alterna Frase → Ranking a cada rodada.
 
-## Limitações e melhorias possíveis
+- **Decifre a Frase:** todos os jogadores digitam respostas privadas; o reconhecimento automático dá **+2** por frase exata, **+1** por equivalente aproximada que preserve número e termos essenciais, e **0** por incorreta/ambígua. O anfitrião revisa casos contestados com justificativa visível antes de avançar; se o grupo responder apenas por voz, pode selecionar um vencedor para **+1**.
+- **Estimativa de Ranking:** a menor distância absoluta entre o item escolhido e a posição-alvo define as colocações da rodada; **1º +5, 2º +3, 3º +1**. Empates dividem a colocação. O total dos pontos soma as rodadas; não significa que cinco pontos finalizam a partida.
+- **Conteúdo:** 110 registros de frases (101 válidos para novos sorteios; 9 antigos problemáticos preservados para compatibilidade) e seis rankings: quatro históricos Top100 **parcialmente** confrontados com suas fontes, além de **IFPI 2025 Top10 de artistas** e **WIPO GII 2026 Top20 de inovação**, cujos recortes foram conferidos integralmente. O jogo informa fonte, edição e limitações.
+- **Importação personalizada:** anfitrião pode adicionar até três listas ao lobby (10–1000 itens ordenados), com fonte HTTPS, edição/data e critérios, antes do início. São rotuladas como listas do anfitrião, sem certificado editorial automático.
 
-- As quatro listas base têm 100 itens. Para Top 250, 500 ou 1.000, é necessário adicionar bases reais e verificadas. **O aplicativo não inventa posições.**
-- A importação de ranking pelo anfitrião permanece adiada até a Etapa 6 (curadoria): por enquanto usam-se as quatro listas verificáveis existentes no `data.json` com 100 itens cada e metadados `id,title,source,url,snapshot,about,items`.
-- O reconhecimento ignora maiúsculas/acentos, usa aliases por lista, identifica ambiguidade/fora de recorte e aceita correção manual justificada pelo anfitrião após revelação. A lista inteira pode ser inspecionada no navegador: não há proteção contra quem consulta o catálogo para trapacear.
-- Não há reconexão com outro ID após apagar dados do navegador, nem troca automática de anfitrião.
-- Não há limite de uso/custo garantido para Firebase; consulte os limites e preços do seu projeto.
+O motor congela o texto e a referência das perguntas na rodada iniciada (`puzzleSnapshot` / `listSnapshot`), evitando mudança do gabarito se uma lista for atualizada. Para conferir os dados: `npm run validate:catalog`; auditoria de qualidade no [relatório V6](docs/catalog-audit-v6.md). A seleção mais refinada de temas e exaustão permanece na Etapa 7.
+
+## Limitações
+
+O jogador técnico ainda pode inspecionar o catálogo público no navegador; a segurança protege **palpites privados**, não a lista de respostas contra engenharia reversa. Correções manuais dependem do anfitrião; quatro rankings históricos ainda precisam auditoria editorial completa de Top100. Também não há reconexão com UID novo após apagar os dados do navegador nem eleição automática de host. GitHub Pages e Firebase de produção dependem da Etapa 4, ainda pendente; testes com emulador não substituem dois celulares físicos.
 
 ## Testes rápidos
 
