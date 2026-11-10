@@ -28,6 +28,8 @@ jobs:
         run: node tests/browser-smoke.mjs
       - name: Regras no Emulator Suite - Auth e Realtime Database
         run: npm run test:rooms
+      - name: Dois navegadores independentes contra o Firebase Emulator
+        run: npm run test:browser-room
       - name: HTML produzido da mesma revisão do frontend
         run: git diff --exit-code -- riviera-showdown.html
       - name: Arquivo de prévia para abrir no navegador
