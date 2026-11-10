@@ -4,7 +4,7 @@ export function normalizeItem(value){
     .replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
 }
 export function isEligibleRanking(list){
-  if(!list||typeof list.id!=="string"||!Array.isArray(list.items)||list.items.length<25)return false;
+  if(!list||typeof list.id!=="string"||!Array.isArray(list.items)||list.items.length<10)return false;
   if(typeof list.source!=="string"||!list.source.trim()||typeof list.snapshot!=="string"||!list.snapshot.trim())return false;
   if(typeof list.url!=="string"||!/^https:\/\//.test(list.url))return false;
   return new Set(list.items.map(normalizeItem)).size===list.items.length;
