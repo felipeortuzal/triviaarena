@@ -17,3 +17,15 @@
 - Gere um inventário por tema e dificuldade com quantidades efetivas, tamanhos permitidos, fontes e limitações. Teste exemplos antes rejeitados por tradução e exemplos que continuam ambíguos.
 - Importe uma lista válida e rejeite fonte ausente, duplicatas conflitantes, metadados inválidos e ordem incompleta. Confira que um título com algarismo inicial sobrevive à importação.
 - Teste uma sala iniciada com o catálogo anterior e confira que ela exibe o mesmo gabarito. Publique somente o que conseguiu verificar e descreva temas restantes concretamente.
+
+## Execução V6 — 10/11/2026
+
+**Estado: Parcial editorial, mecânicas validadas em desenvolvimento.** O catálogo V6 tem 110 registros de frases, preserva todos os índices antigos, coloca 9 duplicatas/erros em `enabled:false` e deixa 101 disponíveis. Corrigidos explicitamente `4 C no D H` e `5 O nos J O` por desativação com redirecionamento ao fato canônico; dicas são progressivas, há IDs estáveis e referências em fatos institucionais. Matriz completa por tema e nível em [auditoria do catálogo](../catalog-audit-v6.md).
+
+**Ranking:** seis listas no catálogo, quatro históricas de 100 itens, mais IFPI Global Artist 2025 Top10 (10/10 posições conferidas) e WIPO GII 2026 Top20 (20/20 confrontadas com fonte primária). `edition` versus `observedAt`, `revision`, `itemIds` e `verifiedPrefix` são campos explícitos. Listas históricas ainda não têm verificação integral da ordenação 100/100 e exibem alerta editorial, sem atribuir certificado indevido. Confronto completo destas quatro listas é a pendência para marcar esta etapa Validada editorialmente. Não gerar Top250/500/1000 de listas com apenas 100 itens.
+
+**Importação:** host pode adicionar até três rankings com 10–1000 itens válidos e fonte HTTPS, critério, data, aliases e IDs estáveis. Lista importada é marcada `origin:host`, não se passa por oficial. Importador não remove números integrantes de nomes como `12 Angry Men`. O mesmo snapshot com fonte/gabarito é gravado na rodada e no histórico. A própria frase também grava um `puzzleSnapshot` para permitir continuidade de partidas abertas com o catálogo anterior.
+
+**Nova regra de partidas, pedida explicitamente pelo Felipe:** 3, 5 ou 7 rodadas (5 padrão); cada rodada de Ranking dá 5/3/1 pontos por colocação e empate com placar acumulado; frase enviada privadamente exata +2 / equivalente próxima +1 / incorreta 0; o anfitrião pode revisar de forma visível antes do avanço. No modo oral é preservado acerto host-only +1 para compatibilidade. A quinta/última rodada soma pontos e fecha o jogo automaticamente. A interface local apresenta progresso e final de partida; o mesmo fluxo roda no Firebase Emulator.
+
+**Validação:** `npm run validate:catalog` verifica esquema, IDs, aliases, fontes, duplicatas e versão. Unitários de catálogo, pontuação e correções; testes Firebase com duas identidades e cinco rodadas completas; Chrome real testa três modalidades em `file://` offline e dois contextos isolados no Emulator. Todos rodam em CI. A liberação online de produção e teste em dois celulares físicos continua pendente da Etapa 4; registrar resultados separadamente.
