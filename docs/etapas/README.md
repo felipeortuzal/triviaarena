@@ -30,7 +30,7 @@ A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos.
 |---|---|---|
 | 1 | Validada | [CI aprovada em Chrome e Node](https://github.com/felipeortuzal/triviaarena/actions/runs/42717663362): 3/3 testes Node; HTTP em `/triviaarena/`, `file://` sem rede, duas dicas, revelação, avanço, responsividade em 375 px, falhas de dados e de CDN. [HTML autônomo](../../riviera-showdown.html). Publicação Pages e salas reais são etapas 4 e 2–3. |
 | 2 | Validada | [CI com Emulator Suite e Chrome](https://github.com/felipeortuzal/triviaarena/actions/runs/42722841443): 4/4 testes com Auth + Realtime Database reais no projeto demo e 3/3 regressões Node. Provados acesso negado, nickname/placar imutáveis a convidados, palpites isolados, choque de código, reconexão por UID, concorrência pela 20ª vaga e duas operações simultâneas do mesmo UID. Lobby premium e prévia HTML atualizados. [Matriz e comandos](../arquitetura-salas-v2.md). Configuração Firebase de produção e dois aparelhos físicos continuam fora desta etapa. |
-| 3 | A executar | — |
+| 3 | Validada | [CI completa no Firebase Emulator + Chrome](https://github.com/felipeortuzal/triviaarena/actions/runs/42727601222): **7/7 testes no emulador e 3/3 testes Node**, além de Chrome real em HTTP prefixado e `file://` offline. Dois UIDs concluíram 3 rodadas com 0/1/2 dicas, vencedor e sem vencedor, pontuação exatamente uma vez, encerramento duplo, reconexão, ingresso bloqueado após início e presença do anfitrião após queda/retorno. Interface de partida, revelação e pódio, e **prévia clicável no arquivo `riviera-showdown.html`** com simulação de lobby e convidado fictício. Teste físico e publicação HTTPS seguem na Etapa 4. |
 | 4 | A executar | — |
 | 5 | A executar | — |
 | 6 | A executar | — |
