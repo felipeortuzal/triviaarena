@@ -55,7 +55,7 @@ function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined
 function isHost(){return localDemo||room?.host===uid}
 function roster(){return `<div class="roster">${members().map(m=>`<div class="player"><b>${esc(m.nick)} ${m.uid===room.host?'👑':''}</b><span>${m.online?'● Conectado':'○ Desconectado'} · ${room?.scores?.[m.uid]||0} ponto(s)</span></div>`).join('')}</div>`}
 function roomHeader(){
-  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1}</div><h2>Demonstração: Decifre a Frase</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
+  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
   return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
 }
 function letters(){
@@ -141,7 +141,7 @@ const rounds=Object.values(room.roundHistory||{}).sort((a,b)=>a.number-b.number)
 const best=ranked[0]?.points??0,winners=ranked.filter(x=>x.points===best);
 return `<section class="panel final-screen"><div class="eyebrow">🏁 PARTIDA FINALIZADA</div><h1>Fim de jogo!</h1><p class="lead">${winners.length>1?'Empate na liderança!':'Campeão da noite:'} <strong class="highlight">${esc(winners.map(x=>x.nick).join(' & '))}</strong></p>
 <div class="podium">${ranked.map((m,i)=>`<div class="podium-item"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span><strong>${esc(m.nick)}</strong><b>${m.points} ponto${m.points===1?'':'s'}</b></div>`).join('')}</div>
-<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>Rodada ${x.number} · ${esc(DATA.puzzles[x.index]?.code||'')}</span><b>${esc(x.winner?room.members?.[x.winner]?.nick||'Jogador':'Sem vencedor')}</b></div>`).join('')}</div>
+<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
 <div class="actions cardline">${btn('← Voltar ao início','leave-room','primary')}${isHost()?btn('Encerrar sala','close-room','ghost',room.closed):''}</div></section>`;
 }
 function render(){
@@ -152,11 +152,21 @@ function render(){
  app.innerHTML=banner+(!room?home():room.phase==='finished'?finishedGame():room.round?(room.round.type==='letters'?letters():ranking()):waiting());
  if(focusId){const el=document.getElementById(focusId);if(el&&!el.disabled){if(value!==null&&el.tagName!=='SELECT'&&focusId!=='invite')el.value=value;el.focus({preventScroll:true})}}
 }
+function watchRankingIfNecessary(id,roomValue){
+  const r=roomValue?.round;
+  const key=r?.type==="rank"?id+":"+r.id:"";
+  if(key===currentGuessRound)return;
+  stopGuess();stopSubmissions();stopGuess=()=>{};stopSubmissions=()=>{};
+  currentGuessRound=key;ownGuess="";submitted={};
+  if(!key||!partyGame||localDemo)return;
+  stopGuess=partyGame.watchMyGuess(id,r.id,value=>{ownGuess=value;if(room?.round?.id===r.id)render()},error);
+  stopSubmissions=partyGame.watchSubmissions(id,r.id,value=>{submitted=value;if(room?.round?.id===r.id)render()},error);
+}
 function connectRoom(id){
   if(!roomGateway)throw Error("A conexão da sala ainda não está pronta.");
-  currentRoomSubscription?.();clearPresence();
+  currentRoomSubscription?.();clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
   selectedWinner='';roomId=id;room=null;
-  currentRoomSubscription=roomGateway.watchRoom(id,value=>{room=value;render()},error);
+  currentRoomSubscription=roomGateway.watchRoom(id,value=>{room=value;watchRankingIfNecessary(id,value);render()},error);
   clearPresence=roomGateway.markPresence(id,error);
   const params=new URLSearchParams(location.search);
   params.set("room",id);
@@ -217,9 +227,9 @@ function finishLocalDemo(){
 }
 async function handle(action){if(busy)return;busy=true;try{if(action==="demo"){startDemo()}
 else if(action==="demo-lobby"){startDemoLobby()}
-else if(action==="stop-demo"){localDemo=false;room=null;roomId=null;render()}
+else if(action==="stop-demo"){localDemo=false;room=null;roomId=null;guessDrafts={};render()}
 else if(action==="leave-room"){
-  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();
+  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
   room=null;roomId=null;const q=new URLSearchParams(location.search);q.delete("room");
   history.replaceState(null,"",location.pathname+(q.size?"?"+q.toString():""));render()
 }
@@ -249,7 +259,7 @@ else if(action==='override'&&isHost()){const id=$('#override-player').value;cons
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
 document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='letter-winner')selectedWinner=e.target.value});
-document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value;if(e.target.id==='guess'&&room?.round)guessDrafts[roomId+':'+room.round.id]=e.target.value;if(e.target.id==='override-reason')rankOverrideReason=e.target.value});
 async function loadData(){
   if(STANDALONE){
     const embedded=window.RIVIERA_EMBEDDED_DATA;
@@ -289,12 +299,13 @@ async function bootNetwork(){
   if(!configured){connectionState="unconfigured";render();return}
   connectionState="connecting";render();
   try{
-    const [fa,au,da,gatewayModule,phraseModule]=await Promise.all([
+    const [fa,au,da,gatewayModule,phraseModule,partyModule]=await Promise.all([
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"),
       import("https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"),
       import("./rooms-v2.js"),
-      import("./phrases-v3.js")
+      import("./phrases-v3.js"),
+      import("./party-game-v5.js")
     ]);
     ({initializeApp}=fa);
     ({getAuth,signInAnonymously,onAuthStateChanged}=au);
@@ -308,13 +319,14 @@ async function bootNetwork(){
     }
     onAuthStateChanged(auth,async user=>{
       try{
-        if(!user){uid=null;roomGateway=null;phraseGame=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
+        if(!user){uid=null;roomGateway=null;phraseGame=null;partyGame=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
         uid=user.uid;
         roomGateway=gatewayModule.makeRoomGateway({
           db,uid,api:{ref:da.ref,get:da.get,set:da.set,runTransaction:da.runTransaction,
             onValue:da.onValue,onDisconnect:da.onDisconnect,serverTimestamp:da.serverTimestamp}
         });
         phraseGame=phraseModule.makePhraseGame({db,uid,api:{ref:da.ref,get:da.get,runTransaction:da.runTransaction},getPuzzles:()=>DATA.puzzles,randomIndex:random});
+        partyGame=partyModule.createPartyGame({db,uid,api:{ref:da.ref,get:da.get,set:da.set,runTransaction:da.runTransaction,onValue:da.onValue},getPuzzles:()=>DATA.puzzles,getRankings:()=>DATA.rankings,randomIndex:random});
         connectionState="online";connectionProblem="";
         const pending=new URLSearchParams(location.search).get("room")?.toUpperCase();
         if(pending&&roomGateway.validateCode(pending)&&!roomId&&!localDemo){
@@ -325,7 +337,7 @@ async function bootNetwork(){
     });
     await signInAnonymously(auth);
   }catch(e){
-    uid=null;db=null;roomGateway=null;phraseGame=null;connectionState="unavailable";
+    uid=null;db=null;roomGateway=null;phraseGame=null;partyGame=null;connectionState="unavailable";
     connectionProblem="Serviço de salas indisponível: "+(e?.message||"erro de rede");
     render();
   }
