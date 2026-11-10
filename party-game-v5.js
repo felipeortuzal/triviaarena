@@ -251,7 +251,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
           if(points)scores[memberUid]=(scores[memberUid]||0)+points;
         }
         record={id:r.id,type:"rank",number:old.number,categoryId:r.categoryId,
-          limit:r.limit,target:r.target,awarded,review:r.review,overrides:r.overrides||{}};
+          limit:r.limit,target:r.target,awarded,review:r.review,overrides:r.overrides||{},listSnapshot:r.listSnapshot||null};
       }
       const history={...(old.roundHistory||{}),[r.id]:record};
       const previous={...old,scores,roundHistory:history,round:{...r,scored:true}};
