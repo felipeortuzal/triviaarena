@@ -11,7 +11,8 @@
     "test": "npm run build && npm run test:unit && npm run build:pages && npm run test:pages",
     "test:all": "npm test && npm run test:rooms",
     "build:pages": "node scripts/prepare-pages.mjs",
-    "test:pages": "node --test tests/pages-build.test.mjs"
+    "test:pages": "node --test tests/pages-build.test.mjs",
+    "test:browser-room": "firebase emulators:exec --project demo-riviera-showdown --only auth,database -- 'node tests/browser-room-emulator.mjs'"
   },
   "devDependencies": {
     "firebase": "11.6.0",
