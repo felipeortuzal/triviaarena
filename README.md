@@ -2,7 +2,7 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia HTML permite jogar **Decifre a Frase, Estimativa de Ranking e Misturado**, incluindo lobby com adversário simulado e placar. O mesmo lobby V2 usa autenticação anônima, convites e presença no Firebase Emulator. A Etapa 5 acrescenta palpites privados, correções com justificativa e placar 5/3/1 na partida online. A Etapa 4 continua pendente de ativação do Pages/Firebase real e testes com aparelhos físicos.
+Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia HTML permite jogar **Decifre a Frase, Estimativa de Ranking e Misturado**, incluindo lobby com adversário simulado e placar. O mesmo lobby V2 usa autenticação anônima, convites e presença no Firebase Emulator. A Etapa 5 acrescentou palpites privados, correções e placar 5/3/1. A Etapa 6 fixa **3, 5 (padrão) ou 10 rodadas por partida**, finaliza automaticamente ao chegar ao limite e permite **meio ponto por resposta aproximada** em Frases, mediante julgamento do anfitrião. A Etapa 4 continua pendente de ativação do Pages/Firebase real e testes com aparelhos físicos.
 
 ## Começar agora
 
@@ -15,19 +15,21 @@ npm run build
 npm test
 ```
 
-O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.json` e `logo.svg`, sem manter outra implementação do jogo. O teste de navegador `node tests/browser-smoke.mjs` exige `playwright-core` e Chrome/Chromium instalados; ele é executado no GitHub Actions. Não confunda uma demonstração local com sala multiplayer validada.
+O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.json`, `catalog-v6.js` e `logo.svg`, sem manter outra implementação do jogo. O teste de navegador `node tests/browser-smoke.mjs` exige `playwright-core` e Chrome/Chromium instalados; ele é executado no GitHub Actions. Não confunda uma demonstração local com sala multiplayer validada.
 
 ## Arquivos
 
 - `index.html` — interface responsiva com carregamento progressivo
 - `app.js` — regras, sorteios e multiplayer
-- `data.json` — 104 frases e 4 rankings-base de 100 itens
+- `data.json` — 104 IDs de frases (96 ativas e 8 duplicatas semânticas inativas) e 4 rankings-base de 100 itens
 - `logo.svg` — marca oficial Riviera Showdown; `logo.png` permanece como arte legada
 - `riviera-showdown.html` — arquivo único offline (gerado, não edite manualmente)
 - `firebase-config.js` — **preencher com a configuração do seu projeto**
 - `rooms-v2.js` — admissão via slots transacionais, perfis e reconexão com mesmo UID
 - `party-game-v5.js` — jogo unificado Frases, Ranking e Misto com apuração atômica
 - `rank-tools-v5.js` — resolução de aliases, fontes elegíveis, distâncias e pontos 5/3/1
+- `catalog-v6.js` — auditoria do catálogo e importação validada de listas da comunidade
+- `docs/inventario-curadoria-v6.md` — inventário, fatos corrigidos, fontes verificadas e candidatos em espera
 - `docs/arquitetura-ranking-v5.md` — regras do jogo, privacidade, testes e limites de confiança
 - `database.rules.json` — regras de acesso por papéis e isolamento de palpites V2
 - `firebase.json` e `.firebaserc` — emuladores de Auth e Realtime Database com projeto `demo-riviera-showdown`
@@ -59,15 +61,15 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 
 ## Catálogo e próximos jogos
 
-- **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e +1 por acerto.
-- **Rankings:** sorteio de categoria, alvo e Top 25/50/75/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
-- **Modo misturado:** alterna Frase → Ranking → Frase com um placar único e resultado final.
+- **Frases:** 96 desafios elegíveis com duas dicas progressivas, resposta revelada e +1 por acerto ou +0,5 por aproximação semanticamente aceita pelo anfitrião. Oito duplicatas são preservadas, porém não sorteadas.
+- **Rankings:** sorteio de categoria, alvo e Top 10/25/50/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
+- **Modo misturado:** alterna Frase → Ranking → Frase com placar único e pódio automático após as 3, 5 ou 10 rodadas configuradas.
 - **Anti-repetição:** frases e combinações categoria/Top/alvo não se repetem até esgotar as opções. A política de distribuição entre categorias será refinada na Etapa 7.
 
 ## Limitações e melhorias possíveis
 
 - As quatro listas base têm 100 itens. Para Top 250, 500 ou 1.000, é necessário adicionar bases reais e verificadas. **O aplicativo não inventa posições.**
-- A importação de ranking pelo anfitrião permanece adiada até a Etapa 6 (curadoria): por enquanto usam-se as quatro listas verificáveis existentes no `data.json` com 100 itens cada e metadados `id,title,source,url,snapshot,about,items`.
+- O importador V6 aceita listas de **10 a 1.000 itens ordenados**, com fonte HTTPS, data, edição e metodologia. As listas não auditadas são **candidatas apenas para prévia local** e não entram automaticamente nas salas reais. Os quatro rankings existentes têm referência e edição; a auditoria linha a linha das 400 posições permanece pendente.
 - O reconhecimento ignora maiúsculas/acentos, usa aliases por lista, identifica ambiguidade/fora de recorte e aceita correção manual justificada pelo anfitrião após revelação. A lista inteira pode ser inspecionada no navegador: não há proteção contra quem consulta o catálogo para trapacear.
 - Não há reconexão com outro ID após apagar dados do navegador, nem troca automática de anfitrião.
 - Não há limite de uso/custo garantido para Firebase; consulte os limites e preços do seu projeto.
