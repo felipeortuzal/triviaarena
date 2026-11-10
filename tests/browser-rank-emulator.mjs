@@ -90,7 +90,7 @@ try{
  await host.locator('[data-action="start-game"]').click();
  await waitPhrase(host);await waitPhrase(guest);
  await host.locator('[data-action="reveal"]').click();
- await host.locator("#letter-winner").selectOption({label:/Convidado/});
+ await host.locator("#letter-winner").selectOption({label:"Convidado"});
  await host.locator('[data-action="next"]').click();
  await waitRank(host);await waitRank(guest);
  await guest.locator("#guess").fill("Japão");
