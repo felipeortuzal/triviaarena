@@ -25,9 +25,9 @@ async function browserChecks(){
     await page.locator('[data-action="hint"]').click();
     await page.getByText("Dica 2:",{exact:false}).waitFor();
     await page.locator('[data-action="reveal"]').click();
-    await page.getByText("RESPOSTA",{exact:true}).waitFor();
+    await page.getByText("RESPOSTA REVELADA",{exact:true}).waitFor();
     await page.locator('[data-action="next"]').click();
-    await page.getByText("RODADA 2",{exact:false}).waitFor();
+    await page.getByText("RODADA 2",{exact:false}).first().waitFor();
     await page.locator('[data-action="stop-demo"]').click();
     await page.locator('[data-action="demo"]').waitFor();
     const extraWidth=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-window.innerWidth));
@@ -71,6 +71,20 @@ async function browserChecks(){
     const offlinePage=await offlineCtx.newPage();
     await offlinePage.goto(pathToFileURL(resolve(ROOT,"riviera-showdown.html")).href);
     await verifyDemo(offlinePage);
+    // Prévia completa do lobby até o pódio, com amigo simulado, offline.
+    await offlinePage.locator('[data-action="demo-lobby"]').click();
+    await offlinePage.getByText("Sua sala está pronta.").waitFor();
+    await offlinePage.locator('[data-action="start-game"]').click();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.locator('#letter-winner').selectOption('guest');
+    await offlinePage.locator('[data-action="next"]').click();
+    await offlinePage.locator('[data-action="hint"]').click();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.locator('[data-action="finish-game"]').click();
+    await offlinePage.getByText("Fim de jogo!").waitFor();
+    await offlinePage.getByText("Resumo das 2 rodadas").waitFor();
+    await offlinePage.locator('[data-action="leave-room"]').click();
+    await offlinePage.locator('[data-action="demo"]').waitFor();
     await offlineCtx.close();
     // Simula falha de conteúdo: a tela inicial e uma rodada-reserva continuam disponíveis.
     const fallbackCtx=await browser.newContext({viewport:{width:375,height:812}});

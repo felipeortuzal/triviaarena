@@ -10,7 +10,7 @@
       "$code": {
         ".read": "auth != null",
         ".write": "auth != null && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/) && !data.exists() && newData.child('version').val() === 2 && newData.child('host').val() === auth.uid && newData.child('phase').val() === 'open'",
-        ".validate": "newData.hasChildren(['version','host','phase','createdAt']) && newData.child('version').val() === 2 && newData.child('host').isString() && newData.child('host').val().length > 0 && (newData.child('phase').val() === 'open' || newData.child('phase').val() === 'closed') && newData.child('createdAt').isNumber() && newData.child('createdAt').val() > 0 && newData.child('createdAt').val() <= now",
+        ".validate": "newData.hasChildren(['version','host','phase','createdAt']) && newData.child('version').val() === 2 && newData.child('host').isString() && newData.child('host').val().length > 0 && (newData.child('phase').val() === 'open' || newData.child('phase').val() === 'locked' || newData.child('phase').val() === 'closed') && newData.child('createdAt').isNumber() && newData.child('createdAt').val() > 0 && newData.child('createdAt').val() <= now",
         "version": {
           ".validate": "newData.val() === 2"
         },
@@ -18,8 +18,8 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "phase": {
-          ".write": "auth != null && root.child('roomRegistry').child($code).child('host').val() === auth.uid && data.exists() && (newData.val() === 'open' || newData.val() === 'closed')",
-          ".validate": "newData.val() === 'open' || newData.val() === 'closed'"
+          ".write": "auth != null && root.child('roomRegistry').child($code).child('host').val() === auth.uid && data.exists() && ((data.val() === 'open' && (newData.val() === 'locked' || newData.val() === 'closed')) || (data.val() === 'locked' && newData.val() === 'closed'))",
+          ".validate": "newData.val() === 'open' || newData.val() === 'locked' || newData.val() === 'closed'"
         },
         "createdAt": {
           ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now"
@@ -104,10 +104,23 @@
           }
         },
         "round": {
-          ".validate": "newData.hasChildren(['id','type','revealed']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && (newData.child('type').val() === 'letters' || newData.child('type').val() === 'rank') && newData.child('revealed').isBoolean()"
+          ".validate": "newData.hasChildren(['id','type','revealed']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && (newData.child('type').val() === 'letters' || newData.child('type').val() === 'rank') && newData.child('revealed').isBoolean() && (newData.child('type').val() !== 'letters' || (newData.hasChildren(['index','topic','level','hints','scored']) && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('index').val() < 10000 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2 && newData.child('scored').isBoolean()))"
         },
         "$other": {
           ".validate": false
+        },
+        "usedLetters": {
+          "$index": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 10000"
+          }
+        },
+        "roundHistory": {
+          "$round": {
+            ".validate": "newData.hasChildren(['id','index','number','topic','hints','winner']) && newData.child('id').val() === $round && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2 && newData.child('winner').isString() && (newData.child('winner').val() === '' || root.child('roomMembers').child($code).child(newData.child('winner').val()).exists())"
+          }
+        },
+        "finishedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now"
         }
       }
     },

@@ -2,11 +2,11 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia local de Frases é jogável; o **lobby online V2** já tem código de convite, autenticação anônima, controle de vagas e presença, mas rodadas online só serão liberadas após a etapa 3 (Frases) e etapa 5 (Ranking/Misto).
+Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia local de Frases é jogável e inclui uma simulação de lobby/placar; o **lobby online V2** tem código de convite, autenticação anônima, controle de vagas e presença; a partida online **Decifre a Frase** da Etapa 3 passou nos testes em emulador. A etapa 4 depende de publicar Firebase real e testar dois aparelhos; Rankings/Misto continuam para a etapa 5.
 
 ## Começar agora
 
-Abra `riviera-showdown.html` por duplo clique para experimentar **Decifre a Frase** no próprio aparelho, mesmo sem internet. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
+Abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, rodadas e pódio, ou em **Jogar neste aparelho** para uma partida rápida. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
 
 Para reconstruir e testar a prévia local, com Node.js 22 ou superior:
 
