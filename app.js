@@ -86,7 +86,7 @@ const own=localDemo?room.localGuesses?.local||"":ownGuess;
 const guess=guessDrafts[`${roomId}:${r.id}`]??own;
 const sent=localDemo?Object.keys(room.localGuesses||{}).length:Object.values(submitted||{}).filter(Boolean).length;
 const input=`<label class="stack"><span class="label">Sua resposta</span><input class="field" id="guess" maxlength="120" autocomplete="off" placeholder="Decifre os números e as iniciais" value="${esc(guess)}"></label>${btn(own?'✓ Atualizar minha resposta':'Enviar minha resposta →','guess','lime')}<p class="tiny" role="status">🔒 ${sent}/${members().length} jogadores enviaram. Respostas privadas até a revelação. ${own?'Sua resposta salva: '+esc(own):''}</p>`;
-const scoring=r.revealed?`<div class="cardline"><h3>Resultado da rodada</h3>${r.resultReady?Object.values(r.review||{}).map(row=>`<div class="history-row"><span>${esc(room.members?.[row.uid]?.nick||'Jogador')}: ${esc(row.guess||'Sem resposta')}</span><b>${row.correct?'✓ +1 ponto':'Sem ponto'}</b></div>`).join(''):'<p>Preparando resultado…</p>'}${isHost()?(r.resultReady?advanceButtons():btn('Atualizar apuração','reveal','primary')):''}</div>`:'';
+const scoring=r.revealed?`<div class="cardline"><h3>Resultado da rodada</h3>${r.resultReady?Object.values(r.review||{}).map(row=>`<div class="history-row"><span>${esc(room.members?.[row.uid]?.nick||'Jogador')}: ${esc(row.guess||'Sem resposta')}</span><b>${row.points===1?'✓ +1 ponto':row.points===0.5?'≈ +0,5 ponto':'Sem ponto'}${row.reason?' · '+esc(row.reason):''}</b></div>`).join(''):'<p>Preparando resultado…</p>'}${isHost()?(r.resultReady?phraseReviewControls()+advanceButtons():btn('Atualizar apuração','reveal','primary')):''}</div>`:'';
 return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack"><div class="row between"><span class="pill">🧩 RODADA ${room.number}</span><span class="pill">${r.hints}/2 dicas</span></div>
 <div class="options"><span class="pill">${esc(p.topic||'Cultura geral')}</span><span class="pill">${esc(p.level||'Geral')}</span></div>
 <div class="largecode">${esc(p.code)}</div><p class="muted" style="text-align:center">O que significam os números e as iniciais?</p>
@@ -98,6 +98,14 @@ function rankData(r){return r.catalog||DATA.rankings.find(x=>x.id===r.categoryId
 
 function localRankScore(r){
  return calculateRanking({list:rankData(r),limit:r.limit,target:r.target,guesses:room.localGuesses||{},members:Object.keys(room.members||{}),overrides:r.overrides||{}});
+}
+function phraseReviewControls(){
+ const r=room.round;
+ return `<div class="round-decision"><div class="eyebrow">REVISAR RESPOSTA APROXIMADA</div><p class="tiny">Respostas exatamente equivalentes recebem +1 automaticamente. Quando o sentido principal está certo mas faltam detalhes, o anfitrião pode dar +0,5 com justificativa visível.</p>
+ <label class="label" for="phrase-override-player">Jogador</label><select class="field" id="phrase-override-player">${members().map(m=>`<option value="${esc(m.uid)}">${esc(m.nick)}</option>`).join("")}</select>
+ <label class="label" for="phrase-override-points">Pontuação</label><select class="field" id="phrase-override-points"><option value="0.5">≈ Aproximação aceita (+0,5)</option><option value="1">✓ Resposta correta (+1)</option><option value="0">✕ Resposta incorreta (0)</option></select>
+ <label class="label" for="phrase-override-reason">Justificativa</label><input class="field" id="phrase-override-reason" maxlength="180" value="${esc(phraseOverrideReason)}" placeholder="Ex.: acertou a ideia, mas faltou o contexto histórico">
+ ${btn("Salvar revisão antes da próxima rodada","correct-phrase","ghost")}</div>`;
 }
 function advanceButtons(){
  return `<div class="actions">${btn(room.number>=(room.roundLimit||5)?"🏆 Ver pódio":"Próxima rodada →","next","lime")}${room.number<(room.roundLimit||5)?btn("🏁 Finalizar partida","finish-game","ghost"):""}</div>`;
@@ -187,7 +195,8 @@ function selectedMode(){return $('#mode')?.value||modeChoice}
 function getNick(){const v=($('#nick')?.value||nick).trim().slice(0,28);if(!v)throw Error('Escolha um nick antes de entrar.');nick=v;saveNick(v);return v}
 function startDemo(){startDemoLobby();startDemoFromLobby()}
 function localChooseRound(){
- const chooser=createPartyGame({api:{},getPuzzles:()=>DATA.puzzles,getRankings:()=>DATA.rankings,randomIndex:random});
+ const localLists=importedRankId&&room.mode==="rank"?DATA.rankings.filter(l=>l.id===importedRankId).map(l=>({...l,status:"verified-reference"})):DATA.rankings;
+ const chooser=createPartyGame({api:{},getPuzzles:()=>DATA.puzzles,getRankings:()=>localLists,randomIndex:random});
  Object.assign(room,chooser.chooseRound(room));
  room.phase="playing";
  room.localGuesses={};ownGuess="";submitted={};guessDrafts={};
@@ -281,6 +290,15 @@ function localCorrectRanking({player,position,reason}){
  r.overrides??={};r.overrides[player]={position:pos,reason:explanation};
  r.review=localRankScore(r);render();
 }
+function localCorrectPhrase({player,points,reason}){
+ const r=room.round;const score=Number(points),note=String(reason||"").trim();
+ if(r.type!=="letters"||!r.resultReady||r.scored)throw Error("Frase indisponível para revisão.");
+ if(!room.members[player]||![0,0.5,1].includes(score))throw Error("Jogador ou pontuação inválida.");
+ if(score===0.5&&note.length<8)throw Error("Justifique a aproximação em pelo menos 8 caracteres.");
+ const previous=r.review[player];if(!previous)throw Error("Resposta não encontrada.");
+ r.review[player]={...previous,points:score,correct:score===1,approximate:score===0.5,...(note?{reason:note}:{})};
+ r.overrides??={};r.overrides[player]={points:score,reason:note||"Avaliação do anfitrião"};render();
+}
 async function handle(action){if(busy)return;busy=true;try{if(action==="demo"){startDemo()}
 else if(action==="demo-lobby"){startDemoLobby()}
 else if(action==="stop-demo"){localDemo=false;room=null;roomId=null;guessDrafts={};render()}
@@ -301,7 +319,9 @@ else if(action==='copy'){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
  catch{const field=$('#invite');if(field){field.focus();field.select()}else throw Error('Copie o convite manualmente: '+url)}
 }
-else if(action==='import'&&isHost()){throw Error('Importação de rankings estará disponível após a curadoria das fontes.')}
+else if(action==='toggle-import'){importFormOpen=!importFormOpen;render()}
+else if(action==='import-user'){const candidate=parseHostRanking({title:$('#import-title')?.value,source:$('#import-source')?.value,url:$('#import-url')?.value,snapshot:$('#import-snapshot')?.value,observedAt:$('#import-observed')?.value,methodology:$('#import-method')?.value,items:$('#import-items')?.value});DATA.rankings=DATA.rankings.filter(l=>l.id!==candidate.id);DATA.rankings.push(candidate);importedRankId=candidate.id;modeChoice='rank';importStatus='Lista validada para demonstração local: '+candidate.items.length+' itens. Escolha Testar lobby e placar.';importFormOpen=false;render()}
+else if(action==='import'&&isHost()){throw Error('Importação em salas reais requer validação editorial. Use prévia local.')}
 else if(action==='start-game'&&localDemo){startDemoFromLobby()}
 else if(action==='start-game'){if(!isHost()||!partyGame)throw Error('Somente o anfitrião pode iniciar.');await partyGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
@@ -311,6 +331,12 @@ else if(action==='finish-game'){if(!partyGame||!isHost())throw Error('Somente o 
 else if(action==='rematch'&&isHost()){
  if(localDemo){room.match++;room.phase="lobby";room.number=0;room.scores={local:0,guest:0};room.roundHistory={};delete room.round;render()}
  else await partyGame.rematch(roomId);
+}
+else if(action==='correct-phrase'&&isHost()&&room?.round?.type==='letters'){
+ const player=$('#phrase-override-player')?.value,points=Number($('#phrase-override-points')?.value),reason=($('#phrase-override-reason')?.value||phraseOverrideReason||'').trim();
+ if(localDemo)localCorrectPhrase({player,points,reason});
+ else await partyGame.correctPhrase(roomId,{player,points,reason});
+ phraseOverrideReason='';
 }
 else if(action==='hint'&&isHost()&&partyGame){await partyGame.hint(roomId)}
 else if(action==='reveal'&&isHost()&&partyGame){if(room.round?.type==='rank')await partyGame.revealRanking(roomId);else await partyGame.revealPhrase(roomId)}
