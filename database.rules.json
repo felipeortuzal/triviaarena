@@ -134,7 +134,7 @@
         "$round": {
           "$uid": {
             ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && ($uid === auth.uid || (root.child('roomRegistry').child($code).child('host').val() === auth.uid && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === true))",
-            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists()",
+            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists() && root.child('roomPublic').child($code).child('round').child('type').val() === 'rank'",
             ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
           }
         }
