@@ -72,11 +72,69 @@ ${r.revealed?answer:hints}${!r.revealed?host:''}${scoring}
 ${!localDemo&&!room.members?.[room.host]?.online?'<div class="notice">⚠ O anfitrião está offline. A rodada continuará quando ele voltar.</div>':''}
 </section>${localDemo&&Object.keys(room.members||{}).length<2?'':`<aside class="panel scoreboard"><div class="eyebrow">PLACAR</div><h3>Quem está liderando?</h3>${roster()}<p class="tiny">${Object.keys(room.roundHistory||{}).length} rodada(s) concluída(s).</p></aside>`}</div>`;
 }
-function rankData(r){if(r.custom)return r.custom;return DATA.rankings.find(x=>x.id===r.categoryId)}
-function rankPos(guess,items){const n=norm(guess);if(!n)return null;let exact=items.findIndex(s=>norm(s)===n);if(exact>=0)return exact+1;return null}
-function scoreRank(r){const data=rankData(r),items=data.items.slice(0,r.limit);const results=members().map(m=>{const g=room.guesses?.[r.id]?.[m.uid]||'';const override=r.overrides?.[m.uid];const pos=override===0?null:(override||rankPos(g,items));return {...m,guess:g,pos,delta:pos?Math.abs(pos-r.target):null}});results.sort((a,b)=>(a.delta??Infinity)-(b.delta??Infinity));let place=0,prev=null;results.forEach((v,i)=>{if(v.delta!==null){if(v.delta!==prev)place=i+1;v.place=place;prev=v.delta}});return results}
-function ranking(){const r=room.round,d=rankData(r);if(!d)return '<p>Ranking não encontrado.</p>';const guess=room.guesses?.[r.id]?.[uid]||'';const locked=!!r.revealed;return `${roomHeader()}<div class="panel stack"><div class="row between"><span class="pill">🏆 ESTIMATIVA DE RANKING</span><span class="pill">TOP ${r.limit}</span></div><div class="eyebrow" style="text-align:center">${esc(d.title)}</div><div class="big-num" style="text-align:center">${r.target}º</div><p style="text-align:center">Qual item ocupa essa posição?</p><p class="tiny" style="text-align:center">${esc(d.description||'')}${d.source?` · <a href="${esc(d.source)}" target="_blank" rel="noopener noreferrer">Fonte</a>`:''}</p>${locked?`<div class="result"><div class="eyebrow">RESPOSTA CORRETA</div><strong>${esc(d.items[r.target-1])}</strong><p>${r.target}º lugar no Top ${r.limit}</p></div>${results(r)}`:`<label><span class="label">Seu palpite (um item)</span><input class="field" id="guess" maxlength="120" placeholder="Ex.: Brasil" value="${esc(guess)}"></label>${btn(guess?'Atualizar palpite ✓':'Enviar meu palpite →','guess','lime')}<p class="tiny">${Object.keys(room.guesses?.[r.id]||{}).length} de ${members().length} palpites enviados. Os nomes ficam ocultos até a revelação.</p>${isHost()?btn('Revelar ranking e resultado','reveal','primary'):'<p class="tiny">Aguardando o anfitrião revelar o ranking.</p>'}`}${locked&&isHost()?btn('Próxima rodada →','next','lime'):''}</div><div class="panel" style="margin-top:18px"><h3>Jogadores</h3>${roster()}</div>`}
-function results(r){const a=scoreRank(r);return `<h3 style="margin-top:24px">Resultado da rodada</h3><div class="tablewrap"><table class="board"><thead><tr><th>Lugar</th><th>Jogador</th><th>Palpite</th><th>Posição</th><th>Distância</th></tr></thead><tbody>${a.map(x=>`<tr><td>${x.place||'—'}</td><td>${esc(x.nick)}</td><td>${esc(x.guess||'—')}</td><td>${x.pos||'—'}</td><td>${x.delta??'—'}</td></tr>`).join('')}</tbody></table></div><p class="tiny">Nomes não reconhecidos podem ser traduções ou itens fora do recorte. O anfitrião pode corrigir a posição antes da próxima rodada.</p>${isHost()?`<div class="row"><select class="field" style="flex:1 1 140px" id="override-player">${a.map(x=>`<option value="${esc(x.uid)}">${esc(x.nick)}</option>`).join('')}</select><input class="field" style="flex:1 1 140px" type="number" min="0" max="${r.limit}" id="override-pos" placeholder="Posição (0 = fora)">${btn('Corrigir','override','ghost')}</div>`:''}`}
+function rankData(r){return DATA.rankings.find(x=>x.id===r.categoryId)}
+
+function localRankResolve(raw,d,limit){
+ const value=norm(raw);
+ if(!value)return {status:"empty",position:null};
+ const matches=[];
+ d.items.forEach((item,index)=>{
+   if([item,...(d.aliases?.[item]||[])].some(label=>norm(label)===value))matches.push(index+1);
+ });
+ if(matches.length>1)return {status:"ambiguous",position:null};
+ if(!matches.length)return {status:"unknown",position:null};
+ if(matches[0]>limit)return {status:"out-of-cut",position:null};
+ return {status:"valid",position:matches[0]};
+}
+
+function localRankScore(r){
+ const list=rankData(r),users=Object.keys(room.members||{}),guesses=room.localGuesses||{},overrides=r.overrides||{};
+ const rows=users.map(uid=>{
+   const guess=guesses[uid]||'',override=overrides[uid];
+   const state=override?{position:override.position||null,status:override.position?"corrected":"corrected-out"}:localRankResolve(guess,list,r.limit);
+   return {uid,guess,position:state.position,status:state.status,delta:state.position===null?null:Math.abs(state.position-r.target),...(override?{reason:override.reason}:{})};
+ });
+ const sorted=rows.filter(x=>x.delta!==null).sort((a,b)=>a.delta-b.delta||a.uid.localeCompare(b.uid));
+ let place=0,previous=null;
+ sorted.forEach((x,i)=>{if(x.delta!==previous)place=i+1;previous=x.delta;x.place=place;x.points=({1:5,2:3,3:1})[place]||0});
+ rows.filter(x=>x.delta===null).forEach(x=>{x.place=null;x.points=0});
+ return Object.fromEntries(rows.map(x=>[x.uid,x]));
+}
+
+function rankReview(r){
+ if(!r.resultReady||!r.review)return `<div class="notice" role="status">🔎 ${isHost()?"Preparando resultado. Se necessário, toque em Revelar novamente.":"O anfitrião está calculando as distâncias."}</div>${isHost()?btn("Atualizar apuração","reveal","ghost"):""}`;
+ const ordered=Object.values(r.review).sort((a,b)=>(a.delta??Infinity)-(b.delta??Infinity)||a.uid.localeCompare(b.uid));
+ const rows=ordered.map(row=>`<tr><td>${row.place?"#"+row.place:"—"}</td><td>${esc(room.members?.[row.uid]?.nick||room.profiles?.[row.uid]?.nick||"Jogador")}</td><td>${esc(row.guess||"Sem palpite")}${row.reason?`<div class="tiny highlight">✎ ${esc(row.reason)}</div>`:""}</td><td>${row.position||"—"}</td><td>${row.delta??"—"}</td><td class="highlight">+${row.points||0}</td></tr>`).join("");
+ return `<div class="cardline"><div class="eyebrow">RESULTADOS · DISTÂNCIA ABSOLUTA</div><h3>Quem chegou mais perto?</h3>
+ <div class="tablewrap"><table class="board"><thead><tr><th>Lugar</th><th>Jogador</th><th>Palpite</th><th>Posição</th><th>Distância</th><th>Pontos</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <p class="tiny">Diferença absoluta da posição-alvo. 1º +5 · 2º +3 · 3º +1. Empates dividem a colocação; respostas inválidas não pontuam.</p>
+ ${isHost()?`<div class="round-decision"><div class="eyebrow">AJUSTE MANUAL JUSTIFICADO</div><p class="tiny">Use somente quando uma tradução ou sinônimo for reconhecido. A justificativa ficará visível a todos.</p>
+ <div class="grid"><label class="stack"><span class="label">Jogador</span><select class="field" id="override-player">${ordered.map(x=>`<option value="${esc(x.uid)}">${esc(room.members?.[x.uid]?.nick||"Jogador")}</option>`).join("")}</select></label>
+ <label class="stack"><span class="label">Posição (0 = inválido)</span><input class="field" id="override-pos" type="number" min="0" max="${r.limit}" placeholder="Ex.: 12"></label></div>
+ <label class="stack"><span class="label">Por que corrigiu?</span><textarea class="field" id="override-reason" maxlength="180" placeholder="Ex.: nome alternativo do item na 12ª posição"></textarea></label>
+ ${btn("Salvar correção antes da pontuação","override","ghost")}</div>
+ <div class="actions">${btn("Próxima rodada →","next","lime")}${btn("🏁 Finalizar partida","finish-game","ghost")}</div>`:"<p class='tiny'>O anfitrião pode revisar o resultado e confirmar a pontuação.</p>"}</div>`;
+}
+
+function ranking(){
+ const r=room.round,d=rankData(r);
+ if(!d)return `${roomHeader()}<div class="panel"><p>Não foi possível carregar a lista selecionada. Confira sua conexão.</p></div>`;
+ const key=`${roomId}:${r.id}`,draft=guessDrafts[key],own=localDemo?room.localGuesses?.local||"":ownGuess,guess=draft!==undefined?draft:own||"";
+ const total=members().length,sent=localDemo?Object.keys(room.localGuesses||{}).length:Object.values(submitted||{}).filter(Boolean).length;
+ const sourceLink=/^https:\/\//i.test(d.url||"")?`<a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">↗ Conferir ranking original</a>`:"Fonte indisponível";
+ const locked=!!r.revealed;
+ return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack">
+ <div class="row between"><span class="pill">🏆 ESTIMATIVA DE RANKING</span><span class="pill">TOP ${r.limit}</span></div>
+ <div class="rank-category"><div class="eyebrow">${esc(d.eyebrow||"RANKING DO DIA")}</div><h2>${esc(d.title)}</h2><p>${esc(d.about||"")}</p></div>
+ <div class="rank-target"><span>QUAL ITEM ESTÁ NA POSIÇÃO</span><strong>${r.target}º</strong><span>NO TOP ${r.limit}?</span></div>
+ <div class="rank-source"><b>${esc(d.source||"Fonte")}</b> · ${esc(d.snapshot||"Data não informada")} · ${sourceLink}</div>
+ ${locked?`<div class="result" role="status"><div class="eyebrow">RESPOSTA DA POSIÇÃO ${r.target}º</div><strong>${esc(d.items[r.target-1])}</strong><p>Referência: ${esc(d.source||"")}</p></div>${rankReview(r)}`:
+ `<label class="stack"><span class="label">Seu palpite — escreva o nome de um item</span><input class="field" id="guess" maxlength="120" placeholder="Ex.: Brasil, Japão, O Poderoso Chefão..." value="${esc(guess)}" autocomplete="off"></label>
+ <div class="actions">${btn(own?"✓ Atualizar meu palpite":"Enviar meu palpite →","guess","lime")}</div>
+ <p class="tiny" role="status">🔒 ${sent}/${total} jogadores enviaram. Os textos ficam privados até a revelação. ${own?"Seu último palpite salvo: "+esc(own):""}</p>
+ ${isHost()?btn("👁 Encerrar envios e revelar","reveal","primary"):"<p class='tiny'>Aguardando o anfitrião fechar os palpites…</p>"}`}
+ </section><aside class="panel scoreboard"><div class="eyebrow">PARTIDA EM ANDAMENTO</div><h3>Placar acumulado</h3>${roster()}</aside></div>`;
+}
 function finishedGame(){
 const ranked=members().map(m=>({...m,points:room.scores?.[m.uid]||0})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
 const rounds=Object.values(room.roundHistory||{}).sort((a,b)=>a.number-b.number);
