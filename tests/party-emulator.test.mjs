@@ -94,7 +94,7 @@ test("Modo misto mantém placar único, alterna frases/rank e conta última roda
  assert.equal(s.phase,"finished");
  assert.equal(s.scores[host.uid],6);
  assert.equal(s.scores[guest.uid],4);
- assert.deepEqual(Object.values(s.roundHistory).map(r=>r.type),["letters","rank","letters"]);
+ assert.deepEqual(Object.values(s.roundHistory).sort((a,b)=>a.number-b.number).map(r=>r.type),["letters","rank","letters"]);
  const fromGuest=(await get(ref(guest.db,`roomPublic/${code}`))).val();
  assert.equal(fromGuest.phase,"finished");
  assert.deepEqual(fromGuest.scores,s.scores);
