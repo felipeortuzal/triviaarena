@@ -19,13 +19,13 @@ async function browserChecks(){
     await page.locator('[data-action="demo"]').waitFor({state:"visible",timeout:10000});
     assert.equal(await page.title(),"Riviera Showdown — Jogue com seus amigos");
     await page.locator('[data-action="demo"]').click();
-    await page.getByText("Demonstração: Decifre a Frase").waitFor();
-    await page.locator('[data-action="hint"]').click();
-    await page.getByText("Dica 1:",{exact:false}).waitFor();
-    await page.locator('[data-action="hint"]').click();
-    await page.getByText("Dica 2:",{exact:false}).waitFor();
+    await page.getByText("Demonstração: Estimativa de Ranking").waitFor();
+    assert.equal(await page.locator('[data-action="choose-letters"], [data-action="choose-mixed"]').count(),0);
+    assert.ok(await page.locator('[data-action="reveal"]').isDisabled());
+    await page.locator('#guess').fill('Brasil');
+    await page.locator('[data-action="guess"]').click();
     await page.locator('[data-action="reveal"]').click();
-    await page.getByText("RESPOSTA REVELADA",{exact:true}).waitFor();
+    await page.getByText("Quem chegou mais perto?",{exact:true}).waitFor();
     await page.locator('[data-action="next"]').click();
     await page.getByText("RODADA 2",{exact:false}).first().waitFor();
     await page.locator('[data-action="stop-demo"]').click();
@@ -75,60 +75,18 @@ async function browserChecks(){
       await offlinePage.goto(base+'offline.html');
     }else await offlinePage.goto(pathToFileURL(resolve(ROOT,"riviera-showdown.html")).href);
     await verifyDemo(offlinePage);
-    // Prévia completa do lobby até o pódio, com amigo simulado, offline.
-    await offlinePage.locator('[data-action="demo-lobby"]').click();
-    await offlinePage.getByText("Sua sala está pronta.").waitFor();
-    await offlinePage.locator('[data-action="start-game"]').click();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.locator('[data-action="next"]').click();
-    await offlinePage.locator('[data-action="hint"]').click();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.locator('[data-action="finish-game"]').click();
-    await offlinePage.getByText("Fim de jogo!").waitFor();
-    await offlinePage.getByText("Resumo das 2 rodadas").waitFor();
-    await offlinePage.locator('[data-action="leave-room"]').click();
-    await offlinePage.locator('[data-action="demo"]').waitFor();
-    // Ranking jogável offline: envio, resolução com fonte e placar final.
-    await offlinePage.locator('[data-action="choose-rank"]').click();
-    await offlinePage.locator('[data-action="demo-lobby"]').click();
-    await offlinePage.locator('[data-action="start-game"]').click();
-    await offlinePage.locator(".rank-target strong").waitFor();
-    await offlinePage.locator("#guess").fill("Brasil");
-    await offlinePage.locator('[data-action="guess"]').click();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.getByText("Quem chegou mais perto?").waitFor({timeout:8000}).catch(async e=>{console.error("DEBUG OFFLINE RANK:",(await offlinePage.locator("body").innerText()).slice(-5500));throw e});
-    await offlinePage.locator('[data-action="finish-game"]').click();
-    await offlinePage.getByText("Fim de jogo!").waitFor();
-    await offlinePage.locator('[data-action="leave-room"]').click();
-    // Misto alterna Frase → Ranking → Frase com placar e histórico únicos.
-    await offlinePage.locator('[data-action="choose-mixed"]').click();
-    await offlinePage.locator('[data-action="demo-lobby"]').click();
-    await offlinePage.locator('[data-action="start-game"]').click();
-    await offlinePage.locator(".largecode").waitFor();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.locator('[data-action="next"]').click();
-    await offlinePage.locator(".rank-target strong").waitFor();
-    await offlinePage.locator("#guess").fill("Brasil");
-    await offlinePage.locator('[data-action="guess"]').click();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.getByText("Quem chegou mais perto?").waitFor();
-    await offlinePage.locator('[data-action="next"]').click();
-    await offlinePage.locator(".largecode").waitFor();
-    await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.locator('[data-action="finish-game"]').click();
-    await offlinePage.getByText("Resumo das 3 rodadas").waitFor();
-    assert.equal(await offlinePage.locator(".history-row").count(),3);
-    const mobileWidth=await offlinePage.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
-    assert.ok(mobileWidth<=1,"overflow horizontal nos três modos: "+mobileWidth);
     await offlineCtx.close();
     // Simula falha de conteúdo: a tela inicial e uma rodada-reserva continuam disponíveis.
     const fallbackCtx=await browser.newContext({viewport:{width:375,height:812}});
     const fallback=await fallbackCtx.newPage();
     await fallback.route("**/data.json",route=>route.abort());
     await fallback.goto(base);
-    await fallback.getByText("rodada de reserva",{exact:false}).waitFor();
-    await fallback.locator('[data-action="demo"]').click();
-    await fallback.getByText("7 M D M",{exact:true}).waitFor();
+    await fallback.getByText("Recarregue o conteúdo para jogar Ranking",{exact:false}).waitFor();
+    assert.ok(await fallback.locator('[data-action="demo"]').isDisabled());
+    assert.ok(await fallback.locator('[data-action="travel-start"]').isDisabled());
+    await fallback.unroute('**/data.json');
+    await fallback.locator('[data-action="retry-data"]').click();
+    await verifyDemo(fallback);
     await fallbackCtx.close();
     // Configuração válida, mas CDN indisponível: o bootstrap não trava.
     const cdnCtx=await browser.newContext({viewport:{width:375,height:812}});
@@ -144,7 +102,7 @@ async function browserChecks(){
     await cdnPage.getByText("Não foi possível conectar às salas.",{exact:false}).waitFor();
     await verifyDemo(cdnPage);
     await cdnCtx.close();
-    console.log("PASS: HTTP prefixado, "+(process.env.RIVIERA_INLINE_OFFLINE==='1'?'HTML interceptado offline':'file:// offline')+", dicas/revelação/avanço, mobile 375px, falha de dados e falha de CDN");
+    console.log("PASS: HTTP prefixado, "+(process.env.RIVIERA_INLINE_OFFLINE==='1'?'HTML interceptado offline':'file:// offline')+", Ranking, espera por todos, revelação/avanço, mobile 375px, falha de dados e falha de CDN");
   }catch(error){failures.push(error);throw error}
   finally{
     if(server)await new Promise(resolve=>server.close(resolve));

@@ -19,11 +19,11 @@ async function correctAnswer(page){
 }
 try{
  mkdirSync(resolve(root,'test-results'),{recursive:true});
- for(const mode of ['letters','rank','mixed']){
+ for(const mode of ['rank']){
   const ctx=await browser.newContext({viewport:{width:375,height:812}});await ctx.setOffline(true);
   if(process.env.RIVIERA_INLINE_OFFLINE==='1')await ctx.route(base,r=>r.fulfill({contentType:'text/html',body:html}));
   let page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base);
-  await page.locator(`[data-action="choose-${mode}"]`).click();
+  assert.equal(await page.locator('[data-action="choose-letters"], [data-action="choose-mixed"], #mode').count(),0);
   await page.locator('#travel-name-0').fill('Felipe');await page.locator('#travel-name-1').fill('Bia');
   await page.locator('[data-action="travel-add"]').click();await page.locator('#travel-name-2').fill('Rafa');
   await page.locator('[data-action="travel-start"]').click();
@@ -55,7 +55,7 @@ try{
    await page.locator('[data-action="next"]').dblclick();
   }
   await page.getByText('Resumo das 5 rodadas').waitFor();
-  const expected=mode==='letters'?5:mode==='rank'?25:13;
+  const expected=25;
   const scores=await page.locator('.podium-item').allInnerTexts();
   assert.ok(scores[0].includes(expected+' pontos'));assert.ok(scores[1].includes(expected+' pontos'));assert.ok(scores[2].includes('0 pontos'));
   assert.equal((await page.locator('.podium').innerText()).includes('Amigo simulado'),false);
@@ -79,6 +79,11 @@ try{
  assert.equal(await page.locator('[data-player]').count(),8);assert.ok(await page.locator('[data-action="travel-add"]').isDisabled());
  await page.locator('[data-action="travel-remove"]').click();assert.equal(await page.locator('[data-player]').count(),7);
  await page.evaluate(()=>localStorage.setItem('riviera-travel-v1','{invalid'));await page.reload();assert.equal(await page.locator('[data-action="travel-resume"]').count(),0);
+ await page.locator('[data-action="travel-start"]').click();
+ await page.evaluate(()=>{const saved=JSON.parse(localStorage.getItem('riviera-travel-v1'));saved.room.mode='letters';localStorage.setItem('riviera-travel-v1',JSON.stringify(saved))});
+ await page.reload();
+ assert.equal(await page.locator('[data-action="travel-resume"]').count(),0,'modo pausado não deve ser retomado');
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('riviera-travel-v1')).room.mode),'letters','save antigo deve ser preservado');
  await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:resolve(root,'test-results/travel-home-mobile.png'),fullPage:true});
  await ctx.close();

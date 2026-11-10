@@ -75,3 +75,11 @@ A revisão seguinte adiciona **Modo viagem** para 2–8 participantes no mesmo a
 `npm run test:browser-travel` cobre três participantes locais nos três modos, cinco rodadas offline, privacidade visual, envio com Enter, passar vez, pausa, nova página, empate, revanche, nomes vazios/duplicados, limite de oito pessoas, dados salvos inválidos, armazenamento bloqueado e botão da marca. O teste é incluído no CI em Chrome com `file://`; no ambiente Cloud utiliza a rota interceptada documentada acima. Não houve teste com aparelhos físicos.
 
 Em 10/11/2026 a nova consulta confirmou `has_pages=false` e HTTP 404. As configurações externas continuam necessárias apenas para salas pela internet. O workflow de download agora recebe o SHA exato da revisão testada, evitando que novas releases reutilizem o HTML antigo.
+
+## Estado atual — versão 0.8, somente Ranking
+
+Felipe pausou Frase e Misturado e pediu foco em Ranking. A interface e o HTML oferecem apenas Ranking. O código anterior foi preservado; a reformulação simultânea de Frase com +1 para o primeiro acerto fica para uma retomada futura.
+
+A revelação de Ranking agora exige resposta ou desistência explícita de todos, validada na interface, no SDK e nas regras do RTDB. Os testes incluem tentativa de revelar antes do último envio, escrita direta pelo anfitrião, concorrência do último envio, privacidade, cinco rodadas, reconexão e revanche. Palpites vazios só são enviados pela ação explícita de passar a vez.
+
+A nova tentativa de infraestrutura confirmou `has_pages=false`, POST de habilitação do Pages com HTTP 403, consulta às variáveis com HTTP 403 e Firebase CLI sem autenticação (`Failed to authenticate`). A URL HTTPS continua 404. Sem credenciais novas, não foi possível provisionar produção; nenhuma permissão foi contornada nem serviço pago criado. As ações mínimas de Pages e Firebase continuam descritas acima.

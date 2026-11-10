@@ -12,13 +12,13 @@ function harness({embedded=true,fetchFails=false}={}){
   const main={innerHTML:""},connection={textContent:""};
   const handlers={},problems=[];
   const puzzle={code:"4 E do A",answer:"4 Estações do Ano",explain:"Primavera, verão, outono e inverno.",hints:["Tempo e clima","Primavera, verão, outono, inverno"],level:"Fácil"};
-  const data={puzzles:[puzzle,{...puzzle,code:"2 D do S"}],rankings:[]};
+  const data={puzzles:[puzzle,{...puzzle,code:"2 D do S"}],rankings:[{id:"test",title:"Ranking de teste",url:"https://example.org/test",source:"Fixture",snapshot:"Teste",items:Array.from({length:25},(_,i)=>"Item "+(i+1))}]};
   const document={
     querySelector(selector){
       if(selector==="#app")return main;
       if(selector==="#connection")return connection;
       if(selector==="#nick")return {value:"Teste",focus(){}};
-      if(selector==="#mode")return {value:"letters"};
+      if(selector==="#guess")return {value:"Item 5"};
       if(selector==="#letter-winner")return {value:""};
       return null;
     },
@@ -53,17 +53,17 @@ test('app.js compila e o HTML contém recursos locais',function shouldCompile(){
   assert.ok(!html.includes('src="app.js"'));
   assert.ok(!html.includes('src="logo.svg"'));
 });
-test('prévia abre sem rede, revela duas dicas e avança',async function shouldStartOffline(){
-  const a=harness({embedded:true});
-  assert.match(a.main.innerHTML,/Jogar neste aparelho/,"home renders synchronously");
-  assert.doesNotMatch(a.main.innerHTML,/Preparando Riviera Showdown/);
-  a.click("demo");
-  assert.match(a.main.innerHTML,/4 E do A|2 D do S/);
-  a.click("hint");assert.match(a.main.innerHTML,/Dica 1/);
-  a.click("hint");assert.match(a.main.innerHTML,/Dica 2/);
-  a.click("reveal");assert.match(a.main.innerHTML,/4 Estações do Ano/);
-  a.click("next");assert.match(a.main.innerHTML,/RODADA 2/);
-  a.click("stop-demo");assert.match(a.main.innerHTML,/Jogar neste aparelho/);
+test('prévia oferece apenas Ranking e espera o palpite antes de revelar',()=>{
+ const a=harness({embedded:true});
+ assert.match(a.main.innerHTML,/Estimativa de Ranking|ESTIMATIVA DE RANKING/);
+ assert.doesNotMatch(a.main.innerHTML,/data-action="choose-letters"|data-action="choose-mixed"/);
+ a.click('demo');
+ assert.match(a.main.innerHTML,/rank-target/);
+ a.click('reveal');assert.match(a.main.innerHTML,/Espere todos enviarem/);
+ assert.doesNotMatch(a.main.innerHTML,/Quem chegou mais perto/);
+ a.click('guess');a.click('reveal');assert.match(a.main.innerHTML,/Quem chegou mais perto/);
+ a.click('next');assert.match(a.main.innerHTML,/RODADA 2/);
+ a.click('stop-demo');assert.match(a.main.innerHTML,/Jogar neste aparelho/);
 });
 test('falha de data.json mantém início e prévia acessíveis',async function shouldFallback(){
   const a=harness({embedded:false,fetchFails:true});
@@ -72,8 +72,6 @@ test('falha de data.json mantém início e prévia acessíveis',async function s
   assert.match(a.main.innerHTML,/Os desafios completos não carregaram/);
   assert.match(a.main.innerHTML,/Criar sala e gerar convite/);
   assert.match(a.main.innerHTML,/disabled title=/);
-  a.click("demo");
-  assert.match(a.main.innerHTML,/7 M D M/);
-  a.click("hint");a.click("hint");
-  assert.match(a.main.innerHTML,/Dica 2/);
+  assert.match(a.main.innerHTML,/data-action="demo" disabled/);
+  assert.match(a.main.innerHTML,/Recarregue o conteúdo para jogar Ranking/);
 });

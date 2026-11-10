@@ -5,7 +5,7 @@ on:
       tag:
         description: Tag da release que receberá o HTML
         required: true
-        default: v0.7.0
+        default: v0.8.0
       revision:
         description: SHA completo da revisão testada
         required: true
@@ -34,14 +34,14 @@ jobs:
         run: |
           SOURCE_SHA="$(git rev-parse HEAD)"
           cat > "$RUNNER_TEMP/riviera-release.md" <<'NOTES'
-          Baixe riviera-showdown.html e abra por duplo clique, sem instalar programas ou iniciar servidor. Modo viagem com 2 a 8 pessoas no mesmo aparelho, respostas escondidas entre os turnos, pausa e retomada. Três modos, cinco rodadas, placar automático, pódio e revanche. A demonstração com adversário simulado é uma opção separada.
+          Baixe riviera-showdown.html e abra por duplo clique, sem instalar programas ou iniciar servidor. Modo viagem com 2 a 8 pessoas no mesmo aparelho, respostas escondidas entre os turnos, pausa e retomada. Apenas Estimativa de Ranking está ativa: cinco rodadas, placar automático, pódio e revanche. Frase e Misturado estão pausados. A demonstração com adversário simulado é uma opção separada.
 
-          Modo viagem offline, HTML file:// e três modos em dois navegadores contra Firebase Emulator verificados. Produção e dois aparelhos físicos continuam pendentes.
+          Ranking offline, HTML file:// e Ranking em dois navegadores contra Firebase Emulator verificados. A revelação só é permitida depois que todos enviam um palpite ou passam a vez explicitamente. Produção e dois aparelhos físicos continuam pendentes.
 
           O GitHub Pages ainda retorna 404: habilitação via API recusada com 403. Firebase de produção não autenticado. Esta release oferece o HTML local e não significa multiplayer público disponível.
           NOTES
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" riviera-showdown.html --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$RELEASE_TAG" riviera-showdown.html --target "$SOURCE_SHA" --title "Riviera Showdown $RELEASE_TAG — Modo viagem" --notes-file "$RUNNER_TEMP/riviera-release.md" --repo "$GITHUB_REPOSITORY"
+            gh release create "$RELEASE_TAG" riviera-showdown.html --target "$SOURCE_SHA" --title "Riviera Showdown $RELEASE_TAG — Estimativa de Ranking" --notes-file "$RUNNER_TEMP/riviera-release.md" --repo "$GITHUB_REPOSITORY"
           fi

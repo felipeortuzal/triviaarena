@@ -34,11 +34,9 @@ jobs:
         run: npm run test:browser-travel
       - name: Testar partidas e regras Firebase no emulador
         run: npm run test:rooms
-      - name: Validar partida em dois navegadores reais com Emulator
-        run: npm run test:browser-room
-      - name: Ranking e Misturado em dois Chrome independentes
+      - name: Ranking em dois Chrome independentes
         run: npm run test:browser-rank
-      - name: Cinco rodadas nos três modos, reconexão e revanche
+      - name: Cinco rodadas de Ranking, reconexão e revanche
         run: npm run test:browser-five
       - name: Construir pacote estático com configuração Web pública (se presente)
         env:

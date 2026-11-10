@@ -30,11 +30,9 @@ jobs:
         run: npm run test:browser-travel
       - name: Regras no Emulator Suite - Auth e Realtime Database
         run: npm run test:rooms
-      - name: Dois navegadores independentes contra o Firebase Emulator
-        run: npm run test:browser-room
-      - name: Ranking e Misturado em dois Chrome independentes
+      - name: Ranking em dois Chrome independentes
         run: npm run test:browser-rank
-      - name: Cinco rodadas nos três modos, reconexão e revanche
+      - name: Cinco rodadas de Ranking, reconexão e revanche
         run: npm run test:browser-five
       - name: HTML produzido da mesma revisão do frontend
         run: git diff --exit-code -- riviera-showdown.html

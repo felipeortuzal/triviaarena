@@ -16,7 +16,7 @@ async function online(page){
 async function newRoom(page,mode,nick){
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await online(page);
-  if(mode!=="letters")await page.locator('[data-action="choose-'+mode+'"]').click();
+
   await page.locator("#nick").fill(nick);
   await page.locator('[data-action="create"]').click();
   await page.locator(".invite-code").waitFor({timeout:20000});
@@ -31,9 +31,6 @@ async function enter(page,invite,nick){
 }
 async function waitRank(page){
   await page.locator(".rank-target strong").waitFor({timeout:20000});
-}
-async function waitPhrase(page){
-  await page.locator(".largecode").waitFor({timeout:20000});
 }
 let url;
 try{
@@ -79,6 +76,10 @@ try{
  await host.getByText("RODADA 2",{exact:false}).first().waitFor({timeout:15000});
  await guest.getByText("RODADA 2",{exact:false}).first().waitFor({timeout:15000});
  await waitRank(host);await waitRank(guest);
+ assert.ok(await host.locator('[data-action="reveal"]').isDisabled());
+ await host.locator('[data-action="skip-guess"]').click();
+ await guest.locator('[data-action="skip-guess"]').click();
+ await host.getByText('2/2 jogadores enviaram.',{exact:false}).waitFor();
  await host.locator('[data-action="reveal"]').click();
  await host.getByText("Quem chegou mais perto?").waitFor({timeout:18000});
  await host.locator('[data-action="finish-game"]').click();
@@ -87,28 +88,11 @@ try{
  assert.equal(await host.locator(".podium").innerText(),await guest.locator(".podium").innerText());
  await host.locator('[data-action="leave-room"]').click();
  await guest.locator('[data-action="leave-room"]').click();
- const mixedInvite=await newRoom(host,"mixed","Anfitrião");
- await enter(guest,mixedInvite,"Convidado");
- await host.locator('[data-action="start-game"]').click();
- await waitPhrase(host);await waitPhrase(guest);
- await host.locator('[data-action="reveal"]').click();
- await host.locator('[data-action="next"]').click();
- await waitRank(host);await waitRank(guest);
- await guest.locator("#guess").fill("Japão");
- await guest.locator('[data-action="guess"]').click();
- await host.locator('[data-action="reveal"]').click();
- await host.getByText("Quem chegou mais perto?").waitFor({timeout:15000});
- await host.locator('[data-action="finish-game"]').click();
- await host.getByText("Resumo das 2 rodadas").waitFor({timeout:15000});
- await guest.getByText("Resumo das 2 rodadas").waitFor({timeout:15000});
- assert.equal(await host.locator(".podium").innerText(),await guest.locator(".podium").innerText());
- assert.ok((await host.locator(".history-row").allInnerTexts()).some(x=>x.includes("🏆")));
- assert.ok((await host.locator(".history-row").allInnerTexts()).some(x=>x.includes("🧩")));
  const width=await guest.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  assert.ok(width<=1,"overflow mobile: "+width);
  assert.deepEqual(failures,[],"erros JS do navegador: "+failures.join("; "));
  await Promise.all([hostCtx.close(),guestCtx.close()]);
- console.log("PASS V5: Ranking + Misturado em 2 navegadores isolados, privados, correção e mobile");
+ console.log("PASS V5: Ranking em 2 navegadores isolados, privados, correção e mobile");
 }finally{
  if(server)await new Promise(resolve=>server.close(resolve));
  await browser.close();

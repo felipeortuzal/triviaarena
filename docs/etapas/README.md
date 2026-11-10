@@ -24,6 +24,10 @@ Para retomar, envie **“retome a etapa N”**. Para consultar sem implementar, 
 
 A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos. Se faltar apenas essa validação, o desenvolvimento das etapas 5–7 pode continuar contra o emulador. A liberação pública segue pendente. A etapa 9 é opcional e pode ser solicitada depois da primeira versão completa.
 
+## Foco atual
+
+Por decisão de Felipe em 10/11/2026, **somente Ranking está ativo**. Frase e Misturado estão pausados; os registros históricos abaixo descrevem entregas anteriores e não autorização para reativá-los. Para uma futura retomada, Frase será simultâneo, com um ponto para quem acertar primeiro.
+
 ## Registro de progresso
 
 | Etapa | Estado | Evidência, pendência e ponto de retomada |
@@ -35,7 +39,7 @@ A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos.
 | 5 | Parcial | Implementação validada em emuladores em 10/11/2026: Ranking, Frase e Misturado, cinco rodadas, palpites privados, 5/3/1 para ranking, +1 por frase correta, apuração idempotente, reconexão e revanche. 11 testes Node + 3 de Pages + 11 SDK aprovados; dois contextos Chromium concluíram cada modo. Homologação de produção e física depende da Etapa 4. |
 | 6 | A executar | — |
 | 7 | A executar | — |
-| 8 | Parcial | Modo viagem 0.7: 2–8 participantes no mesmo aparelho, três modos, cinco rodadas, respostas escondidas na troca de jogador, passar vez, pausa/retomada e revanche. Playwright offline: três participantes locais, página reaberta, nomes inválidos, limite de jogadores, armazenamento bloqueado e save corrompido. Interface de toque em 360/375 px; HTML gerado dos mesmos módulos. CI inclui teste file://. Pages/Firebase reais e aparelhos físicos seguem pendentes; etapas 6–7 continuam fora desta entrega. |
+| 8 | Parcial | Versão 0.8 focada exclusivamente em Ranking: Frase/Misturado retirados da seleção e retomada; código preservado. Revelação bloqueada na interface, no SDK e nas regras RTDB enquanto faltar algum palpite. Desistência explícita vale zero; sem timeout que revele sozinho. Cinco rodadas, reconexão, pódio e revanche; HTML offline com 2–8 pessoas no mesmo aparelho. Pages/Firebase reais e aparelhos físicos continuam pendentes. |
 | 9 | A executar | — |
 
 ## Ponto de partida auditado

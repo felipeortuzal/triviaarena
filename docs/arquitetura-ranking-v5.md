@@ -47,3 +47,13 @@ Se todos estiverem na posição 5, todos ficam em 1º e recebem +5. A pontuaçã
 - `npm run build`: regenera `riviera-showdown.html` a partir do frontend e dos quatro rankings, sem dependência de Firebase ou CDN.
 
 O Pages e Firebase reais dependem da ação externa já documentada na [Etapa 4](publicacao-piloto.md). Testes com emulador e dois navegadores de máquina virtual **não são testes em dois aparelhos físicos** e não comprovam hospedagem pública.
+
+## Revisão 0.8 — Ranking ativo e espera obrigatória
+
+Frase e Misturado foram pausados na interface. Os módulos continuam versionados e cobertos por regressões internas; isso não os torna modos ativos no produto.
+
+O anfitrião só pode revelar Ranking quando todos os perfis inscritos enviaram um palpite. `submitGuess(code, "", {skip:true})` representa desistência explícita, pontua zero e registra status de envio. Atualizações continuam permitidas até a revelação. A interface mostra quantos enviaram e quais nomes faltam; o SDK recusa a revelação incompleta.
+
+As regras de `roomPublic/$code/round` também validam a barreira para gravações diretas do anfitrião: verificam cada uma das **20 vagas máximas** de `roomSeats`, exigindo `roomGuessStatus` verdadeiro para cada vaga com perfil. A expressão é expandida porque a linguagem de regras de Realtime Database não fornece `numChildren()` nem iteração. Vagas vazias ou reservas ainda sem perfil não bloqueiam a rodada. O status só pode ser escrito pelo próprio UID, com perfil e palpite privado existentes. A barreira também é testada em alterações do campo `revealed` e da sala inteira.
+
+O anfitrião continua sendo uma parte de confiança para a apuração, como documentado anteriormente. Desconectar não envia palpite automaticamente; o jogador pode reconectar e responder ou passar a vez. Não há revelação forçada por timeout.

@@ -75,9 +75,9 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     return t.committed;
   }
   async function revealPhrase(code){ return revealRound(code,"letters"); }
-  async function submitGuess(code,guess){
+  async function submitGuess(code,guess,{skip=false}={}){
     const answer=String(guess??"").trim();
-    if(!answer||answer.length>120)throw Error("Digite uma resposta (1–120 caracteres).");
+    if((!answer&&!skip)||answer.length>120)throw Error("Digite uma resposta (1–120 caracteres).");
     const state=(await get(roomAt(code))).val();
     if(!state||state.phase!=="playing"||!["letters","rank"].includes(state.round?.type)||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
     if(!state.profiles?.[uid])throw Error("Você não está inscrito na sala.");
@@ -99,6 +99,10 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     ensureHost(current);
     if(current.phase!=="playing"||current.round?.type!==type)throw Error("O tipo da rodada mudou. Atualize a sala.");
     const id=current.round.id;
+    if(type==='rank'&&!current.round.revealed){
+      const sent=(await get(ref(db,`roomGuessStatus/${code}/${id}`))).val()||{};
+      if(Object.keys(current.profiles||{}).some(player=>sent[player]!==true))throw Error('Espere todos enviarem um palpite ou passarem a vez antes de revelar.');
+    }
     const locked=await runTransaction(roomAt(code),value=>{
       const old=value||current;
       if(old.phase!=="playing"||old.round?.id!==id||old.round.revealed)return;

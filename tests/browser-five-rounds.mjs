@@ -33,12 +33,12 @@ async function reveal(host,guest){
 }
 try{
  mkdirSync(resolve(root,'test-results'),{recursive:true});
- for(const mode of ['letters','rank','mixed']){
+ for(const mode of ['rank']){
   const hc=await browser.newContext({viewport:{width:1365,height:900}}),gc=await browser.newContext({viewport:{width:390,height:844}});
   const host=await hc.newPage(),guest=await gc.newPage();
   for(const p of [host,guest])p.on('pageerror',e=>errors.push(e.message));
   await host.goto(base);await ready(host);
-  await host.locator(`[data-action="choose-${mode}"]`).click();await host.locator('#nick').fill('Felipe');
+  assert.equal(await host.locator('[data-action="choose-letters"], [data-action="choose-mixed"], #mode').count(),0);await host.locator('#nick').fill('Felipe');
   await host.locator('[data-action="create"]').click();await host.locator('#invite').waitFor();
   const invite=await host.locator('#invite').inputValue();
   await guest.goto(invite);await ready(guest);await guest.locator('#nick').fill('Amigo');await guest.locator('[data-action="join"]').click();await guest.locator('#invite').waitFor();
@@ -47,7 +47,12 @@ try{
   for(let round=1;round<=5;round++){
    for(const p of [host,guest])await p.getByText(`RODADA ${round} DE 5`,{exact:false}).first().waitFor();
    if(round===2){await guest.reload();await guest.getByText('RODADA 2 DE 5',{exact:false}).first().waitFor();}
-   await submitCorrect(host);await submitCorrect(guest);
+   assert.ok(await host.locator('[data-action="reveal"]').isDisabled());
+   await submitCorrect(host);
+   await host.getByText('1/2 jogadores enviaram.',{exact:false}).waitFor();
+   assert.ok(await host.locator('[data-action="reveal"]').isDisabled());
+   assert.equal(await guest.locator('.result').count(),0);
+   await submitCorrect(guest);
    await host.getByText('2/2 jogadores enviaram.',{exact:false}).waitFor();
    if(round===2){await host.reload();await host.getByText('2/2 jogadores enviaram.',{exact:false}).waitFor();}
    await reveal(host,guest);
@@ -57,7 +62,7 @@ try{
   }
   for(const p of [host,guest])await p.getByText('Resumo das 5 rodadas').waitFor();
   assert.equal(await host.locator('.podium').innerText(),await guest.locator('.podium').innerText());
-  const expected=mode==='letters'?5:mode==='rank'?25:13;
+  const expected=25;
   assert.ok((await host.locator('.podium').innerText()).includes(`${expected} pontos`));
   assert.equal(await host.locator('.history-row').count(),5);
   assert.ok(await guest.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=1);
@@ -67,6 +72,10 @@ try{
   assert.match(await guest.locator('.roster').innerText(),/0 ponto/);
   await host.locator('[data-action="start-game"]').click();
   await guest.getByText('0/2 jogadores enviaram.',{exact:false}).waitFor();
+  assert.ok(await host.locator('[data-action="reveal"]').isDisabled());
+  await host.locator('[data-action="skip-guess"]').click();
+  await guest.locator('[data-action="skip-guess"]').click();
+  await host.getByText('2/2 jogadores enviaram.',{exact:false}).waitFor();
   await reveal(host,guest);
   await host.locator('[data-action="finish-game"]').click();
   await guest.getByText('Fim de jogo!').waitFor();
@@ -75,16 +84,16 @@ try{
   await hc.close();await gc.close();
   console.log(`PASS ${mode}: 5 rodadas, 2 sessões, resposta privada, refresh, pontos ${expected}, clique duplo, pódio e revanche`);
  }
- // Exact delivered artifact: all three modes offline, five rounds and rematch.
+ // Exact delivered artifact: Ranking offline, five rounds and rematch.
  const ctx=await browser.newContext({viewport:{width:375,height:812}});await ctx.setOffline(true);
  const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));
- for(const mode of ['letters','rank','mixed']){
+ for(const mode of ['rank']){
   if(process.env.RIVIERA_INLINE_OFFLINE==='1'){
    const offlineUrl=`http://127.0.0.1:${server.address().port}/triviaarena/offline.html`;
    await page.route(offlineUrl,route=>route.fulfill({contentType:'text/html',body:readFileSync(resolve(root,'riviera-showdown.html'),'utf8')}));
    await page.goto(offlineUrl);
   }else await page.goto(pathToFileURL(resolve(root,'riviera-showdown.html')).href);
-  await page.locator(`[data-action="choose-${mode}"]`).click();await page.locator('[data-action="demo"]').click();
+  await page.locator('[data-action="demo"]').click();
   for(let round=1;round<=5;round++){
    await submitCorrect(page);await page.locator('[data-action="reveal"]').click();await page.locator('[data-action="next"]').click();
   }

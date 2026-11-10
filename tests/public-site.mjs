@@ -21,8 +21,8 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base);
   await page.locator('[data-action="demo"]').waitFor();
-  for(const mode of ['letters','rank','mixed'])await page.locator(`[data-action="choose-${mode}"]`).click();
-  await page.locator('[data-action="demo"]').click();await page.locator('.largecode').waitFor();
+  assert.equal(await page.locator('[data-action="choose-letters"], [data-action="choose-mixed"]').count(),0);
+  await page.locator('[data-action="demo"]').click();await page.locator('.rank-target').waitFor();
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)<=1);
   assert.deepEqual(errors,[]);await page.close();
  }

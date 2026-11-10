@@ -86,6 +86,10 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   await rejected(set(ref(out.db,"roomPrivateGuesses/RVAB23/r1/"+out.uid),"Espiando"));
   await rejected(set(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+h.uid),"Forjado"));
   await rejected(set(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid),123));
+  await rejected(update(ref(h.db,"roomPublic/RVAB23/round"),{revealed:true}));
+  await set(ref(h.db,"roomPrivateGuesses/RVAB23/r1/"+h.uid),"");
+  await set(ref(h.db,"roomGuessStatus/RVAB23/r1/"+h.uid),true);
+  await set(ref(g.db,"roomGuessStatus/RVAB23/r1/"+g.uid),true);
   await update(ref(h.db,"roomPublic/RVAB23/round"),{revealed:true});
   assert.equal((await get(ref(h.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid))).val(),"Meu palpite");
   await rejected(set(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid),"Depois"));
