@@ -93,7 +93,7 @@ async function browserChecks(){
     await offlinePage.locator("#guess").fill("Brasil");
     await offlinePage.locator('[data-action="guess"]').click();
     await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.getByText("Quem chegou mais perto?").waitFor();
+    await offlinePage.getByText("Quem chegou mais perto?").waitFor({timeout:8000}).catch(async e=>{console.error("DEBUG OFFLINE RANK:",(await offlinePage.locator("body").innerText()).slice(-5500));throw e});
     await offlinePage.locator('[data-action="finish-game"]').click();
     await offlinePage.getByText("Fim de jogo!").waitFor();
     await offlinePage.locator('[data-action="leave-room"]').click();
