@@ -68,7 +68,7 @@ test("3 rodadas compartilhadas, dicas, convite, reconexão e pontos uma vez",asy
   assert.equal(afterFirst.val().scores[guest.uid],1);
   assert.equal(Object.keys(afterFirst.val().roundHistory).length,1);
   assert.equal(await host.game.hint("RVJH82"),true);
-  assert.equal((await get(ref(guest.db,"roomPublic/RVJH82/round/hints"))).val(),1);
+  await eventually(()=>get(ref(guest.db,"roomPublic/RVJH82/round/hints")),v=>v.val()===1,"dica não sincronizou com convidado");
   // Mesmo UID retorna, mantendo a mesma vaga e a pontuação; host pode recarregar.
   assert.equal(await guest.gateway.resumeRoom("RVJH82"),true);
   assert.equal((await guest.gateway.joinRoom({code:"RVJH82",nick:"Amigo"})).alreadyMember,true);
