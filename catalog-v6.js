@@ -78,5 +78,5 @@ export const rankingSnapshot=list=>({
   id:list.id,revision:list.revision||"legacy-1",title:list.title,source:list.source,
   url:list.url,snapshot:list.snapshot,about:list.about,category:list.category||"",
   items:[...list.items],itemIds:list.itemIds||list.items.map((_,i)=>list.id+"-"+String(i+1).padStart(4,"0")),
-  aliases:list.aliases||{},origin:list.origin||"official",
+  aliases:list.aliases||{},origin:list.origin||"official",verifiedPrefix:list.verifiedPrefix||0,edition:list.edition||"",observedAt:list.observedAt||"",verificationNote:list.verificationNote||"",
 });
