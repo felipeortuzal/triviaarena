@@ -44,7 +44,7 @@ export function validateRanking(list,{minimum=10}={}){
 }
 export function importRanking({id,title,source,url,snapshot,about,rawItems,aliases={},category="Personalizado"}){
   const items=parseOrderedItems(rawItems);
-  const list={id:slug(id||title),title:String(title||"").trim(),source:String(source||"").trim(),
+  const list={id:"host-"+slug(id||title),title:String(title||"").trim(),source:String(source||"").trim(),
     url:String(url||"").trim(),snapshot:String(snapshot||"").trim(),
     about:String(about||"").trim(),category,items,aliases,origin:"host",
     itemIds:items.map((_,i)=>"item-"+String(i+1).padStart(4,"0"))};
