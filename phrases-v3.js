@@ -27,7 +27,7 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
     const register=await get(reg(code));
     if(!register.exists()||register.val().host!==uid)throw Error("Somente o anfitrião pode iniciar.");
     if(register.val().phase==="open"){
-      const lock=await runTransaction(ref(db,"roomRegistry/"+code+"/phase"),val=>val==="open"?"locked":undefined,{applyLocally:false});
+      const lock=await runTransaction(ref(db,"roomRegistry/"+code+"/phase"),val=>(val===null||val==="open")?"locked":undefined,{applyLocally:false});
       if(!lock.committed){
         const fresh=await get(reg(code));
         if(fresh.val()?.phase!=="locked")throw Error("Não foi possível bloquear novas entradas nesta sala.");
