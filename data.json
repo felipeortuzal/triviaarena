@@ -9,7 +9,9 @@
       "hints": [
         "O assunto está ligado a cultura geral.",
         "É uma lista clássica de grande fama."
-      ]
+      ],
+      "id": "frase-0001",
+      "status": "active"
     },
     {
       "code": "28 P em um J de D D",
@@ -20,7 +22,9 @@
       "hints": [
         "O assunto é um jogo de mesa.",
         "As peças têm dois lados com pontos."
-      ]
+      ],
+      "id": "frase-0002",
+      "status": "active"
     },
     {
       "code": "27 E na B do B",
@@ -31,7 +35,9 @@
       "hints": [
         "É um símbolo nacional.",
         "Cada unidade da federação está representada."
-      ]
+      ],
+      "id": "frase-0003",
+      "status": "active"
     },
     {
       "code": "64 C em um T de X",
@@ -42,7 +48,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0004",
+      "status": "active"
     },
     {
       "code": "32 P no I de uma P de X",
@@ -53,7 +61,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0005",
+      "status": "active"
     },
     {
       "code": "52 C em um B S C",
@@ -64,7 +74,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0006",
+      "status": "active"
     },
     {
       "code": "4 N em um B T",
@@ -75,7 +87,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0007",
+      "status": "active"
     },
     {
       "code": "13 C em cada N de um B T",
@@ -86,7 +100,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0008",
+      "status": "active"
     },
     {
       "code": "9 C em um T de J da V",
@@ -97,7 +113,9 @@
       "hints": [
         "O assunto está ligado a jogos.",
         "Pense nos componentes ou nas regras de um jogo de mesa."
-      ]
+      ],
+      "id": "frase-0009",
+      "status": "active"
     },
     {
       "code": "361 I em um T de G",
@@ -108,7 +126,9 @@
       "hints": [
         "É um jogo de estratégia oriental.",
         "Seu tabuleiro tem 19 linhas em cada direção."
-      ]
+      ],
+      "id": "frase-0010",
+      "status": "active"
     },
     {
       "code": "6 F em um D T",
@@ -119,7 +139,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0011",
+      "status": "active"
     },
     {
       "code": "21 P na S das F de um D",
@@ -130,7 +152,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0012",
+      "status": "active"
     },
     {
       "code": "7 P na S de F O de um D",
@@ -141,7 +165,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0013",
+      "status": "active"
     },
     {
       "code": "6 F em um C",
@@ -152,7 +178,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0014",
+      "status": "active"
     },
     {
       "code": "8 V em um C",
@@ -163,7 +191,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0015",
+      "status": "active"
     },
     {
       "code": "12 A em um C",
@@ -174,7 +204,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0016",
+      "status": "active"
     },
     {
       "code": "20 F em um I",
@@ -185,7 +217,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0017",
+      "status": "active"
     },
     {
       "code": "360 G em uma V C",
@@ -196,7 +230,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0018",
+      "status": "active"
     },
     {
       "code": "180 G na S dos Â de um T",
@@ -207,7 +243,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0019",
+      "status": "active"
     },
     {
       "code": "540 G na S dos Â I de um P",
@@ -218,7 +256,9 @@
       "hints": [
         "O assunto está ligado a matemática.",
         "É uma propriedade geométrica ou uma contagem de elementos."
-      ]
+      ],
+      "id": "frase-0020",
+      "status": "active"
     },
     {
       "code": "8 B em um B",
@@ -229,7 +269,9 @@
       "hints": [
         "O assunto está ligado a tecnologia.",
         "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+      ],
+      "id": "frase-0021",
+      "status": "active"
     },
     {
       "code": "1024 B em um K",
@@ -240,7 +282,9 @@
       "hints": [
         "O assunto está ligado a tecnologia.",
         "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+      ],
+      "id": "frase-0022",
+      "status": "active"
     },
     {
       "code": "1024 K em um M",
@@ -251,7 +295,9 @@
       "hints": [
         "O assunto está ligado a tecnologia.",
         "Está relacionado a unidades usadas no armazenamento digital."
-      ]
+      ],
+      "id": "frase-0023",
+      "status": "active"
     },
     {
       "code": "118 E na T P",
@@ -262,7 +308,10 @@
       "hints": [
         "É uma referência da química.",
         "Ela organiza átomos por número atômico."
-      ]
+      ],
+      "id": "frase-0024",
+      "status": "active",
+      "reference": "https://iupac.org/what-we-do/periodic-table-of-elements/"
     },
     {
       "code": "3 L do M de N",
@@ -273,7 +322,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0025",
+      "status": "active"
     },
     {
       "code": "3 L de K",
@@ -284,7 +335,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0026",
+      "status": "active"
     },
     {
       "code": "8 P no S S",
@@ -295,7 +348,9 @@
       "hints": [
         "O assunto está ligado a espaço.",
         "A resposta é reconhecida pela astronomia moderna."
-      ]
+      ],
+      "id": "frase-0027",
+      "status": "active"
     },
     {
       "code": "88 C O na A",
@@ -306,7 +361,9 @@
       "hints": [
         "O assunto está ligado a espaço.",
         "A resposta é reconhecida pela astronomia moderna."
-      ]
+      ],
+      "id": "frase-0028",
+      "status": "active"
     },
     {
       "code": "24 H em um D",
@@ -317,7 +374,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0029",
+      "status": "active"
     },
     {
       "code": "60 M em uma H",
@@ -328,7 +387,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0030",
+      "status": "active"
     },
     {
       "code": "60 S em um M",
@@ -339,7 +400,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0031",
+      "status": "active"
     },
     {
       "code": "365 D em um A C",
@@ -350,7 +413,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0032",
+      "status": "active"
     },
     {
       "code": "366 D em um A B",
@@ -361,7 +426,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0033",
+      "status": "active"
     },
     {
       "code": "12 M em um A",
@@ -372,7 +439,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0034",
+      "status": "active"
     },
     {
       "code": "7 D em uma S",
@@ -383,7 +452,9 @@
       "hints": [
         "O assunto está ligado a tempo.",
         "Pense no funcionamento do relógio ou do calendário."
-      ]
+      ],
+      "id": "frase-0035",
+      "status": "active"
     },
     {
       "code": "24 F H T da T",
@@ -394,7 +465,9 @@
       "hints": [
         "O assunto está ligado a geografia.",
         "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+      ],
+      "id": "frase-0036",
+      "status": "active"
     },
     {
       "code": "100 C em um M",
@@ -405,7 +478,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "frase-0037",
+      "status": "active"
     },
     {
       "code": "1000 M em um Q",
@@ -416,7 +491,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "frase-0038",
+      "status": "active"
     },
     {
       "code": "1000 M em um L",
@@ -427,7 +504,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "frase-0039",
+      "status": "active"
     },
     {
       "code": "1852 M em uma M N",
@@ -438,7 +517,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "frase-0040",
+      "status": "active"
     },
     {
       "code": "1609 M A em uma M T",
@@ -449,7 +530,9 @@
       "hints": [
         "O assunto está ligado a medidas.",
         "É uma relação entre unidades de medida."
-      ]
+      ],
+      "id": "frase-0041",
+      "status": "active"
     },
     {
       "code": "299792458 M por S para a V da L no V",
@@ -460,7 +543,9 @@
       "hints": [
         "É uma constante fundamental da física.",
         "Ela determina um limite de velocidade no Universo."
-      ]
+      ],
+      "id": "frase-0042",
+      "status": "active"
     },
     {
       "code": "206 O no C H A",
@@ -471,7 +556,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0043",
+      "status": "active"
     },
     {
       "code": "32 D na D P C",
@@ -482,7 +569,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0044",
+      "status": "active"
     },
     {
       "code": "4 C no C H",
@@ -493,7 +582,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0045",
+      "status": "active"
     },
     {
       "code": "46 C em uma C H S",
@@ -504,7 +595,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0046",
+      "status": "active"
     },
     {
       "code": "23 P de C H",
@@ -515,7 +608,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0047",
+      "status": "active"
     },
     {
       "code": "5 S T do C H",
@@ -526,7 +621,9 @@
       "hints": [
         "O assunto está ligado a corpo humano.",
         "Pense em estruturas do organismo ou em genética."
-      ]
+      ],
+      "id": "frase-0048",
+      "status": "active"
     },
     {
       "code": "26 L no A P",
@@ -537,7 +634,9 @@
       "hints": [
         "O assunto está ligado a língua.",
         "Está relacionada às regras de escrita."
-      ]
+      ],
+      "id": "frase-0049",
+      "status": "active"
     },
     {
       "code": "5 L em uma P M",
@@ -548,7 +647,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0050",
+      "status": "active"
     },
     {
       "code": "7 N M N",
@@ -559,7 +660,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0051",
+      "status": "active"
     },
     {
       "code": "12 S em uma O M",
@@ -570,7 +673,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0052",
+      "status": "active"
     },
     {
       "code": "88 T em um P P",
@@ -581,7 +686,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0053",
+      "status": "active"
     },
     {
       "code": "4 C em um V",
@@ -592,7 +699,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0054",
+      "status": "active"
     },
     {
       "code": "6 C em um V T",
@@ -603,7 +712,9 @@
       "hints": [
         "O assunto está ligado a música.",
         "Está relacionado à notação ou aos instrumentos musicais."
-      ]
+      ],
+      "id": "frase-0055",
+      "status": "active"
     },
     {
       "code": "11 J por E no F",
@@ -614,7 +725,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0056",
+      "status": "active"
     },
     {
       "code": "90 M em uma P de F",
@@ -625,7 +738,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0057",
+      "status": "active"
     },
     {
       "code": "6 J por E no V",
@@ -636,7 +751,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0058",
+      "status": "active"
     },
     {
       "code": "5 J por E no B",
@@ -647,7 +764,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0059",
+      "status": "active"
     },
     {
       "code": "18 B em um C de G P",
@@ -658,7 +777,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0060",
+      "status": "active"
     },
     {
       "code": "10 P em uma P de B",
@@ -669,7 +790,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0061",
+      "status": "active"
     },
     {
       "code": "5 A no S O",
@@ -678,9 +801,12 @@
       "topic": "Esportes",
       "level": "Fácil",
       "hints": [
-        "O assunto está ligado a esportes.",
-        "É uma regra ou característica comum de um esporte."
-      ]
+        "É um símbolo associado a um evento esportivo mundial.",
+        "Seus círculos entrelaçados representam a união dos cinco continentes."
+      ],
+      "id": "frase-0062",
+      "status": "active",
+      "reference": "https://www.olympics.com/cio/faq/le-symbole-olympique-et-autres-elements-identitaires/quelle-est-la-signification-des-anneaux-olympiques"
     },
     {
       "code": "42195 M em uma M",
@@ -691,7 +817,9 @@
       "hints": [
         "O assunto está ligado a esportes.",
         "É uma regra ou característica comum de um esporte."
-      ]
+      ],
+      "id": "frase-0063",
+      "status": "active"
     },
     {
       "code": "50 E nos E U",
@@ -702,7 +830,9 @@
       "hints": [
         "É uma divisão administrativa de um país.",
         "O país fica na América do Norte."
-      ]
+      ],
+      "id": "frase-0064",
+      "status": "active"
     },
     {
       "code": "27 U F no B",
@@ -713,7 +843,9 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "frase-0065",
+      "status": "active"
     },
     {
       "code": "26 E no B",
@@ -724,7 +856,9 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "frase-0066",
+      "status": "active"
     },
     {
       "code": "3 P da R B",
@@ -735,18 +869,23 @@
       "hints": [
         "O assunto está ligado a brasil.",
         "A informação aparece em símbolos ou instituições brasileiras."
-      ]
+      ],
+      "id": "frase-0067",
+      "status": "active"
     },
     {
       "code": "5 O na C M",
       "answer": "5 Oceanos na Classificação Moderna",
-      "explain": "Pacífico, Atlântico, Índico, Ártico e Austral.",
+      "explain": "A NOAA reconhece cinco regiões oceânicas nomeadas: Pacífico, Atlântico, Índico, Ártico e Austral. Há um único oceano global, com divisões por convenção.",
       "topic": "Geografia",
       "level": "Médio",
       "hints": [
-        "O assunto está ligado a geografia.",
-        "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+        "O planeta tem um só oceano global, mas seus grandes setores recebem nomes.",
+        "Atlântico, Pacífico, Índico, Ártico e Austral compõem a lista moderna."
+      ],
+      "id": "frase-0068",
+      "status": "active",
+      "reference": "https://oceanservice.noaa.gov/facts/howmanyoceans.html"
     },
     {
       "code": "27 P na U E",
@@ -757,7 +896,9 @@
       "hints": [
         "O assunto está ligado a geografia.",
         "Trata-se de uma contagem aceita em mapas ou divisões territoriais."
-      ]
+      ],
+      "id": "frase-0069",
+      "status": "active"
     },
     {
       "code": "193 E M da O",
@@ -768,7 +909,10 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0070",
+      "status": "active",
+      "reference": "https://www.un.org/en/about-us/member-states"
     },
     {
       "code": "5 M P do C de S da O",
@@ -779,7 +923,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0071",
+      "status": "active"
     },
     {
       "code": "15 M no C de S da O",
@@ -790,7 +936,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0072",
+      "status": "active"
     },
     {
       "code": "17 O de D S da O",
@@ -801,7 +949,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0073",
+      "status": "active"
     },
     {
       "code": "4 C do A",
@@ -812,7 +962,9 @@
       "hints": [
         "O assunto está ligado a cultura geral.",
         "É uma lista clássica de grande fama."
-      ]
+      ],
+      "id": "frase-0074",
+      "status": "active"
     },
     {
       "code": "12 T de H",
@@ -823,7 +975,9 @@
       "hints": [
         "O assunto está ligado a mitologia.",
         "Pense em personagens e histórias da Grécia antiga."
-      ]
+      ],
+      "id": "frase-0075",
+      "status": "active"
     },
     {
       "code": "9 M da M G",
@@ -834,7 +988,9 @@
       "hints": [
         "O assunto está ligado a mitologia.",
         "Pense em personagens e histórias da Grécia antiga."
-      ]
+      ],
+      "id": "frase-0076",
+      "status": "active"
     },
     {
       "code": "12 D O da M G",
@@ -845,7 +1001,9 @@
       "hints": [
         "O assunto está ligado a mitologia.",
         "Pense em personagens e histórias da Grécia antiga."
-      ]
+      ],
+      "id": "frase-0077",
+      "status": "active"
     },
     {
       "code": "7 A na H da B de N",
@@ -856,7 +1014,9 @@
       "hints": [
         "O assunto está ligado a cultura pop.",
         "É algo presente em uma história conhecida há gerações."
-      ]
+      ],
+      "id": "frase-0078",
+      "status": "active"
     },
     {
       "code": "3 P no C T",
@@ -867,7 +1027,9 @@
       "hints": [
         "O assunto está ligado a cultura pop.",
         "É algo presente em uma história conhecida há gerações."
-      ]
+      ],
+      "id": "frase-0079",
+      "status": "active"
     },
     {
       "code": "4 E C no N T",
@@ -878,7 +1040,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0080",
+      "status": "active"
     },
     {
       "code": "5 L do P",
@@ -889,7 +1053,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0081",
+      "status": "active"
     },
     {
       "code": "66 L na B P",
@@ -900,7 +1066,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0082",
+      "status": "active"
     },
     {
       "code": "73 L na B C",
@@ -911,7 +1079,9 @@
       "hints": [
         "O assunto está ligado a história.",
         "A informação vem de uma instituição ou tradição histórica."
-      ]
+      ],
+      "id": "frase-0083",
+      "status": "active"
     },
     {
       "code": "4 E do A na A",
@@ -922,7 +1092,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0084",
+      "status": "active"
     },
     {
       "code": "3 C P da L",
@@ -933,7 +1105,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0085",
+      "status": "active"
     },
     {
       "code": "3 C P S da I",
@@ -944,7 +1118,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0086",
+      "status": "active"
     },
     {
       "code": "2 P em um Í",
@@ -955,7 +1131,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0087",
+      "status": "active"
     },
     {
       "code": "4 N no D",
@@ -966,7 +1144,9 @@
       "hints": [
         "O assunto está ligado a ciência.",
         "A pista está em uma definição ou estrutura estudada nas ciências."
-      ]
+      ],
+      "id": "frase-0088",
+      "status": "active"
     },
     {
       "code": "14 V em um S",
@@ -977,7 +1157,9 @@
       "hints": [
         "Forma clássica de poesia.",
         "Possui dois quartetos e dois tercetos."
-      ]
+      ],
+      "id": "frase-0089",
+      "status": "active"
     },
     {
       "code": "26 L no A I",
@@ -988,18 +1170,23 @@
       "hints": [
         "Pense em linguagem escrita.",
         "É usado no inglês."
-      ]
+      ],
+      "id": "frase-0090",
+      "status": "active"
     },
     {
-      "code": "4 C no D H",
+      "code": "4 C no C H",
       "answer": "4 Câmaras no Coração Humano",
-      "explain": "4 Câmaras no Coração Humano.",
+      "explain": "O coração humano tem dois átrios e dois ventrículos; item duplicado, fora de novos sorteios.",
       "topic": "Biologia",
       "level": "Médio",
       "hints": [
         "Anatomia humana.",
         "São dois átrios e dois ventrículos."
-      ]
+      ],
+      "id": "frase-0091",
+      "status": "inactive",
+      "duplicateOf": "frase-0045"
     },
     {
       "code": "5 A nos A O",
@@ -1010,7 +1197,10 @@
       "hints": [
         "Símbolo esportivo internacional.",
         "Os círculos são entrelaçados."
-      ]
+      ],
+      "id": "frase-0092",
+      "status": "inactive",
+      "duplicateOf": "frase-0062"
     },
     {
       "code": "11 J em um T de F",
@@ -1021,7 +1211,10 @@
       "hints": [
         "Esporte coletivo.",
         "Há um goleiro."
-      ]
+      ],
+      "id": "frase-0093",
+      "status": "inactive",
+      "duplicateOf": "frase-0056"
     },
     {
       "code": "12 S no Z O",
@@ -1032,7 +1225,9 @@
       "hints": [
         "Astrologia.",
         "Áries e Peixes estão na lista."
-      ]
+      ],
+      "id": "frase-0094",
+      "status": "active"
     },
     {
       "code": "7 C no A-Í",
@@ -1043,7 +1238,9 @@
       "hints": [
         "Fenômeno óptico.",
         "Aparece com sol e chuva."
-      ]
+      ],
+      "id": "frase-0095",
+      "status": "active"
     },
     {
       "code": "3 E P da M",
@@ -1054,7 +1251,9 @@
       "hints": [
         "Física e química.",
         "Sólido, líquido e gasoso."
-      ]
+      ],
+      "id": "frase-0096",
+      "status": "active"
     },
     {
       "code": "46 C nos C H",
@@ -1065,7 +1264,10 @@
       "hints": [
         "Genética.",
         "São 23 pares."
-      ]
+      ],
+      "id": "frase-0097",
+      "status": "inactive",
+      "duplicateOf": "frase-0046"
     },
     {
       "code": "24 L no A G",
@@ -1076,7 +1278,9 @@
       "hints": [
         "Escrita antiga.",
         "Alfa e ômega."
-      ]
+      ],
+      "id": "frase-0098",
+      "status": "active"
     },
     {
       "code": "13 F na B dos E U",
@@ -1087,18 +1291,24 @@
       "hints": [
         "Símbolo nacional.",
         "Representam as colônias originais."
-      ]
+      ],
+      "id": "frase-0099",
+      "status": "active"
     },
     {
-      "code": "5 O nos J O",
-      "answer": "5 Oceanos nos Mapas Oceânicos",
-      "explain": "5 Oceanos nos Mapas Oceânicos.",
+      "code": "5 O na C M",
+      "answer": "5 Oceanos na Classificação Moderna",
+      "explain": "O Atlântico, Pacífico, Índico, Ártico e Austral são cinco regiões nomeadas por classificações modernas; item duplicado, fora do sorteio.",
       "topic": "Geografia",
       "level": "Médio",
       "hints": [
         "Geografia física.",
         "Atlântico e Pacífico são dois deles."
-      ]
+      ],
+      "id": "frase-0100",
+      "status": "inactive",
+      "duplicateOf": "frase-0068",
+      "reference": "https://oceanservice.noaa.gov/facts/howmanyoceans.html"
     },
     {
       "code": "6 C em um H",
@@ -1109,7 +1319,10 @@
       "hints": [
         "Instrumento musical.",
         "Usado com acordes."
-      ]
+      ],
+      "id": "frase-0101",
+      "status": "inactive",
+      "duplicateOf": "frase-0055"
     },
     {
       "code": "88 T em um P T",
@@ -1120,7 +1333,10 @@
       "hints": [
         "Instrumento de teclas.",
         "Tem teclas brancas e pretas."
-      ]
+      ],
+      "id": "frase-0102",
+      "status": "inactive",
+      "duplicateOf": "frase-0053"
     },
     {
       "code": "7 N M na E D",
@@ -1131,18 +1347,23 @@
       "hints": [
         "Teoria musical.",
         "Dó, ré, mi..."
-      ]
+      ],
+      "id": "frase-0103",
+      "status": "inactive",
+      "duplicateOf": "frase-0051"
     },
     {
-      "code": "9 M de G em uma G",
-      "answer": "9 Meses de Gestação em uma Gravidez",
-      "explain": "9 Meses de Gestação em uma Gravidez.",
+      "code": "9 M de G A em uma G",
+      "answer": "9 Meses de Gestação Aproximadamente em uma Gravidez",
+      "explain": "A duração da gravidez costuma ser expressa popularmente como cerca de nove meses; em obstetrícia a idade gestacional é contada em semanas.",
       "topic": "Biologia",
       "level": "Fácil",
       "hints": [
         "Ciclo da vida.",
         "Duração aproximada de uma gravidez humana."
-      ]
+      ],
+      "id": "frase-0104",
+      "status": "active"
     }
   ],
   "rankings": [
@@ -1317,7 +1538,122 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "status": "verified-reference",
+      "category": "Geografia",
+      "methodology": "Área total (terra e águas interiores) de países e dependências, conforme ordenação publicada pelo Worldometer.",
+      "edition": "snapshot-2026-11",
+      "observedAt": "2026-11-10",
+      "tiePolicy": "A ordem da posição publicada na edição é o desempate; itens sem ordem inequívoca não podem entrar.",
+      "itemIds": [
+        "area-0001",
+        "area-0002",
+        "area-0003",
+        "area-0004",
+        "area-0005",
+        "area-0006",
+        "area-0007",
+        "area-0008",
+        "area-0009",
+        "area-0010",
+        "area-0011",
+        "area-0012",
+        "area-0013",
+        "area-0014",
+        "area-0015",
+        "area-0016",
+        "area-0017",
+        "area-0018",
+        "area-0019",
+        "area-0020",
+        "area-0021",
+        "area-0022",
+        "area-0023",
+        "area-0024",
+        "area-0025",
+        "area-0026",
+        "area-0027",
+        "area-0028",
+        "area-0029",
+        "area-0030",
+        "area-0031",
+        "area-0032",
+        "area-0033",
+        "area-0034",
+        "area-0035",
+        "area-0036",
+        "area-0037",
+        "area-0038",
+        "area-0039",
+        "area-0040",
+        "area-0041",
+        "area-0042",
+        "area-0043",
+        "area-0044",
+        "area-0045",
+        "area-0046",
+        "area-0047",
+        "area-0048",
+        "area-0049",
+        "area-0050",
+        "area-0051",
+        "area-0052",
+        "area-0053",
+        "area-0054",
+        "area-0055",
+        "area-0056",
+        "area-0057",
+        "area-0058",
+        "area-0059",
+        "area-0060",
+        "area-0061",
+        "area-0062",
+        "area-0063",
+        "area-0064",
+        "area-0065",
+        "area-0066",
+        "area-0067",
+        "area-0068",
+        "area-0069",
+        "area-0070",
+        "area-0071",
+        "area-0072",
+        "area-0073",
+        "area-0074",
+        "area-0075",
+        "area-0076",
+        "area-0077",
+        "area-0078",
+        "area-0079",
+        "area-0080",
+        "area-0081",
+        "area-0082",
+        "area-0083",
+        "area-0084",
+        "area-0085",
+        "area-0086",
+        "area-0087",
+        "area-0088",
+        "area-0089",
+        "area-0090",
+        "area-0091",
+        "area-0092",
+        "area-0093",
+        "area-0094",
+        "area-0095",
+        "area-0096",
+        "area-0097",
+        "area-0098",
+        "area-0099",
+        "area-0100"
+      ],
+      "allowedCuts": [
+        10,
+        25,
+        50,
+        100
+      ],
+      "verificationScope": "Referência de publicação identificada e início da lista confrontado; auditoria linha a linha ainda pendente."
     },
     {
       "id": "population",
@@ -1498,7 +1834,122 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "status": "verified-reference",
+      "category": "Demografia",
+      "methodology": "Estimativas demográficas 2026 do Worldometer baseadas na Divisão de População da ONU.",
+      "edition": "estimate-2026",
+      "observedAt": "2026-11-10",
+      "tiePolicy": "A ordem da posição publicada na edição é o desempate; itens sem ordem inequívoca não podem entrar.",
+      "itemIds": [
+        "population-0001",
+        "population-0002",
+        "population-0003",
+        "population-0004",
+        "population-0005",
+        "population-0006",
+        "population-0007",
+        "population-0008",
+        "population-0009",
+        "population-0010",
+        "population-0011",
+        "population-0012",
+        "population-0013",
+        "population-0014",
+        "population-0015",
+        "population-0016",
+        "population-0017",
+        "population-0018",
+        "population-0019",
+        "population-0020",
+        "population-0021",
+        "population-0022",
+        "population-0023",
+        "population-0024",
+        "population-0025",
+        "population-0026",
+        "population-0027",
+        "population-0028",
+        "population-0029",
+        "population-0030",
+        "population-0031",
+        "population-0032",
+        "population-0033",
+        "population-0034",
+        "population-0035",
+        "population-0036",
+        "population-0037",
+        "population-0038",
+        "population-0039",
+        "population-0040",
+        "population-0041",
+        "population-0042",
+        "population-0043",
+        "population-0044",
+        "population-0045",
+        "population-0046",
+        "population-0047",
+        "population-0048",
+        "population-0049",
+        "population-0050",
+        "population-0051",
+        "population-0052",
+        "population-0053",
+        "population-0054",
+        "population-0055",
+        "population-0056",
+        "population-0057",
+        "population-0058",
+        "population-0059",
+        "population-0060",
+        "population-0061",
+        "population-0062",
+        "population-0063",
+        "population-0064",
+        "population-0065",
+        "population-0066",
+        "population-0067",
+        "population-0068",
+        "population-0069",
+        "population-0070",
+        "population-0071",
+        "population-0072",
+        "population-0073",
+        "population-0074",
+        "population-0075",
+        "population-0076",
+        "population-0077",
+        "population-0078",
+        "population-0079",
+        "population-0080",
+        "population-0081",
+        "population-0082",
+        "population-0083",
+        "population-0084",
+        "population-0085",
+        "population-0086",
+        "population-0087",
+        "population-0088",
+        "population-0089",
+        "population-0090",
+        "population-0091",
+        "population-0092",
+        "population-0093",
+        "population-0094",
+        "population-0095",
+        "population-0096",
+        "population-0097",
+        "population-0098",
+        "population-0099",
+        "population-0100"
+      ],
+      "allowedCuts": [
+        10,
+        25,
+        50,
+        100
+      ],
+      "verificationScope": "Referência de publicação identificada e início da lista confrontado; auditoria linha a linha ainda pendente."
     },
     {
       "id": "gdp",
@@ -1676,7 +2127,122 @@
         "Austrália": [
           "Australia"
         ]
-      }
+      },
+      "status": "verified-reference",
+      "category": "Economia",
+      "methodology": "PIB nominal em dólares correntes (estimativa 2025), WEO outubro de 2026, reprodução Worldometer.",
+      "edition": "imf-weo-2026-10-2025",
+      "observedAt": "2026-11-10",
+      "tiePolicy": "A ordem da posição publicada na edição é o desempate; itens sem ordem inequívoca não podem entrar.",
+      "itemIds": [
+        "gdp-0001",
+        "gdp-0002",
+        "gdp-0003",
+        "gdp-0004",
+        "gdp-0005",
+        "gdp-0006",
+        "gdp-0007",
+        "gdp-0008",
+        "gdp-0009",
+        "gdp-0010",
+        "gdp-0011",
+        "gdp-0012",
+        "gdp-0013",
+        "gdp-0014",
+        "gdp-0015",
+        "gdp-0016",
+        "gdp-0017",
+        "gdp-0018",
+        "gdp-0019",
+        "gdp-0020",
+        "gdp-0021",
+        "gdp-0022",
+        "gdp-0023",
+        "gdp-0024",
+        "gdp-0025",
+        "gdp-0026",
+        "gdp-0027",
+        "gdp-0028",
+        "gdp-0029",
+        "gdp-0030",
+        "gdp-0031",
+        "gdp-0032",
+        "gdp-0033",
+        "gdp-0034",
+        "gdp-0035",
+        "gdp-0036",
+        "gdp-0037",
+        "gdp-0038",
+        "gdp-0039",
+        "gdp-0040",
+        "gdp-0041",
+        "gdp-0042",
+        "gdp-0043",
+        "gdp-0044",
+        "gdp-0045",
+        "gdp-0046",
+        "gdp-0047",
+        "gdp-0048",
+        "gdp-0049",
+        "gdp-0050",
+        "gdp-0051",
+        "gdp-0052",
+        "gdp-0053",
+        "gdp-0054",
+        "gdp-0055",
+        "gdp-0056",
+        "gdp-0057",
+        "gdp-0058",
+        "gdp-0059",
+        "gdp-0060",
+        "gdp-0061",
+        "gdp-0062",
+        "gdp-0063",
+        "gdp-0064",
+        "gdp-0065",
+        "gdp-0066",
+        "gdp-0067",
+        "gdp-0068",
+        "gdp-0069",
+        "gdp-0070",
+        "gdp-0071",
+        "gdp-0072",
+        "gdp-0073",
+        "gdp-0074",
+        "gdp-0075",
+        "gdp-0076",
+        "gdp-0077",
+        "gdp-0078",
+        "gdp-0079",
+        "gdp-0080",
+        "gdp-0081",
+        "gdp-0082",
+        "gdp-0083",
+        "gdp-0084",
+        "gdp-0085",
+        "gdp-0086",
+        "gdp-0087",
+        "gdp-0088",
+        "gdp-0089",
+        "gdp-0090",
+        "gdp-0091",
+        "gdp-0092",
+        "gdp-0093",
+        "gdp-0094",
+        "gdp-0095",
+        "gdp-0096",
+        "gdp-0097",
+        "gdp-0098",
+        "gdp-0099",
+        "gdp-0100"
+      ],
+      "allowedCuts": [
+        10,
+        25,
+        50,
+        100
+      ],
+      "verificationScope": "Referência de publicação identificada e início da lista confrontado; auditoria linha a linha ainda pendente."
     },
     {
       "id": "movies",
@@ -1839,7 +2405,122 @@
         "The Lord of the Rings: The Two Towers": [
           "O Senhor dos Anéis: As Duas Torres"
         ]
-      }
+      },
+      "status": "verified-reference",
+      "category": "Cinema",
+      "methodology": "Recorte histórico das posições 1–100 do IMDb Top 250 com snapshot datado de 01/11/2026, espelhado por página de terceiro.",
+      "edition": "imdb-2026-11-01",
+      "observedAt": "2026-11-10",
+      "tiePolicy": "A ordem da posição publicada na edição é o desempate; itens sem ordem inequívoca não podem entrar.",
+      "itemIds": [
+        "movies-0001",
+        "movies-0002",
+        "movies-0003",
+        "movies-0004",
+        "movies-0005",
+        "movies-0006",
+        "movies-0007",
+        "movies-0008",
+        "movies-0009",
+        "movies-0010",
+        "movies-0011",
+        "movies-0012",
+        "movies-0013",
+        "movies-0014",
+        "movies-0015",
+        "movies-0016",
+        "movies-0017",
+        "movies-0018",
+        "movies-0019",
+        "movies-0020",
+        "movies-0021",
+        "movies-0022",
+        "movies-0023",
+        "movies-0024",
+        "movies-0025",
+        "movies-0026",
+        "movies-0027",
+        "movies-0028",
+        "movies-0029",
+        "movies-0030",
+        "movies-0031",
+        "movies-0032",
+        "movies-0033",
+        "movies-0034",
+        "movies-0035",
+        "movies-0036",
+        "movies-0037",
+        "movies-0038",
+        "movies-0039",
+        "movies-0040",
+        "movies-0041",
+        "movies-0042",
+        "movies-0043",
+        "movies-0044",
+        "movies-0045",
+        "movies-0046",
+        "movies-0047",
+        "movies-0048",
+        "movies-0049",
+        "movies-0050",
+        "movies-0051",
+        "movies-0052",
+        "movies-0053",
+        "movies-0054",
+        "movies-0055",
+        "movies-0056",
+        "movies-0057",
+        "movies-0058",
+        "movies-0059",
+        "movies-0060",
+        "movies-0061",
+        "movies-0062",
+        "movies-0063",
+        "movies-0064",
+        "movies-0065",
+        "movies-0066",
+        "movies-0067",
+        "movies-0068",
+        "movies-0069",
+        "movies-0070",
+        "movies-0071",
+        "movies-0072",
+        "movies-0073",
+        "movies-0074",
+        "movies-0075",
+        "movies-0076",
+        "movies-0077",
+        "movies-0078",
+        "movies-0079",
+        "movies-0080",
+        "movies-0081",
+        "movies-0082",
+        "movies-0083",
+        "movies-0084",
+        "movies-0085",
+        "movies-0086",
+        "movies-0087",
+        "movies-0088",
+        "movies-0089",
+        "movies-0090",
+        "movies-0091",
+        "movies-0092",
+        "movies-0093",
+        "movies-0094",
+        "movies-0095",
+        "movies-0096",
+        "movies-0097",
+        "movies-0098",
+        "movies-0099",
+        "movies-0100"
+      ],
+      "allowedCuts": [
+        10,
+        25,
+        50,
+        100
+      ],
+      "verificationScope": "Referência de publicação identificada e início da lista confrontado; auditoria linha a linha ainda pendente."
     }
   ]
 }
