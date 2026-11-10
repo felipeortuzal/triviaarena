@@ -24,16 +24,18 @@ test("110 fatos: 104 índices originais preservados, duplicatas desativadas, IDs
  assert.equal(data.puzzles[67].enabled,true);
  assert.notEqual(data.puzzles[44].hints[0],data.puzzles[44].hints[1]);
 });
-test("quatro rankings ordenados com IDs e metadados da edição",()=>{
- assert.equal(data.rankings.length,4);
+test("seis rankings com fontes: quatro Top100 históricos e dois oficiais totalmente conferidos",()=>{
+ assert.equal(data.rankings.length,6);
  for(const list of data.rankings){
-  assert.equal(list.items.length,100);
-  assert.equal(list.itemIds.length,100);
+  assert.ok([10,20,100].includes(list.items.length));
+  assert.equal(list.itemIds.length,list.items.length);
   assert.equal(new Set(list.itemIds).size,100);
   assert.ok(list.revision&&list.edition&&list.observedAt);
-  assert.ok(list.verifiedPrefix>0&&list.verifiedPrefix<list.items.length);
-  assert.deepEqual(validateRanking(list,{minimum:25}),[],list.id);
+  assert.ok(list.verifiedPrefix>0&&list.verifiedPrefix<=list.items.length);
+  assert.deepEqual(validateRanking(list,{minimum:10}),[],list.id);
  }
+ assert.equal(data.rankings.find(x=>x.id==="ifpi-artist-2025").verifiedPrefix,10);
+ assert.equal(data.rankings.find(x=>x.id==="wipo-innovation-2026").verifiedPrefix,20);
  assert.deepEqual(cutsFor(10),[10]);
  assert.deepEqual(cutsFor(100),[10,25,50,100]);
  assert.deepEqual(cutsFor(1000),RANK_CUTS);
