@@ -14,7 +14,7 @@ const safeNick=()=>{try{return localStorage.getItem('riviera-nick')||localStorag
 const saveNick=n=>{try{localStorage.setItem('riviera-nick',n)}catch{}};
 let DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]},db=null,auth=null,uid=null,roomId=null,room=null,unsubRoom=null,modeChoice='letters',nick=safeNick(),view='home',busy=false,err='',imported=[],localHints=0;
 let localDemo=false,configured=false,dataReady=false,dataProblem='',connectionState=STANDALONE?'local':'checking',connectionProblem='';
-let roundLimitChoice=5,approximateScore=1;
+let roundLimitChoice=5,approximateScore=1,importFormOpen=false,importStatus='',importedRankId='';
 let roomGateway=null,phraseGame=null,partyGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,selectedWinner='',pendingJoinCode='';
 let stopGuess=()=>{},stopSubmissions=()=>{},currentGuessRound='',ownGuess='',submitted={},guessDrafts={},rankOverrideReason='';
 const onlineReady=()=>!!(uid&&db&&dataReady&&!localDemo);
@@ -36,6 +36,19 @@ function home(){
     :"Conexão pronta para criar uma sala e compartilhar convites.";
   return wrap(`<div class="grid modes"><button class="panel mode ${modeChoice==="letters"?"selected":""}" data-action="choose-letters"><div class="emoji">🧩</div><h2>Decifre a Frase</h2><p>Descubra expressões e curiosidades com números e iniciais. Duas dicas e revelação da resposta.</p></button><button class="panel mode orange ${modeChoice==="rank"?"selected":""}" data-action="choose-rank"><div class="emoji">🏆</div><h2>Estimativa de Ranking</h2><p>Acerte posições em rankings reais: países, filmes e economias. Dispute pontos com seu grupo.</p></button><button class="panel mode ${modeChoice==="mixed"?"selected":""}" data-action="choose-mixed"><div class="emoji">🎲</div><h2>Modo Misturado</h2><p>Alterne rodadas de frases e rankings, com um placar compartilhado.</p></button></div>
 <section class="panel homejoin" aria-label="Jogar neste aparelho"><div class="row between"><div><div class="eyebrow">PRÉVIA LOCAL • SEM CADASTRO</div><h2>Jogar neste aparelho</h2></div><span class="pill">🎲 Três modos</span></div><p>Experimente os três modos. Você pode jogar frases, estimar posições e alternar jogos com placar simulado, sem internet.</p><div class="actions">${btn("▶ Jogar neste aparelho","demo","lime")}${btn("👑 Testar lobby e placar","demo-lobby","ghost")}${dataProblem?btn("↻ Tentar carregar conteúdo","retry-data","ghost"):""}</div>${dataProblem?`<p class="notice" role="status">${esc(dataProblem)}. Uma rodada de reserva está disponível.</p>`:""}</section>
+<section class="panel homejoin"><div class="row between"><div><div class="eyebrow">CURADORIA DA COMUNIDADE</div><h2>Importar um ranking próprio</h2></div><span class="pill">Lista não verificada</span></div>
+<p class="tiny">Experimente seu Top 10–1000 na prévia local, com fonte e edição. Não será distribuído aos amigos como catálogo oficial sem revisão.</p>
+${btn(importFormOpen?"Ocultar importador":"📥 Importar lista para testar","toggle-import","ghost")}
+${importFormOpen?`<div class="stack cardline">
+<div class="grid"><label><span class="label">Título</span><input class="field" id="import-title" placeholder="Ex.: Top 10 jogadores"></label>
+<label><span class="label">Nome da fonte</span><input class="field" id="import-source" placeholder="Ex.: Dados fornecidos pelo grupo"></label></div>
+<label><span class="label">URL de referência HTTPS</span><input class="field" id="import-url" placeholder="https://..."></label>
+<div class="grid"><label><span class="label">Edição / período</span><input class="field" id="import-snapshot" placeholder="Edição novembro 2026"></label>
+<label><span class="label">Data da observação (AAAA-MM-DD)</span><input class="field" id="import-observed" placeholder="2026-11-10"></label></div>
+<label><span class="label">Critério e metodologia</span><input class="field" id="import-method" placeholder="Ordem por quantidade de..."></label>
+<label><span class="label">Itens ordenados (um por linha)</span><textarea class="field" id="import-items" rows="7" placeholder="1. Primeiro item&#10;2. Segundo item&#10;..."></textarea></label>
+${btn("Validar e usar em ranking local","import-user","lime")}</div>`:""}
+${importStatus?`<p class="notice" role="status">${esc(importStatus)}</p>`:""}</section>
 <section class="panel homejoin" aria-label="Salas online"><div class="row between"><div><div class="eyebrow">SALA ONLINE</div><h2>Crie ou entre com um convite</h2></div><span class="pill">${online?"● Disponível":"○ Indisponível"}</span></div><p class="tiny" role="status">${esc(help)}</p>${connectionProblem?`<p class="notice tiny">${esc(connectionProblem)}</p>`:""}
 <div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><label><span class="label">Modo da sala</span><select class="field" id="mode"><option value="letters" ${modeChoice==="letters"?"selected":""}>🧩 Decifre a Frase</option><option value="rank" ${modeChoice==="rank"?"selected":""}>🏆 Ranking</option><option value="mixed" ${modeChoice==="mixed"?"selected":""}>🎲 Misturado</option></select></label><label><span class="label">Duração da partida</span><select class="field" id="round-limit"><option value="3" ${roundLimitChoice===3?"selected":""}>3 rodadas · rápida</option><option value="5" ${roundLimitChoice===5?"selected":""}>5 rodadas · padrão</option><option value="10" ${roundLimitChoice===10?"selected":""}>10 rodadas · longa</option></select></label>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
 <div class="stack"><label><span class="label">Código de convite</span><input class="field" id="join-code" maxlength="10" placeholder="Ex.: TRV7XK" value="${esc(pendingJoinCode||new URLSearchParams(location.search).get("room")||"")}"></label><p class="tiny">Quem recebe o link abre o site, escolhe um nick e entra na sala.</p>${btn("Entrar na sala →","join","primary",!online)}</div></div></section>
@@ -207,14 +220,14 @@ function localChooseRound(){
    room.usedLetters=pool.length?[...(room.usedLetters||[]),index]:[index];
    room.round={type:"letters",id:`frase-${number}`,index,hints:0,revealed:false,scored:false,content:{...DATA.puzzles[index]}};
  }else{
-   const eligible=DATA.rankings.filter(d=>Array.isArray(d.items)&&d.items.length>=25&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
+   const eligible=DATA.rankings.filter(d=>Array.isArray(d.items)&&d.items.length>=10&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
    if(!eligible.length)throw Error("Nenhuma lista de ranking disponível nesta prévia.");
    const combinations=[];
    for(const d of eligible)for(const limit of (d.allowedCuts||[25,50,75,100]).filter(n=>n<=d.items.length)){
      for(let target=1;target<=limit;target++)combinations.push({categoryId:d.id,limit,target});
    }
    const fresh=combinations.filter(x=>!(room.usedRanks||[]).includes(`${x.categoryId}:${x.limit}:${x.target}`));
-   const choices=fresh.length?fresh:combinations;
+   const choices=(fresh.length?fresh:combinations).filter(x=>!importedRankId||modeChoice!=="rank"||x.categoryId===importedRankId);
    const selected=choices[random(choices.length)];
    const key=`${selected.categoryId}:${selected.limit}:${selected.target}`;
    room.usedRanks=fresh.length?[...(room.usedRanks||[]),key]:[key];
@@ -336,7 +349,9 @@ else if(action==='copy'){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
  catch{const field=$('#invite');if(field){field.focus();field.select()}else throw Error('Copie o convite manualmente: '+url)}
 }
-else if(action==='import'&&isHost()){throw Error('Importação de rankings estará disponível após a curadoria das fontes.')}
+else if(action==='toggle-import'){importFormOpen=!importFormOpen;render()}
+else if(action==='import-user'){const parser=STANDALONE?window.RIVIERA_IMPORTER:(await import('./catalog-v6.js')).parseHostRanking;if(typeof parser!=='function')throw Error('Validador indisponível.');const candidate=parser({title:$('#import-title')?.value,source:$('#import-source')?.value,url:$('#import-url')?.value,snapshot:$('#import-snapshot')?.value,observedAt:$('#import-observed')?.value,methodology:$('#import-method')?.value,items:$('#import-items')?.value});DATA.rankings=DATA.rankings.filter(l=>l.id!==candidate.id);DATA.rankings.push(candidate);importedRankId=candidate.id;modeChoice='rank';importStatus='Lista validada para demonstração local: '+candidate.items.length+' itens. Selecione Testar lobby e placar.';importFormOpen=false;render()}
+else if(action==='import'&&isHost()){throw Error('Importação nas salas online precisa de revisão editorial. Use importação local.')}
 else if(action==='start-game'&&localDemo){startDemoFromLobby()}
 else if(action==='start-game'){if(!isHost()||!partyGame)throw Error('Somente o anfitrião pode iniciar.');await partyGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
