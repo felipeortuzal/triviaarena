@@ -30,6 +30,8 @@ jobs:
           git diff --exit-code -- riviera-showdown.html
       - name: Testar Chrome - responsive, file e falhas
         run: node tests/browser-smoke.mjs
+      - name: Modo viagem offline, troca de jogador e retomada
+        run: npm run test:browser-travel
       - name: Testar partidas e regras Firebase no emulador
         run: npm run test:rooms
       - name: Validar partida em dois navegadores reais com Emulator

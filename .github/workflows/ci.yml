@@ -26,6 +26,8 @@ jobs:
         run: npm test
       - name: Chrome - HTML offline e URL com prefixo
         run: node tests/browser-smoke.mjs
+      - name: Modo viagem offline, troca de jogador e retomada
+        run: npm run test:browser-travel
       - name: Regras no Emulator Suite - Auth e Realtime Database
         run: npm run test:rooms
       - name: Dois navegadores independentes contra o Firebase Emulator

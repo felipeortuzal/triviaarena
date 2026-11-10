@@ -4,11 +4,23 @@
 
 Riviera Showdown reúne **Decifre a Frase, Estimativa de Ranking e Misturado**, com partidas de **cinco rodadas**, respostas privadas, pontuação automática, pódio e revanche na mesma sala. O HTML local usa as mesmas funções de sorteio e pontuação da versão online.
 
-**Estado em 10/11/2026:** [CI completa aprovada](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438), com HTML `file://` em Chrome e multiplayer em emulador. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
+**Estado em 10/11/2026:** modo viagem 0.7 implementado e testado em Chromium offline. A [CI da versão 0.6](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438) também validou HTML `file://` e multiplayer em emulador; a CI atual inclui `npm run test:browser-travel`. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
 
-## Começar agora
+## Começar agora — viagens e encontros
 
-Baixe o [HTML autocontido](https://github.com/felipeortuzal/triviaarena/releases/download/v0.6.0/riviera-showdown.html) e abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Escolha **um dos três modos** na página inicial e clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, palpites, rodadas e pódio. **Jogar neste aparelho** inicia uma partida rápida do modo selecionado. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
+Baixe o [HTML do modo viagem](https://github.com/felipeortuzal/triviaarena/releases/download/v0.7.0/riviera-showdown.html) antes de sair e abra no navegador. **Não precisa de conta, servidor nem Firebase para jogar juntos no mesmo aparelho.**
+
+1. Escolha Frase, Ranking ou Misturado.
+2. Preencha os nomes de **2 a 8 pessoas** e toque em **Começar com a turma**.
+3. Passe o aparelho para a pessoa indicada. Ela toca em **Estou com o aparelho**, responde e passa para a próxima. **Não sei · passar vez** deixa a partida seguir sem pontuar aquela resposta.
+4. Depois de todos responderem, revelem juntos. O jogo calcula os pontos e termina na quinta rodada.
+5. Toque em **Jogar revanche** para manter a turma e zerar o placar.
+
+**Pausar e sair** guarda a partida neste navegador. Ao abrir novamente o mesmo arquivo, use **Retomar partida**. O salvamento depende de armazenamento local permitido; se ele estiver bloqueado, o jogo avisa para manter a página aberta. Respostas enviadas e placares são preservados; rascunhos ainda não enviados são apagados ao passar o aparelho ou pausar. O arquivo não sincroniza aparelhos diferentes.
+
+**Experimentar sozinho** e **Testar lobby e placar** continuam disponíveis com adversário explicitamente simulado. As salas entre aparelhos permanecem em uma seção separada e exigem Firebase de produção. Não confunda o modo viagem com multiplayer pela internet.
+
+A revisão 0.7 adiciona controles maiores para toque, modos compactos no celular, envio com Enter, dicas individuais, troca de jogador sem revelar respostas anteriores e navegação pelo logo sem sair do arquivo HTML. Os testes automatizados cobrem cinco rodadas nos três modos, passar vez, pausa, nova página, empate e revanche. Dois aparelhos físicos continuam sem homologação.
 
 Para reconstruir e testar a prévia local, com Node.js 22 ou superior:
 

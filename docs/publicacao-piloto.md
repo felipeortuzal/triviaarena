@@ -67,3 +67,11 @@ Abrir o arquivo `riviera-showdown.html` por duplo clique. **Jogar neste aparelho
 ## Limites de confiança
 
 A apuração roda no cliente do anfitrião, com transação única para placar e histórico; convidados não podem gravar esses campos. Um anfitrião malicioso ainda pode alterar seu cliente e o catálogo de respostas é público. Isso não equivale a um servidor antitrapaça. As regras protegem os envios privados antes da revelação e impedem que convidados modifiquem o placar. Nenhum serviço pago foi adicionado.
+
+## Adaptação para viagens — versão 0.7
+
+A revisão seguinte adiciona **Modo viagem** para 2–8 participantes no mesmo aparelho. Esse fluxo dispensa Firebase: cada pessoa responde na própria vez, a tela intermediária esconde os palpites, a revelação só fica disponível depois de todos enviarem e a pontuação usa os mesmos módulos do jogo online. São cinco rodadas com pódio e revanche. Há botão para passar a vez e salvamento local com pausa/retomada. Se o navegador negar armazenamento, a partida segue e mostra aviso; não promete que ficará salva.
+
+`npm run test:browser-travel` cobre três participantes locais nos três modos, cinco rodadas offline, privacidade visual, envio com Enter, passar vez, pausa, nova página, empate, revanche, nomes vazios/duplicados, limite de oito pessoas, dados salvos inválidos, armazenamento bloqueado e botão da marca. O teste é incluído no CI em Chrome com `file://`; no ambiente Cloud utiliza a rota interceptada documentada acima. Não houve teste com aparelhos físicos.
+
+Em 10/11/2026 a nova consulta confirmou `has_pages=false` e HTTP 404. As configurações externas continuam necessárias apenas para salas pela internet. O workflow de download agora recebe o SHA exato da revisão testada, evitando que novas releases reutilizem o HTML antigo.

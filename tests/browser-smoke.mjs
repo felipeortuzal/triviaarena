@@ -61,6 +61,7 @@ async function browserChecks(){
     const ctx=await browser.newContext({viewport:{width:375,height:812}});
     const page=await ctx.newPage();
     await page.goto(base);
+    await page.locator(".online-options > summary").click();
     await page.locator('[data-action="create"]').waitFor();
     assert.equal(await page.locator('[data-action="create"]').isDisabled(),true,"salas devem ficar inativas sem configuração");
     await verifyDemo(page);
@@ -138,6 +139,8 @@ async function browserChecks(){
     }));
     await cdnPage.route("https://www.gstatic.com/**",route=>route.abort());
     await cdnPage.goto(base);
+    await cdnPage.getByText("Não foi possível conectar às salas.",{exact:false}).waitFor({state:"attached"});
+    await cdnPage.locator(".online-options > summary").click();
     await cdnPage.getByText("Não foi possível conectar às salas.",{exact:false}).waitFor();
     await verifyDemo(cdnPage);
     await cdnCtx.close();

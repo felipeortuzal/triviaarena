@@ -35,7 +35,7 @@ A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos.
 | 5 | Parcial | Implementação validada em emuladores em 10/11/2026: Ranking, Frase e Misturado, cinco rodadas, palpites privados, 5/3/1 para ranking, +1 por frase correta, apuração idempotente, reconexão e revanche. 11 testes Node + 3 de Pages + 11 SDK aprovados; dois contextos Chromium concluíram cada modo. Homologação de produção e física depende da Etapa 4. |
 | 6 | A executar | — |
 | 7 | A executar | — |
-| 8 | A executar | — |
+| 8 | Parcial | Modo viagem 0.7: 2–8 participantes no mesmo aparelho, três modos, cinco rodadas, respostas escondidas na troca de jogador, passar vez, pausa/retomada e revanche. Playwright offline: três participantes locais, página reaberta, nomes inválidos, limite de jogadores, armazenamento bloqueado e save corrompido. Interface de toque em 360/375 px; HTML gerado dos mesmos módulos. CI inclui teste file://. Pages/Firebase reais e aparelhos físicos seguem pendentes; etapas 6–7 continuam fora desta entrega. |
 | 9 | A executar | — |
 
 ## Ponto de partida auditado
