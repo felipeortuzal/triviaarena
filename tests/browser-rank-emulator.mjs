@@ -76,6 +76,8 @@ try{
  await host.locator('[data-action="override"]').click();
  await guest.getByText("Tradução alternativa confirmada na fonte").waitFor({timeout:15000});
  await host.locator('[data-action="next"]').click();
+ await host.getByText("RODADA 2",{exact:false}).first().waitFor({timeout:15000});
+ await guest.getByText("RODADA 2",{exact:false}).first().waitFor({timeout:15000});
  await waitRank(host);await waitRank(guest);
  await host.locator('[data-action="reveal"]').click();
  await host.getByText("Quem chegou mais perto?").waitFor({timeout:18000});
