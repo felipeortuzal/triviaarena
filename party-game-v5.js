@@ -48,6 +48,21 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       round:{type:"rank",id:`ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,
         revealed:false,scored:false,resultReady:false,listSnapshot:rankingSnapshot(selected)}};
   }
+  async function addCustomRanking(code,fields){
+    const list=importRanking(fields);
+    const preview=(await get(roomAt(code))).val();
+    ensureHost(preview);
+    if(preview.phase!=="lobby")throw Error("Adicione listas antes de iniciar a partida.");
+    const t=await runTransaction(roomAt(code),value=>{
+      const old=value||preview;
+      if(old.host!==uid||old.phase!=="lobby")return;
+      const current=old.customRankings||{};
+      if(Object.keys(current).length>=3||current[list.id])return;
+      return {...old,customRankings:{...current,[list.id]:list}};
+    },{applyLocally:false});
+    if(!t.committed)throw Error("Lista duplicada, limite de três listas, ou partida já iniciada.");
+    return list;
+  }
   async function start(code){
     const preview=(await get(roomAt(code))).val();
     ensureHost(preview);
@@ -246,7 +261,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     },{applyLocally:false});
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
-  return {start,hint,revealPhrase,submitGuess,watchMyGuess,watchSubmissions,
+  return {start,hint,revealPhrase,submitGuess,addCustomRanking,watchMyGuess,watchSubmissions,
     revealRanking,correctRanking,correctPhrase,advance,chooseRound};
 };
 export const createPartyGame=(args)=>makePartyGame({...args,isEligibleRanking,calculateRanking,RANK_CUTS,puzzleSnapshot,rankingSnapshot,validateRanking,importRanking,reviewPhrase});
