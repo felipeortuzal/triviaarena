@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {initializeApp,deleteApp} from "firebase/app";
 import {initializeAuth,connectAuthEmulator,signInAnonymously,inMemoryPersistence,signOut} from "firebase/auth";
-import {getDatabase,connectDatabaseEmulator,goOffline,ref,get,set,onValue,runTransaction,update,onDisconnect,serverTimestamp} from "firebase/database";
+import {getDatabase,connectDatabaseEmulator,goOffline,goOnline,ref,get,set,onValue,runTransaction,update,onDisconnect,serverTimestamp} from "firebase/database";
 import {makeRoomGateway} from "../rooms-v2.js";
 import {makePhraseGame} from "../phrases-v3.js";
 
@@ -110,4 +110,20 @@ test("link inexistente, convidado sem permissão e partida não vira Ranking",as
  const host=await makeClient("rank-host",()=> "RVKM23");
  await host.gateway.createRoom({nick:"Host",mode:"rank"});
  await assert.rejects(host.game.start("RVKM23"),/não pôde|não foi|não/);
+});
+
+test("queda e retorno do anfitrião preservam sala e presença",async()=>{
+ const host=await makeClient("presence-host",()=> "RVPA56");
+ const guest=await makeClient("presence-guest");
+ await host.gateway.createRoom({nick:"Host",mode:"letters"});
+ await guest.gateway.joinRoom({code:"RVPA56",nick:"Visitante"});
+ const stop=host.gateway.markPresence("RVPA56");
+ const path="roomPresence/RVPA56/"+host.uid;
+ await eventually(()=>get(ref(guest.db,path)),s=>s.val()?.connected===true,"presença não ficou online");
+ goOffline(host.db);
+ await eventually(()=>get(ref(guest.db,path)),s=>!s.exists(),"presença não foi retirada na desconexão");
+ assert.equal(await guest.gateway.resumeRoom("RVPA56"),true);
+ goOnline(host.db);
+ await eventually(()=>get(ref(guest.db,path)),s=>s.val()?.connected===true,"presença não voltou após reconexão");
+ stop();
 });
