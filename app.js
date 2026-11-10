@@ -272,7 +272,7 @@ function localChooseRound(){
    room.round={type:"letters",id:`frase-${number}`,index,hints:0,revealed:false,scored:false,resultReady:false,puzzleSnapshot:{...DATA.puzzles[index]}};
    room.localGuesses={};ownGuess="";submitted={};guessDrafts={};
  }else{
-   const eligible=[...DATA.rankings,...Object.values(room.customRankings||{})].filter(d=>Array.isArray(d.items)&&d.items.length>=(d.origin==="host"?10:25)&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
+   const eligible=[...DATA.rankings,...Object.values(room.customRankings||{})].filter(d=>Array.isArray(d.items)&&d.items.length>=((d.origin==="host"||d.verifiedPrefix>=10)?10:25)&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
    if(!eligible.length)throw Error("Nenhuma lista de ranking disponível nesta prévia.");
    const combinations=[];
    for(const d of eligible)for(const limit of [10,25,50,100,250,500,1000].filter(n=>n<=d.items.length)){
