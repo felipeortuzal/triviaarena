@@ -29,7 +29,7 @@ test("seis rankings com fontes: quatro Top100 históricos e dois oficiais totalm
  for(const list of data.rankings){
   assert.ok([10,20,100].includes(list.items.length));
   assert.equal(list.itemIds.length,list.items.length);
-  assert.equal(new Set(list.itemIds).size,100);
+  assert.equal(new Set(list.itemIds).size,list.items.length);
   assert.ok(list.revision&&list.edition&&list.observedAt);
   assert.ok(list.verifiedPrefix>0&&list.verifiedPrefix<=list.items.length);
   assert.deepEqual(validateRanking(list,{minimum:10}),[],list.id);
