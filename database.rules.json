@@ -61,7 +61,7 @@
       "$code": {
         ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists()",
         ".write": "auth != null && root.child('roomRegistry').child($code).child('host').val() === auth.uid && newData.exists()",
-        ".validate": "newData.hasChildren(['version','host','mode','phase','createdAt','number']) && newData.child('version').val() === 2 && newData.child('host').val() === root.child('roomRegistry').child($code).child('host').val() && (newData.child('mode').val() === 'letters' || newData.child('mode').val() === 'rank' || newData.child('mode').val() === 'mixed') && (newData.child('phase').val() === 'lobby' || newData.child('phase').val() === 'playing' || newData.child('phase').val() === 'finished' || newData.child('phase').val() === 'closed') && newData.child('number').isNumber() && newData.child('number').val() >= 0 && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now && (!data.exists() || (newData.child('host').val() === data.child('host').val() && newData.child('mode').val() === data.child('mode').val() && newData.child('createdAt').val() === data.child('createdAt').val()))",
+        ".validate": "newData.hasChildren(['version','host','mode','phase','createdAt','number']) && newData.child('version').val() === 2 && newData.child('host').val() === root.child('roomRegistry').child($code).child('host').val() && (newData.child('mode').val() === 'letters' || newData.child('mode').val() === 'rank' || newData.child('mode').val() === 'mixed') && (newData.child('phase').val() === 'lobby' || newData.child('phase').val() === 'playing' || newData.child('phase').val() === 'finished' || newData.child('phase').val() === 'closed') && newData.child('number').isNumber() && newData.child('number').val() >= 0 && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now && (!data.exists() || (newData.child('host').val() === data.child('host').val() && newData.child('mode').val() === data.child('mode').val() && newData.child('createdAt').val() === data.child('createdAt').val())) && (!newData.child('roundLimit').exists() || (newData.child('roundLimit').isNumber() && (newData.child('roundLimit').val() === 3 || newData.child('roundLimit').val() === 5 || newData.child('roundLimit').val() === 10))) && (!data.child('roundLimit').exists() || newData.child('roundLimit').val() === data.child('roundLimit').val())",
         "version": {
           ".validate": "newData.val() === 2"
         },
@@ -116,7 +116,7 @@
         },
         "roundHistory": {
           "$round": {
-            ".validate": "newData.hasChildren(['id','type','number']) && newData.child('id').val() === $round && newData.child('number').isNumber() && newData.child('number').val() >= 1 && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','hints','winner']) && newData.child('index').isNumber() && newData.child('hints').isNumber() && newData.child('winner').isString()) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','awarded','review']) && newData.child('categoryId').isString() && newData.child('limit').isNumber() && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val()))"
+            ".validate": "newData.hasChildren(['id','type','number']) && newData.child('id').val() === $round && newData.child('number').isNumber() && newData.child('number').val() >= 1 && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','hints','winner']) && newData.child('index').isNumber() && newData.child('hints').isNumber() && newData.child('winner').isString()) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','awarded','review']) && newData.child('categoryId').isString() && newData.child('limit').isNumber() && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val())) && (newData.child('type').val() !== 'letters' || !newData.child('winnerPoints').exists() || (newData.child('winnerPoints').isNumber() && (newData.child('winnerPoints').val() === 0 || newData.child('winnerPoints').val() === 0.5 || newData.child('winnerPoints').val() === 1)))"
           }
         },
         "finishedAt": {
@@ -126,6 +126,9 @@
           "$index": {
             ".validate": "newData.isString() && newData.val().length >= 5 && newData.val().length <= 70"
           }
+        },
+        "roundLimit": {
+          ".validate": "newData.isNumber() && (newData.val() === 3 || newData.val() === 5 || newData.val() === 10) && (!data.exists() || newData.val() === data.val())"
         }
       }
     },
