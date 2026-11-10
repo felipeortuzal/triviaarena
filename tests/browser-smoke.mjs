@@ -27,7 +27,7 @@ async function browserChecks(){
     await page.locator('[data-action="reveal"]').click();
     await page.getByText("RESPOSTA REVELADA",{exact:true}).waitFor();
     await page.locator('[data-action="next"]').click();
-    await page.getByText("RODADA 2",{exact:false}).waitFor();
+    await page.getByText("RODADA 2",{exact:false}).first().waitFor();
     await page.locator('[data-action="stop-demo"]').click();
     await page.locator('[data-action="demo"]').waitFor();
     const extraWidth=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-window.innerWidth));
