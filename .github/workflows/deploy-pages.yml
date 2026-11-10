@@ -1,0 +1,62 @@
+name: Riviera Showdown · Publicar site HTTPS
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: riviera-showdown-pages
+  cancel-in-progress: true
+jobs:
+  verificar:
+    name: Testar build, navegador e Firebase Emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Garantir prévia reproduzível e validar exportação Pages
+        run: |
+          npm test
+          git diff --exit-code -- riviera-showdown.html
+      - name: Testar Chrome - responsive, file e falhas
+        run: node tests/browser-smoke.mjs
+      - name: Testar partidas e regras Firebase no emulador
+        run: npm run test:rooms
+      - name: Construir pacote estático com configuração Web pública (se presente)
+        env:
+          RIVIERA_FIREBASE_WEB_CONFIG: ${{ vars.RIVIERA_FIREBASE_WEB_CONFIG }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: npm run build:pages
+      - name: Publicar artefato Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    name: Publicação GitHub Pages
+    needs: verificar
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - name: Detectar e configurar Pages (GitHub Settings > Pages deve estar habilitado)
+        uses: actions/configure-pages@v5
+      - name: Publicar no endereço HTTPS do projeto
+        id: publish
+        uses: actions/deploy-pages@v4
