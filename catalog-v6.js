@@ -70,13 +70,13 @@ export function validatePuzzle(puzzle){
   return [...new Set(errors)];
 }
 export const puzzleSnapshot=(p,index)=>({
-  id:p.id||"legacy-"+index,code:p.code,answer:p.answer,explain:p.explain,
-  topic:p.topic,level:p.level,hints:[...(p.hints||[])],acceptedAnswers:[...(p.acceptedAnswers||[])],
+  id:p.id||"legacy-"+index,code:p.code||"",answer:p.answer||"",explain:p.explain||"Sem explicação registrada.",
+  topic:p.topic||"Geral",level:p.level||"Geral",hints:[...(p.hints||["Dica indisponível","Outra dica indisponível"])],acceptedAnswers:[...(p.acceptedAnswers||[])],
   sourceName:p.sourceName||"",sourceUrl:p.sourceUrl||"",edition:p.edition||""
 });
 export const rankingSnapshot=list=>({
-  id:list.id,revision:list.revision||"legacy-1",title:list.title,source:list.source,
-  url:list.url,snapshot:list.snapshot,about:list.about,category:list.category||"",
+  id:list.id,revision:list.revision||"legacy-1",title:list.title||"Ranking",source:list.source||"Fonte não informada",
+  url:list.url||"",snapshot:list.snapshot||"Data não informada",about:list.about||"Critério da lista conforme referência indicada.",category:list.category||"",
   items:[...list.items],itemIds:list.itemIds||list.items.map((_,i)=>list.id+"-"+String(i+1).padStart(4,"0")),
   aliases:list.aliases||{},origin:list.origin||"official",verifiedPrefix:list.verifiedPrefix||0,edition:list.edition||"",observedAt:list.observedAt||"",verificationNote:list.verificationNote||"",
 });
