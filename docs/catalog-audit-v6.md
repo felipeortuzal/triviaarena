@@ -48,7 +48,7 @@ O catálogo anterior tinha **104 posições indexadas**. Preservamos todas, acre
 
 **Novas perguntas:** 3600 segundos em uma hora, 5 sólidos platônicos, 6 arestas e 4 faces de um tetraedro, 8 pernas de aranha, 6 pernas de inseto. Todas incluem enunciado, explicação, duas dicas distintas, tema e nível. Não são cópias de rankings externos.
 
-## Inventário dos quatro rankings
+## Inventário dos seis rankings
 
 | ID | Lista | Edição/data da fonte | Consulta observada | Verificação inicial | Referência |
 |---|---|---|---|---|---|
@@ -56,10 +56,12 @@ O catálogo anterior tinha **104 posições indexadas**. Preservamos todas, acre
 | `population` | Mais populosos do planeta | 2026 | 2026-11-10 | 12/100 posições confrontadas | https://www.worldometers.info/world-population/population-by-country/ |
 | `gdp` | Maiores economias do mundo | 2025, vintage FMI outubro de 2026 | 2026-11-10 | 20/100 posições confrontadas | https://www.worldometers.info/gdp/gdp-by-country/imf-2025-nominal-worldwide/ |
 | `movies` | Filmes mais bem avaliados | 01/11/2026 | 2026-11-10 | 30/100 posições confrontadas | https://www.timo-schreiter.de/imdb/my_top250.php |
+| `ifpi-artist-2025` | Artistas globais mais vendidos | 2025, tabela IFPI publicada em 2026 | 2026-11-10 | **10/10 posições conferidas** | https://www.ifpi.org/our-industry/global-charts/ |
+| `wipo-innovation-2026` | Economias mais inovadoras | GII 2026, 29/09/2026 | 2026-11-10 | **20/20 posições conferidas** | https://www.wipo.int/pressroom/en/articles/2026/article_0014.html |
 
-**Atenção:** "posições confrontadas" refere-se apenas ao prefixo indicado, não a uma validação de 100/100. Fora desse prefixo, o jogador vê um aviso editorial no site. Não declaramos que um Top 100 seja comprovado apenas porque há 100 itens armazenados. O catálogo completo e suas posições continuam disponíveis para demonstração e uso sob responsabilidade do grupo, como na V5; a curadoria exaustiva aguarda extração/checagem dos recortes integrais. O recorte original das salas antigas é mantido.
+**Atenção:** IFPI Top 10 e WIPO Top 20 são dois novos recortes inteiramente conferidos contra a publicação oficial. Para as outras quatro listas, "posições confrontadas" refere-se apenas ao prefixo indicado, não a uma validação de 100/100. Fora desse prefixo, o jogador vê um aviso editorial no site. Não declaramos que um Top 100 seja comprovado apenas porque há 100 itens armazenados. O catálogo completo e suas posições continuam disponíveis para demonstração e uso sob responsabilidade do grupo, como na V5; a curadoria exaustiva aguarda extração/checagem dos recortes integrais. O recorte original das salas antigas é mantido.
 
-**Versionamento:** os quatro rankings têm ID próprio, itemIds por posição, `revision` de edição, `edition` da fonte e `observedAt` separado. Cada rodada V6 armazena `listSnapshot` com itens, aliases, fonte e revisão: alterações futuras em `data.json` não alteram a resposta de uma partida já iniciada. As frases têm `puzzleSnapshot` próprio.
+**Versionamento:** os seis rankings têm ID próprio, itemIds por posição, `revision` de edição, `edition` da fonte e `observedAt` separado. Cada rodada V6 armazena `listSnapshot` com itens, aliases, fonte e revisão: alterações futuras em `data.json` não alteram a resposta de uma partida já iniciada. As frases têm `puzzleSnapshot` próprio.
 
 **Limite de confiança:** as respostas dos rankings estão no navegador; usuários técnicos podem consultar o catálogo. O mecanismo de segurança protege os *palpites privados*, não impede consulta manual a conteúdo público. O anfitrião pode importar até três rankings por lobby, desde que apresente URL HTTPS, edição, critério de ordenação e 10–1000 itens sem duplicatas; esses são marcados como *listas do anfitrião*, sem selo de verificação editorial. Nomes que começam com números — como **12 Angry Men** — não perdem o número ao importar.
 
@@ -67,11 +69,11 @@ O catálogo anterior tinha **104 posições indexadas**. Preservamos todas, acre
 
 | Tema | Fonte verificável | O que oferece | Condição antes de liberar |
 |---|---|---|---|
-| Futebol | FIFA World Ranking: https://quality.fifa.com/fifa-rankings/world-ranking/men | Classificações de seleções com data de publicação | Congelar edição específica, checar cobertura e reutilização |
+| Futebol | FIFA World Ranking: https://inside.fifa.com/fifa-rankings/world-ranking/men | Classificações de seleções com data de publicação | Congelar edição específica, checar cobertura e reutilização |
 | Esportes | Regras IFAB: https://www.theifab.com/laws/latest/the-players/ | Regras oficiais de número de jogadores e outros fatos | Ideal para frases; não é ranking de 100 equipes |
-| Música | IFPI Global Charts: https://www.ifpi.org/our-industry/global-charts/ | Ranking Top 10 de singles com edição | Edição/direitos de reutilização e formato reconhecido |
+| Música | IFPI Global Charts: https://www.ifpi.org/our-industry/global-charts/ | Além do Top 10 de artistas já incluído, oferece rankings de singles e álbuns | Novas tabelas só após conferir edição, itens e reutilização |
 | Cultura/História | UNESCO DataHub: https://data.unesco.org/explore/assets/whc001/export/ | Lista aberta de patrimônio mundial (CC BY-SA 4.0) | Dataset **não** oferece ranking universal por qualidade; definir critério derivado e desempate |
-| Tecnologia | WIPO Global Innovation Index: https://www.wipo.int/en/web/global-innovation-index | Ranking anual de inovação e indicadores | Congelar edição 2026, licença e conferência dos itens |
+| Tecnologia | WIPO Global Innovation Index: https://www.wipo.int/en/web/global-innovation-index | Além do Top 20 já incluído, há classificação completa de 139 economias | Ampliar só após verificar item a item, edição e reutilização |
 | Negócios | Fortune Global 500: https://fortune.com/ranking/global500/ | Empresas por receita e metodologia | Checar licença/republicação e lista completa; não copiar sem autorização |
 | Economia | FMI WEO 2026: https://data.imf.org/datasets/WEO | Indicadores de PIB por país com vintage do relatório | Especificar ano, indicador, moeda, desempate e unidades |
 | Astronomia | IAU: https://www.iau.org/IAU/Astronomy-FAQs/Constellations.aspx | Fatos oficiais e listas de constelações | É inventário, não ranking sem critério de ordenação |
