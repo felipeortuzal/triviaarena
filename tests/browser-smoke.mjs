@@ -150,7 +150,7 @@ async function browserChecks(){
     await offlinePage.locator('#import-snapshot').fill('Edição novembro 2026');
     await offlinePage.locator('#import-observed').fill('2026-11-10');
     await offlinePage.locator('#import-method').fill('Classificação ordenada por votação');
-    await offlinePage.locator('#import-items').fill(['1. O Poderoso Chefão','2. 12 Angry Men',...Array.from({length:8},(_,i)=>(i+3)+'. Filme '+(i+3))].join('\\n'));
+    await offlinePage.locator('#import-items').fill(['1. O Poderoso Chefão','2. 12 Angry Men',...Array.from({length:8},(_,i)=>(i+3)+'. Filme '+(i+3))].join('\n'));
     await offlinePage.locator('[data-action="import-user"]').click();
     await offlinePage.getByText('Lista validada para demonstração local',{exact:false}).waitFor();
     await offlinePage.locator('[data-action="demo-lobby"]').click();
