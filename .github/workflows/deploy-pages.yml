@@ -32,6 +32,8 @@ jobs:
         run: node tests/browser-smoke.mjs
       - name: Testar partidas e regras Firebase no emulador
         run: npm run test:rooms
+      - name: Validar partida em dois navegadores reais com Emulator
+        run: npm run test:browser-room
       - name: Construir pacote estático com configuração Web pública (se presente)
         env:
           RIVIERA_FIREBASE_WEB_CONFIG: ${{ vars.RIVIERA_FIREBASE_WEB_CONFIG }}
