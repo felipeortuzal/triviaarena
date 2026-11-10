@@ -81,20 +81,59 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     return t.committed;
   }
   async function revealPhrase(code){
-    const initial=(await get(roomAt(code))).val();
-    ensureHost(initial);
+    const current=(await get(roomAt(code))).val();
+    ensureHost(current);
+    if(current.phase!=="playing"||current.round?.type!=="letters")throw Error("Esta rodada não é de frases.");
+    const id=current.round.id;
+    const locked=await runTransaction(ref(db,`roomPublic/${code}/round/revealed`),v=>v===true?undefined:true,{applyLocally:false});
+    if(!locked.committed){
+      const latest=(await get(roomAt(code))).val();
+      if(!latest?.round?.revealed||latest.round.id!==id)throw Error("Não foi possível encerrar os envios.");
+      if(latest.round.resultReady)return latest;
+    }
+    const state=(await get(roomAt(code))).val();
+    if(state.round?.id!==id)throw Error("A rodada mudou.");
+    const guesses={};
+    for(const memberUid of Object.keys(state.profiles||{})){
+      const answer=await get(ref(db,`roomPrivateGuesses/${code}/${id}/${memberUid}`));
+      if(answer.exists())guesses[memberUid]=answer.val();
+    }
+    const puzzle=state.round.puzzleSnapshot||getPuzzles()[state.round.index];
+    if(!puzzle)throw Error("A frase desta rodada não está no catálogo.");
+    const review=reviewPhrase({puzzle,guesses,members:Object.keys(state.profiles||{})});
     const t=await runTransaction(roomAt(code),value=>{
-      const old=value||initial;
-      if(old.phase!=="playing"||old.round?.type!=="letters"||old.round.revealed)return;
-      return {...old,round:{...old.round,revealed:true}};
+      const old=value||state;
+      if(old.phase!=="playing"||old.round?.id!==id||!old.round.revealed||old.round.resultReady)return;
+      return {...old,round:{...old.round,guesses,review,resultReady:true,overrides:{}}};
     },{applyLocally:false});
-    return t.committed;
+    return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
+  }
+  async function correctPhrase(code,{player,points,reason}){
+    const note=String(reason||"").trim().slice(0,180);
+    if(note.length<8)throw Error("Descreva o motivo em pelo menos 8 caracteres.");
+    const position=Number(points);
+    if(!Number.isInteger(position)||position<0||position>2)throw Error("Pontos de frase precisam ser 0, 1 ou 2.");
+    const state=(await get(roomAt(code))).val();
+    ensureHost(state);
+    const r=state.round;
+    if(r?.type!=="letters"||!r.resultReady||r.scored)throw Error("Esta frase não está em revisão.");
+    if(!Object.hasOwn(state.profiles||{},player))throw Error("Jogador desconhecido.");
+    const puzzle=r.puzzleSnapshot||getPuzzles()[r.index];
+    const t=await runTransaction(roomAt(code),value=>{
+      const old=value||state;
+      if(old.round?.id!==r.id||old.round.scored||!old.round.resultReady)return;
+      const overrides={...(old.round.overrides||{}),[player]:{points:position,reason:note}};
+      const review=reviewPhrase({puzzle,guesses:old.round.guesses||{},
+        members:Object.keys(old.profiles||{}),overrides});
+      return {...old,round:{...old.round,overrides,review}};
+    },{applyLocally:false});
+    return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
   async function submitGuess(code,guess){
     const answer=String(guess??"").trim();
-    if(!answer||answer.length>120)throw Error("Digite o nome de um item (1–120 caracteres).");
+    if(!answer||answer.length>120)throw Error("Digite sua resposta (1–120 caracteres).");
     const state=(await get(roomAt(code))).val();
-    if(!state||state.phase!=="playing"||state.round?.type!=="rank"||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
+    if(!state||state.phase!=="playing"||!["rank","letters"].includes(state.round?.type)||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
     if(!state.profiles?.[uid])throw Error("Você não está inscrito na sala.");
     const id=state.round.id;
     await set(ref(db,`roomPrivateGuesses/${code}/${id}/${uid}`),answer);
@@ -172,8 +211,22 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       let record;
       if(r.type==="letters"){
         if(winner&&!old.profiles?.[winner])return;
-        if(winner)scores[winner]=(scores[winner]||0)+1;
-        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,winner:String(winner)};
+        const awarded={};
+        const written=Object.keys(r.guesses||{}).length>0;
+        if(written&&r.resultReady&&r.review){
+          for(const [memberUid,result] of Object.entries(r.review)){
+            const points=Math.max(0,Math.min(2,Number(result.points)||0));
+            awarded[memberUid]=points;
+            if(points)scores[memberUid]=(scores[memberUid]||0)+points;
+          }
+        }else if(winner){
+          // Compatibilidade com salas que jogam oralmente e com as partidas V3.
+          awarded[winner]=1;
+          scores[winner]=(scores[winner]||0)+1;
+        }
+        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,
+          winner:String(winner),awarded,review:r.review||{},overrides:r.overrides||{},
+          puzzleSnapshot:r.puzzleSnapshot||null};
       }else{
         if(!r.resultReady||!r.review)return;
         const awarded={};
@@ -194,6 +247,6 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
   return {start,hint,revealPhrase,submitGuess,watchMyGuess,watchSubmissions,
-    revealRanking,correctRanking,advance,chooseRound};
+    revealRanking,correctRanking,correctPhrase,advance,chooseRound};
 };
 export const createPartyGame=(args)=>makePartyGame({...args,isEligibleRanking,calculateRanking,RANK_CUTS,puzzleSnapshot,rankingSnapshot,validateRanking,importRanking,reviewPhrase});
