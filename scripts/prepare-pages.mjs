@@ -21,7 +21,7 @@ if(raw){
   for(const key of keys){
     if(typeof parsed[key]!=="string"||!parsed[key].trim()||parsed[key]==="COLE_AQUI")throw Error("Config Web Firebase sem campo "+key);
   }
-  if(!/^https:\/\/[a-z0-9-]+\.(?:firebaseio\.com|firebasedatabase\.app)(?:\/)?$/i.test(parsed.databaseURL)){
+  if(!/^https:\/\/(?:[a-z0-9-]+\.)+(?:firebaseio\.com|firebasedatabase\.app)\/?$/i.test(parsed.databaseURL)){
     throw Error("databaseURL não aponta para um Realtime Database Firebase HTTPS");
   }
   const publicConfig=Object.fromEntries(keys.map(key=>[key,parsed[key]]));
