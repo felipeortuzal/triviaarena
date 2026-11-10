@@ -76,6 +76,7 @@ test("Modo misto mantém placar único, alterna frases/rank e conta última roda
  const code="RVMB25";
  let s=await host.game.start(code);
  assert.equal(s.round.type,"letters");
+ await assert.rejects(set(ref(guest.db,`roomPrivateGuesses/${code}/${s.round.id}/${guest.uid}`),"Palpite em frase"),/permission/i);
  await host.game.revealPhrase(code);
  s=await host.game.advance(code,{winner:guest.uid});
  assert.equal(s.round.type,"rank");
