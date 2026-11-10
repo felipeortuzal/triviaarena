@@ -1,0 +1,44 @@
+name: Riviera Showdown · HTML para download
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag da release que receberá o HTML
+        required: true
+        default: v0.6.0
+permissions:
+  contents: write
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 539c023c01c0596a83f5de1246ec69ebb417a231
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Gerar HTML da revisão exata da release
+        run: |
+          npm run build
+          git diff --exit-code -- riviera-showdown.html
+      - name: Anexar HTML autocontido sem ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          SOURCE_SHA: 539c023c01c0596a83f5de1246ec69ebb417a231
+        run: |
+          cat > "$RUNNER_TEMP/riviera-release.md" <<'NOTES'
+          Baixe riviera-showdown.html e abra por duplo clique, sem instalar programas ou iniciar servidor. Três modos, cinco rodadas, pódio e revanche com adversário claramente simulado.
+
+          CI aprovada: https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438
+          HTML file:// offline e três modos em dois navegadores contra Firebase Emulator verificados. Produção e dois aparelhos físicos continuam pendentes.
+
+          O GitHub Pages ainda retorna 404: habilitação via API recusada com 403. Firebase de produção não autenticado. Esta release oferece o HTML local e não significa multiplayer público disponível.
+          NOTES
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" riviera-showdown.html --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" riviera-showdown.html --target "$SOURCE_SHA" --title "Riviera Showdown $RELEASE_TAG — Cinco rodadas e revanche" --notes-file "$RUNNER_TEMP/riviera-release.md" --repo "$GITHUB_REPOSITORY"
+          fi

@@ -9,9 +9,15 @@
 - 11 testes Node de inicialização, rankings e equivalências de frases + 3 testes do pacote Pages aprovados.
 - 11 testes SDK com Auth/Realtime Database Emulator aprovados: privacidade inclusive contra o anfitrião antes da revelação, acesso de convidados, concorrência pela última vaga, apuração idempotente, cinco rodadas, reconexão e IDs novos na revanche.
 - Playwright/Chromium: regressões de salas e rankings aprovadas; **dois contextos independentes** completaram cinco rodadas em **cada um dos três modos**, com placares iguais (5 pontos em Frase, 25 em Ranking, 13 em Misturado para respostas corretas em todas as rodadas), atualização de ambos os navegadores, clique duplo e revanche. Desktop 1365 px e mobile 390 px; sem exceções fatais JavaScript.
-- HTML autocontido: três modos até a quinta rodada e revanche, rede desligada, viewport 375 px. O Chromium do ambiente Cloud bloqueia `file://` por política administrativa; o teste local entregou os mesmos bytes por rota interceptada do Playwright. Isso **não é teste de duplo clique**. O CI conserva o teste `file://` real, sem essa substituição.
+- HTML autocontido: três modos até a quinta rodada e revanche, rede desligada, viewport 375 px. O Chromium do ambiente Cloud bloqueia `file://` por política administrativa; o teste local entregou os mesmos bytes por rota interceptada do Playwright. Isso **não é teste de duplo clique**. O [CI em Chrome](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438) **passou também no `file://` real**, incluindo cinco rodadas nos três modos e revanche. A prévia não exige servidor.
 - O SDK Node de Realtime Database ignora `NO_PROXY` para WebSocket. A execução SDK local retirou as quatro variáveis de proxy **somente do processo de testes que fala com 127.0.0.1**, preservando o proxy do CLI e dos acessos externos.
 - O build utiliza `package-lock.json` e `npm ci`. O workflow de publicação testa os três modos e, após o deploy, confere assets, SHA de `release.json` e interface em navegador real.
+
+### Resultado no GitHub Actions
+
+[CI completa aprovada](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438) na revisão `539c023`: Node, pacote Pages, Chrome `file://`, regras Firebase, convites, cinco rodadas nos três modos, reconexão e revanche. O [workflow de publicação](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049394) aprovou todos os testes e gerou o artefato de produção; a implantação falhou em `actions/configure-pages` com `Get Pages site failed / Not Found`. A origem GitHub Actions precisa ser ativada nas configurações de Pages. A URL foi conferida em navegador real e permanece 404.
+
+O HTML da revisão testada está na [release v0.6.0](https://github.com/felipeortuzal/triviaarena/releases/tag/v0.6.0). O workflow `publish-preview.yml` gera e anexa o arquivo sem ZIP usando a revisão testada `539c023`; foi necessário porque o upload direto pelo CLI recebeu HTTP 401 no endpoint `uploads.github.com`.
 
 ## O que está pronto
 - `.github/workflows/deploy-pages.yml` é o único mecanismo projetado para publicar em Pages: no `main`, verifica build, testes Node, Chrome real, Firebase Emulator, partida de Frases em dois **browsers independentes** e monta `dist/` com assets relativos; somente depois implanta com `actions/deploy-pages`. Mantém o nome do repositório `triviaarena`.

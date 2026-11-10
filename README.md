@@ -4,11 +4,11 @@
 
 Riviera Showdown reúne **Decifre a Frase, Estimativa de Ranking e Misturado**, com partidas de **cinco rodadas**, respostas privadas, pontuação automática, pódio e revanche na mesma sala. O HTML local usa as mesmas funções de sorteio e pontuação da versão online.
 
-**Estado em 10/11/2026:** versão local e multiplayer em emulador testados. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
+**Estado em 10/11/2026:** [CI completa aprovada](https://github.com/felipeortuzal/triviaarena/actions/runs/42820049438), com HTML `file://` em Chrome e multiplayer em emulador. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
 
 ## Começar agora
 
-Abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Escolha **um dos três modos** na página inicial e clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, palpites, rodadas e pódio. **Jogar neste aparelho** inicia uma partida rápida do modo selecionado. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
+Baixe o [HTML autocontido](https://github.com/felipeortuzal/triviaarena/releases/download/v0.6.0/riviera-showdown.html) e abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Escolha **um dos três modos** na página inicial e clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, palpites, rodadas e pódio. **Jogar neste aparelho** inicia uma partida rápida do modo selecionado. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
 
 Para reconstruir e testar a prévia local, com Node.js 22 ou superior:
 
