@@ -105,9 +105,10 @@ async function createRoom({nick,mode}){
     try{registry=await get(at(p.registry(id)))}catch(e){throw niceError(e)}
     if(!registry.exists())throw Error("Sala não encontrada. Confira o código do convite.");
     if(registry.val().version!==2)throw Error("Este convite pertence a uma versão antiga.");
-    if(registry.val().phase!=="open")throw Error("Esta sala foi encerrada pelo anfitrião.");
     const before=await get(at(p.member(id,uid)));
-    await claimSeat(id);
+    if(!before.exists()&&registry.val().phase==="locked")throw Error("A partida já começou. Novos jogadores não entram nesta rodada.");
+    if(!before.exists()&&registry.val().phase!=="open")throw Error("Esta sala foi encerrada pelo anfitrião.");
+    if(!before.exists())await claimSeat(id);
     const state=await get(at(p.public(id)));
     if(!state.exists())throw Error("O anfitrião ainda está preparando esta sala. Tente entrar novamente.");
     const previous=await get(at(p.profile(id,uid)));
