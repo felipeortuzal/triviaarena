@@ -200,7 +200,7 @@ function render(){
 }
 function watchRankingIfNecessary(id,roomValue){
   const r=roomValue?.round;
-  const key=r?.type==="rank"?id+":"+r.id:"";
+  const key=["rank","letters"].includes(r?.type)?id+":"+r.id:"";
   if(key===currentGuessRound)return;
   stopGuess();stopSubmissions();stopGuess=()=>{};stopSubmissions=()=>{};
   currentGuessRound=key;ownGuess="";submitted={};
@@ -229,6 +229,22 @@ function usedKey(type){return type==='letters'?'usedLetters':'usedRanks'}
 function nextChoice(){const current=room.round;let type=room.mode==='mixed'?(current?.type==='letters'?'rank':'letters'):room.mode;if(type==='letters'){const used=room.usedLetters||[];let available=DATA.puzzles.map((_,i)=>i).filter(i=>!used.includes(i));if(!available.length)available=DATA.puzzles.map((_,i)=>i);const index=pick(available);return {type:'letters',index,hints:0,revealed:false,usedLetters:available.length===DATA.puzzles.length&&used.length? [index]:[...used,index]}}
  const pool=[...DATA.rankings,...(room.customRankings||[])];if(!pool.length)throw Error('Não há rankings cadastrados.');const used=room.usedRanks||[];let choices=pool.filter(x=>!used.includes(x.id));if(!choices.length)choices=pool;let c=pick(choices);const limits=[25,50,75,100,250,500,1000].filter(n=>n<=c.items.length);if(!limits.includes(c.items.length))limits.push(c.items.length);const limit=pick(limits);const history=room.targetHistory?.[c.id+'-'+limit]||[];let positions=Array.from({length:limit},(_,i)=>i+1).filter(i=>!history.includes(i));if(!positions.length)positions=Array.from({length:limit},(_,i)=>i+1);const target=pick(positions);const id='r'+Date.now().toString(36)+random(9999);return {type:'rank',categoryId:c.id,custom:room.customRankings?.find(x=>x.id===c.id)||null,limit,target,id,revealed:false,usedRanks:choices.length===pool.length&&used.length?[c.id]:[...used,c.id],targetHistory:{...(room.targetHistory||{}),[c.id+'-'+limit]:positions.length===limit&&history.length?[target]:[...history,target]}}}
 async function nextRound(){if(localDemo){nextLocalRound();return}throw Error('Partidas online serão habilitadas na etapa 3.');if(!isHost())return;let add=nextChoice();const updateData={number:(room.number||0)+1,round:add};if(add.usedLetters)updateData.usedLetters=add.usedLetters;if(add.usedRanks)updateData.usedRanks=add.usedRanks;if(add.targetHistory)updateData.targetHistory=add.targetHistory;delete add.usedLetters;delete add.usedRanks;delete add.targetHistory;if(room.round?.type==='letters'&&room.round.revealed){const winner=$('#letter-winner')?.value;if(winner){updateData[`scores/${winner}`]=(room.scores?.[winner]||0)+1}}if(room.round?.type==='rank'&&room.round.revealed&&!room.round.scored){const ranked=scoreRank(room.round);const scores={...room.scores};ranked.forEach(x=>{if(x.place&&x.place<=3)scores[x.uid]=(scores[x.uid]||0)+({1:5,2:3,3:1}[x.place]||0)});updateData.scores=scores}await update(ref(db,'rooms/'+roomId),updateData)}
+function importLocalRanking(fields){
+ const items=String(fields.rawItems||"").split(/\r?\n/).map(s=>s.trim().replace(/^(?:\d{1,4}[.)]\s+|\d{1,4}º\s+-?\s*)/,"").trim()).filter(Boolean);
+ const normItems=items.map(norm),count=items.length;
+ if(count<10||count>1000)throw Error("Lista precisa ter de 10 a 1.000 itens.");
+ if(new Set(normItems).size!==count)throw Error("Itens duplicados na lista.");
+ if(!fields.title||fields.title.trim().length<5||!fields.source||fields.source.trim().length<4||
+   !fields.url?.startsWith("https://")||!fields.snapshot||fields.snapshot.trim().length<4||
+   !fields.about||fields.about.trim().length<12)throw Error("Preencha título, fonte, URL HTTPS, data e critério.");
+ const id="custom-"+norm(fields.title).replace(/ /g,"-").slice(0,36);
+ const list={id,title:fields.title.trim(),source:fields.source.trim(),url:fields.url.trim(),
+  snapshot:fields.snapshot.trim(),about:fields.about.trim(),items,origin:"host",aliases:{},
+  itemIds:items.map((_,i)=>id+"-"+(i+1))};
+ room.customRankings??={};
+ if(Object.keys(room.customRankings).length>=3||room.customRankings[id])throw Error("Máximo três listas, sem duplicatas.");
+ room.customRankings[id]=list;render();
+}
 function startDemo(){
  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
  localDemo=true;roomId="LOCAL";selectedWinner="";guessDrafts={};
@@ -404,7 +420,7 @@ else if(action==="leave-room"){
 else if(action==="close-room"){if(!isHost()||!roomGateway)throw Error("Apenas o anfitrião pode encerrar.");await roomGateway.closeRoom(roomId)}
 else if(action==="retry-data"){await loadData()}
 else if(action==="hint"&&localDemo){if(room.round?.type==='letters'){room.round.hints=Math.min(2,room.round.hints+1);render()}}
-else if(action==="reveal"&&localDemo){if(room.round?.type==='rank')localReveal();else{room.round.revealed=true;render()}}
+else if(action==="reveal"&&localDemo){localReveal()}
 else if(['choose-letters','choose-rank','choose-mixed'].includes(action)){modeChoice=action.replace('choose-','').replace('rank','rank');render();const field=$('#mode');if(field)field.value=modeChoice;$('#nick')?.focus()}
 else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode(),totalRounds:selectedRounds});connectRoom(result.code)}
 else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||pendingJoinCode||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
@@ -413,7 +429,13 @@ else if(action==='copy'){
  try{if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');await navigator.clipboard.writeText(url);const b=$('[data-action="copy"]');if(b)b.textContent='✓ Link copiado'}
  catch{const field=$('#invite');if(field){field.focus();field.select()}else throw Error('Copie o convite manualmente: '+url)}
 }
-else if(action==='import'&&isHost()){throw Error('Importação de rankings estará disponível após a curadoria das fontes.')}
+else if(action==='import'&&isHost()){
+ const fields={title:$('#custom-title')?.value||'',source:$('#custom-source')?.value||'',
+  url:$('#custom-url')?.value||'',snapshot:$('#custom-snapshot')?.value||'',
+  about:$('#custom-about')?.value||'',rawItems:$('#custom-items')?.value||''};
+ if(localDemo)importLocalRanking(fields);
+ else{if(!partyGame)throw Error('Importador indisponível.');await partyGame.addCustomRanking(roomId,fields)}
+}
 else if(action==='start-game'&&localDemo){startDemoFromLobby()}
 else if(action==='start-game'){if(!isHost()||!partyGame)throw Error('Somente o anfitrião pode iniciar.');await partyGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
@@ -422,6 +444,17 @@ else if(action==='finish-game'&&localDemo){finishLocalDemo()}
 else if(action==='finish-game'){if(!partyGame||!isHost())throw Error('Somente o anfitrião encerra.');await partyGame.advance(roomId,{winner:room.round?.type==='letters'?($('#letter-winner')?.value||selectedWinner||''):'',finish:true});selectedWinner=''}
 else if(action==='hint'&&isHost()&&partyGame){await partyGame.hint(roomId)}
 else if(action==='reveal'&&isHost()&&partyGame){if(room.round?.type==='rank')await partyGame.revealRanking(roomId);else await partyGame.revealPhrase(roomId)}
+else if(action==='phrase-guess'&&room?.round?.type==='letters'){
+ const text=($('#phrase-answer')?.value||guessDrafts[roomId+':'+room.round.id]||'').trim();
+ if(localDemo)localSubmitGuess(text);
+ else{if(!partyGame)throw Error('Partida indisponível.');ownGuess=await partyGame.submitGuess(roomId,text);delete guessDrafts[roomId+':'+room.round.id];render()}
+}
+else if(action==='phrase-override'&&isHost()&&room?.round?.type==='letters'){
+ const player=$('#phrase-correct-player')?.value,points=Number($('#phrase-correct-points')?.value);
+ const reason=$('#phrase-correct-reason')?.value||'';
+ if(localDemo)localCorrectPhrase({player,points,reason});
+ else{if(!partyGame)throw Error('Não foi possível revisar a frase.');await partyGame.correctPhrase(roomId,{player,points,reason})}
+}
 else if(action==='guess'&&room?.round?.type==='rank'){
  const guess=($('#guess')?.value||guessDrafts[roomId+':'+room.round.id]||'').trim();
  if(localDemo)localSubmitGuess(guess);
@@ -437,7 +470,7 @@ else if(action==='override'&&isHost()&&room?.round?.type==='rank'){
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
 document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='round-count')selectedRounds=Number(e.target.value);if(e.target.id==='letter-winner')selectedWinner=e.target.value});
-document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value;if(e.target.id==='guess'&&room?.round)guessDrafts[roomId+':'+room.round.id]=e.target.value;if(e.target.id==='override-reason')rankOverrideReason=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value;if(['guess','phrase-answer'].includes(e.target.id)&&room?.round)guessDrafts[roomId+':'+room.round.id]=e.target.value;if(e.target.id==='override-reason')rankOverrideReason=e.target.value});
 async function loadData(){
   if(STANDALONE){
     const embedded=window.RIVIERA_EMBEDDED_DATA;
