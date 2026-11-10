@@ -76,7 +76,7 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
       const scores={...(old.scores||{})};
       if(chosen)scores[chosen]=(scores[chosen]||0)+1;
       const roundHistory={...(old.roundHistory||{}),[r.id]:{
-        id:r.id,index:r.index,number:old.number,topic:r.topic||"Geral",hints:r.hints||0,winner:chosen
+        id:r.id,type:"letters",index:r.index,number:old.number,topic:r.topic||"Geral",hints:r.hints||0,winner:chosen
       }};
       const scored={...r,scored:true,winner:chosen};
       const previous={...old,scores,roundHistory,round:scored};

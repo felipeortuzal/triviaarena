@@ -30,6 +30,8 @@ jobs:
         run: npm run test:rooms
       - name: Dois navegadores independentes contra o Firebase Emulator
         run: npm run test:browser-room
+      - name: Ranking e Misturado em dois Chrome independentes
+        run: npm run test:browser-rank
       - name: HTML produzido da mesma revisão do frontend
         run: git diff --exit-code -- riviera-showdown.html
       - name: Arquivo de prévia para abrir no navegador

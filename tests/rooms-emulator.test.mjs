@@ -79,7 +79,7 @@ test('isolamento, 2 usuários, permissões, palpites privados e reconexão',asyn
   await rejected(set(ref(g.db,"roomRegistry/RVAB23/host"),g.uid));
   await rejected(set(ref(g.db,"roomMembers/RVAB23/"+g.uid),null));
   await rejected(get(ref(g.db,"roomPrivateGuesses/RVAB23")));
-  await update(ref(h.db,"roomPublic/RVAB23"),{phase:"playing",number:1,round:{id:"r1",type:"rank",revealed:false}});
+  await update(ref(h.db,"roomPublic/RVAB23"),{phase:"playing",number:1,round:{id:"r1",type:"rank",categoryId:"fixture",limit:25,target:5,scored:false,resultReady:false,revealed:false}});
   await set(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid),"Meu palpite");
   assert.equal((await get(ref(g.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid))).val(),"Meu palpite");
   await rejected(get(ref(h.db,"roomPrivateGuesses/RVAB23/r1/"+g.uid)));

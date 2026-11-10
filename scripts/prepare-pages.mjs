@@ -6,7 +6,7 @@ import {fileURLToPath} from "node:url";
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
 const dist=join(root,"dist");
-const assets=["index.html","app.js","rooms-v2.js","phrases-v3.js","data.json","logo.svg","riviera-showdown.html"];
+const assets=["index.html","app.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","data.json","logo.svg","riviera-showdown.html"];
 mkdirSync(dist,{recursive:true});
 for(const file of assets){
   const from=join(root,file);

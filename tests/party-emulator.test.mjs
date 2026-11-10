@@ -1,0 +1,127 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {initializeApp,deleteApp} from "firebase/app";
+import {initializeAuth,connectAuthEmulator,signInAnonymously,inMemoryPersistence,signOut} from "firebase/auth";
+import {getDatabase,connectDatabaseEmulator,goOffline,ref,get,set,onValue,runTransaction,serverTimestamp,onDisconnect} from "firebase/database";
+import {createPartyGame} from "../party-game-v5.js";
+import {makeRoomGateway} from "../rooms-v2.js";
+const base={apiKey:"demo-riviera-web",projectId:"demo-riviera-showdown",authDomain:"demo-riviera-showdown.firebaseapp.com",databaseURL:"https://demo-riviera-showdown-default-rtdb.firebaseio.com",appId:"1:123456789:web:demo"};
+const api={ref,get,set,onValue,runTransaction,serverTimestamp,onDisconnect};
+const fixture={id:"fixture",title:"Ranking de teste — 30 itens",source:"Fonte sintética",snapshot:"Teste 2026",url:"https://example.org/ranking-fixture",items:Array.from({length:30},(_,i)=>"Item "+(i+1)),aliases:{"Item 4":["Quarto"],"Item 6":["Sexto"]}};
+const puzzles=[{code:"7 M D M",answer:"7 Maravilhas do Mundo",hints:["Dica 1","Dica 2"]},{code:"12 M D A",answer:"12 Meses do Ano",hints:["Calendário","Janeiro"]}];
+const clients=[];
+async function client(name,code){
+  const app=initializeApp(base,"v5-"+name+"-"+clients.length);
+  const auth=initializeAuth(app,{persistence:inMemoryPersistence});
+  connectAuthEmulator(auth,"http://127.0.0.1:9099",{disableWarnings:true});
+  const db=getDatabase(app);connectDatabaseEmulator(db,"127.0.0.1",9000);
+  const uid=(await signInAnonymously(auth)).user.uid;
+  const gateway=makeRoomGateway({db,uid,api,...(code?{generateCode:()=>code}:{})});
+  const game=createPartyGame({db,uid,api,getPuzzles:()=>puzzles,getRankings:()=>[fixture],randomIndex:n=>(code?4:0)%n});
+  clients.push({app,auth,db});
+  return {uid,db,gateway,game};
+}
+test.after(async()=>{
+  for(const c of clients){try{goOffline(c.db)}catch{};try{await signOut(c.auth)}catch{};await deleteApp(c.app).catch(()=>{});}
+});
+test("Ranking real-time: 5, 4, 6 -> 5/3/3; privacidade, revisão e idempotência",async()=>{
+ const host=await client("host","RVRA25"),guest=await client("guest"),other=await client("other"),outsider=await client("outsider");
+ await host.gateway.createRoom({nick:"Felipe",mode:"rank"});
+ await guest.gateway.joinRoom({code:"RVRA25",nick:"Rafa"});
+ await other.gateway.joinRoom({code:"RVRA25",nick:"Giba"});
+ let latest=await host.game.start("RVRA25");
+ assert.equal(latest.round.type,"rank");
+ assert.equal(latest.round.target,5);
+ assert.equal(latest.round.limit,25);
+ await host.game.submitGuess("RVRA25","item 5");
+ await guest.game.submitGuess("RVRA25","quarto");
+ await other.game.submitGuess("RVRA25","Sexto");
+ const code="RVRA25",id=latest.round.id;
+ const status=(await get(ref(guest.db,`roomGuessStatus/${code}/${id}`))).val();
+ assert.deepEqual(Object.values(status),[true,true,true]);
+ assert.equal(JSON.stringify(status).includes("quarto"),false,"Status não pode conter textos dos palpites.");
+ await assert.rejects(get(ref(guest.db,`roomPrivateGuesses/${code}/${id}/${host.uid}`)),/permission/i);
+ await assert.rejects(get(ref(outsider.db,`roomGuessStatus/${code}/${id}`)),/permission/i);
+ await assert.rejects(set(ref(guest.db,`roomPrivateGuesses/${code}/${id}/${host.uid}`),"trapaça"),/permission/i);
+ latest=await host.game.revealRanking(code);
+ assert.equal(latest.round.revealed,true);
+ assert.equal(latest.round.resultReady,true);
+ assert.equal(latest.round.review[host.uid].points,5);
+ assert.equal(latest.round.review[guest.uid].points,3);
+ assert.equal(latest.round.review[other.uid].points,3);
+ assert.equal(latest.round.review[guest.uid].place,2);
+ await assert.rejects(guest.game.submitGuess(code,"Item 5"),/permission|não aceita/i);
+ await assert.rejects(get(ref(guest.db,`roomPrivateGuesses/${code}/${id}/${other.uid}`)),/permission/i);
+ await assert.rejects(guest.game.correctRanking(code,{player:guest.uid,position:5,reason:"Nome legítimo"}),/Somente/);
+ await assert.rejects(host.game.correctRanking(code,{player:guest.uid,position:5,reason:"curto"}),/Explique/);
+ const amended=await host.game.correctRanking(code,{player:guest.uid,position:5,reason:"Nome alternativo comprovado"});
+ assert.equal(amended.round.review[guest.uid].points,5);
+ assert.equal(amended.round.review[guest.uid].reason,"Nome alternativo comprovado");
+ const attempt=await Promise.all([host.game.advance(code,{finish:true}),host.game.advance(code,{finish:true})]);
+ const final=(await get(ref(host.db,`roomPublic/${code}`))).val();
+ assert.equal(final.phase,"finished");
+ assert.equal(final.number,1);
+ assert.equal(final.scores[host.uid],5);
+ assert.equal(final.scores[guest.uid],5);
+ assert.equal(final.scores[other.uid],1);
+ assert.equal(Object.keys(final.roundHistory).length,1);
+ assert.equal(final.roundHistory[id].overrides[guest.uid].reason,"Nome alternativo comprovado");
+ assert.equal(attempt.length,2);
+ await assert.rejects(host.game.submitGuess(code,"Item 1"),/não aceita/);
+});
+test("Modo misto mantém placar único, alterna frases/rank e conta última rodada",async()=>{
+ const host=await client("mixed-host","RVMB25"),guest=await client("mixed-guest");
+ await host.gateway.createRoom({nick:"Anfitrião",mode:"mixed"});
+ await guest.gateway.joinRoom({code:"RVMB25",nick:"Convidado"});
+ const code="RVMB25";
+ let s=await host.game.start(code);
+ assert.equal(s.round.type,"letters");
+ await assert.rejects(set(ref(guest.db,`roomPrivateGuesses/${code}/${s.round.id}/${guest.uid}`),"Palpite em frase"),/permission/i);
+ await host.game.revealPhrase(code);
+ s=await host.game.advance(code,{winner:guest.uid});
+ assert.equal(s.round.type,"rank");
+ await host.game.submitGuess(code,"Item 5");
+ await guest.game.submitGuess(code,"Item 4");
+ s=await host.game.revealRanking(code);
+ assert.equal(s.round.review[host.uid].points,5);
+ assert.equal(s.round.review[guest.uid].points,3);
+ s=await host.game.advance(code);
+ assert.equal(s.round.type,"letters");
+ assert.equal(s.scores[host.uid],5);
+ assert.equal(s.scores[guest.uid],4);
+ await host.game.hint(code);
+ await host.game.revealPhrase(code);
+ s=await host.game.advance(code,{winner:host.uid,finish:true});
+ assert.equal(s.phase,"finished");
+ assert.equal(s.scores[host.uid],6);
+ assert.equal(s.scores[guest.uid],4);
+ assert.deepEqual(Object.values(s.roundHistory).sort((a,b)=>a.number-b.number).map(r=>r.type),["letters","rank","letters"]);
+ const fromGuest=(await get(ref(guest.db,`roomPublic/${code}`))).val();
+ assert.equal(fromGuest.phase,"finished");
+ assert.deepEqual(fromGuest.scores,s.scores);
+ assert.equal((await guest.gateway.resumeRoom(code)),true);
+});
+
+test("envio concorrente ao fechamento não permite palpite depois da revelação",async()=>{
+  const host=await client("race-host","RVRC25");
+  const guest=await client("race-guest");
+  await host.gateway.createRoom({nick:"Host",mode:"rank"});
+  await guest.gateway.joinRoom({code:"RVRC25",nick:"Guest"});
+  const code="RVRC25";
+  await host.game.start(code);
+  const [sent,closed]=await Promise.allSettled([
+    guest.game.submitGuess(code,"Item 5"),
+    host.game.revealRanking(code)
+  ]);
+  assert.equal(closed.status,"fulfilled","fechamento do anfitrião deve prevalecer");
+  const state=(await get(ref(host.db,"roomPublic/"+code))).val();
+  assert.equal(state.round.revealed,true);
+  assert.equal(state.round.resultReady,true);
+  assert.equal(state.round.guesses?.[guest.uid]||"",state.round.review[guest.uid]?.guess||"");
+  if(state.round.guesses?.[guest.uid])assert.equal(state.round.review[guest.uid].points,5);
+  else assert.equal(state.round.review[guest.uid].points,0);
+  await assert.rejects(guest.game.submitGuess(code,"Item 5"),/não aceita|permission/i);
+  const value=(await get(ref(guest.db,`roomPrivateGuesses/${code}/${state.round.id}/${guest.uid}`))).val();
+  assert.equal(value||"",state.round.guesses?.[guest.uid]||"");
+  assert.ok(["fulfilled","rejected"].includes(sent.status));
+});

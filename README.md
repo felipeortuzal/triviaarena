@@ -2,11 +2,11 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia local de Frases é jogável e inclui uma simulação de lobby/placar; o **lobby online V2** tem código de convite, autenticação anônima, controle de vagas e presença; a partida online **Decifre a Frase** da Etapa 3 passou nos testes em emulador. A etapa 4 depende de publicar Firebase real e testar dois aparelhos; Rankings/Misto continuam para a etapa 5.
+Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia HTML permite jogar **Decifre a Frase, Estimativa de Ranking e Misturado**, incluindo lobby com adversário simulado e placar. O mesmo lobby V2 usa autenticação anônima, convites e presença no Firebase Emulator. A Etapa 5 acrescenta palpites privados, correções com justificativa e placar 5/3/1 na partida online. A Etapa 4 continua pendente de ativação do Pages/Firebase real e testes com aparelhos físicos.
 
 ## Começar agora
 
-Abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, rodadas e pódio, ou em **Jogar neste aparelho** para uma partida rápida. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
+Abra `riviera-showdown.html` por duplo clique para **experimentar a interface real sem internet**. Escolha **um dos três modos** na página inicial e clique em **Testar lobby e placar** para simular uma sala, duas pessoas, dicas, palpites, rodadas e pódio. **Jogar neste aparelho** inicia uma partida rápida do modo selecionado. A simulação não conecta pessoas reais. No site HTTP, a tela inicial também abre sem Firebase; as ações de criar ou entrar em salas ficam desativadas até a conexão estar configurada.
 
 Para reconstruir e testar a prévia local, com Node.js 22 ou superior:
 
@@ -26,6 +26,9 @@ O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.j
 - `riviera-showdown.html` — arquivo único offline (gerado, não edite manualmente)
 - `firebase-config.js` — **preencher com a configuração do seu projeto**
 - `rooms-v2.js` — admissão via slots transacionais, perfis e reconexão com mesmo UID
+- `party-game-v5.js` — jogo unificado Frases, Ranking e Misto com apuração atômica
+- `rank-tools-v5.js` — resolução de aliases, fontes elegíveis, distâncias e pontos 5/3/1
+- `docs/arquitetura-ranking-v5.md` — regras do jogo, privacidade, testes e limites de confiança
 - `database.rules.json` — regras de acesso por papéis e isolamento de palpites V2
 - `firebase.json` e `.firebaserc` — emuladores de Auth e Realtime Database com projeto `demo-riviera-showdown`
 - `scripts/prepare-pages.mjs` — pacote público do Pages; lê somente configuração Web Firebase opcional
@@ -40,7 +43,7 @@ npm install
 npm run test:rooms
 ```
 
-Para testar manualmente: inicie `npx firebase emulators:start --only auth,database --project demo-riviera-showdown`, sirva o site com `python -m http.server 8000` e abra `http://localhost:8000/?emulator=1`. A configuração de emulador só é ativada quando você opta pelo parâmetro em `localhost`/`127.0.0.1`. Isso **não liga Firebase de produção**. Ver [arquitetura de salas](docs/arquitetura-salas-v2.md).
+Para testar os três modos multiplayer em dois Chromes isolados: `npm run test:browser-rank`. Para testar manualmente: inicie `npx firebase emulators:start --only auth,database --project demo-riviera-showdown`, sirva o site com `python -m http.server 8000` e abra `http://localhost:8000/?emulator=1`. A configuração de emulador só é ativada quando você opta pelo parâmetro em `localhost`/`127.0.0.1`. Isso **não liga Firebase de produção**. Ver [arquitetura de salas](docs/arquitetura-salas-v2.md).
 
 ## Publicação HTTPS — Etapa 04 (pendente de habilitação externa)
 
@@ -56,16 +59,16 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 
 ## Catálogo e próximos jogos
 
-- **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e pontuação opcional.
-- **Rankings:** sorteio de categoria, posição e recorte Top 25/50/75/100; palpites enviados individualmente e revelados juntos. Distâncias e pódio automáticos; o anfitrião pode corrigir posições de nomes alternativos antes de pontuar.
-- **Modo misturado:** alterna os dois jogos.
-- **Anti-repetição:** categorias e frases não se repetem antes de esgotar o conjunto; as posições sorteadas são lembradas por categoria e tamanho.
+- **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e +1 por acerto.
+- **Rankings:** sorteio de categoria, alvo e Top 25/50/75/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
+- **Modo misturado:** alterna Frase → Ranking → Frase com um placar único e resultado final.
+- **Anti-repetição:** frases e combinações categoria/Top/alvo não se repetem até esgotar as opções. A política de distribuição entre categorias será refinada na Etapa 7.
 
 ## Limitações e melhorias possíveis
 
 - As quatro listas base têm 100 itens. Para Top 250, 500 ou 1.000, é necessário adicionar bases reais e verificadas. **O aplicativo não inventa posições.**
-- O anfitrião pode importar rankings de 10 a 1.000 posições no lobby, com título, fonte e itens ordenados; também é possível adicionar bases em `data.json` no formato `{id,title,description,source,items:[...]}`.
-- O reconhecimento de palpites é literal, ignorando maiúsculas e acentos. Traduções e apelidos podem ser corrigidos pelo anfitrião na tela de resultados.
+- A importação de ranking pelo anfitrião permanece adiada até a Etapa 6 (curadoria): por enquanto usam-se as quatro listas verificáveis existentes no `data.json` com 100 itens cada e metadados `id,title,source,url,snapshot,about,items`.
+- O reconhecimento ignora maiúsculas/acentos, usa aliases por lista, identifica ambiguidade/fora de recorte e aceita correção manual justificada pelo anfitrião após revelação. A lista inteira pode ser inspecionada no navegador: não há proteção contra quem consulta o catálogo para trapacear.
 - Não há reconexão com outro ID após apagar dados do navegador, nem troca automática de anfitrião.
 - Não há limite de uso/custo garantido para Firebase; consulte os limites e preços do seu projeto.
 

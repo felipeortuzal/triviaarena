@@ -104,7 +104,7 @@
           }
         },
         "round": {
-          ".validate": "newData.hasChildren(['id','type','revealed']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && (newData.child('type').val() === 'letters' || newData.child('type').val() === 'rank') && newData.child('revealed').isBoolean() && (newData.child('type').val() !== 'letters' || (newData.hasChildren(['index','topic','level','hints','scored']) && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('index').val() < 10000 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2 && newData.child('scored').isBoolean()))"
+          ".validate": "newData.hasChildren(['id','type','revealed','scored']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && newData.child('revealed').isBoolean() && newData.child('scored').isBoolean() && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','topic','level','hints']) && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('index').val() < 10000 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','resultReady']) && newData.child('categoryId').isString() && newData.child('categoryId').val().length >= 1 && newData.child('limit').isNumber() && newData.child('limit').val() >= 1 && newData.child('limit').val() <= 100 && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val() && newData.child('resultReady').isBoolean()))"
         },
         "$other": {
           ".validate": false
@@ -116,11 +116,16 @@
         },
         "roundHistory": {
           "$round": {
-            ".validate": "newData.hasChildren(['id','index','number','topic','hints','winner']) && newData.child('id').val() === $round && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2 && newData.child('winner').isString() && (newData.child('winner').val() === '' || root.child('roomMembers').child($code).child(newData.child('winner').val()).exists())"
+            ".validate": "newData.hasChildren(['id','type','number']) && newData.child('id').val() === $round && newData.child('number').isNumber() && newData.child('number').val() >= 1 && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','hints','winner']) && newData.child('index').isNumber() && newData.child('hints').isNumber() && newData.child('winner').isString()) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','awarded','review']) && newData.child('categoryId').isString() && newData.child('limit').isNumber() && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val()))"
           }
         },
         "finishedAt": {
           ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now"
+        },
+        "usedRanks": {
+          "$index": {
+            ".validate": "newData.isString() && newData.val().length >= 5 && newData.val().length <= 70"
+          }
         }
       }
     },
@@ -129,7 +134,7 @@
         "$round": {
           "$uid": {
             ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && ($uid === auth.uid || (root.child('roomRegistry').child($code).child('host').val() === auth.uid && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === true))",
-            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists()",
+            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists() && root.child('roomPublic').child($code).child('round').child('type').val() === 'rank'",
             ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
           }
         }
@@ -159,6 +164,17 @@
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid && newData.exists() && newData.isNumber() && newData.val() >= 0 && newData.val() <= 19 && !root.child('roomMembers').child($code).child(auth.uid).exists() && (!data.exists() || (data.val() !== newData.val() && root.child('roomSeats').child($code).child(data.val() + '').exists() && root.child('roomSeats').child($code).child(data.val() + '').val() !== auth.uid))",
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 19"
+        }
+      }
+    },
+    "roomGuessStatus": {
+      "$code": {
+        ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists()",
+        "$round": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($code).child(auth.uid).exists() && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('type').val() === 'rank' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && root.child('roomPrivateGuesses').child($code).child($round).child($uid).exists() && newData.val() === true",
+            ".validate": "newData.val() === true"
+          }
         }
       }
     }
