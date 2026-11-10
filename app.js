@@ -1,3 +1,6 @@
+import {calculatePhrase} from "./phrase-tools.js";
+import {calculateRanking} from "./rank-tools-v5.js";
+import {createPartyGame} from "./party-game-v5.js";
 const $=s=>document.querySelector(s), app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,' ').trim().replace(/\s+/g,' ');
@@ -5,7 +8,7 @@ const random=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0
 const pick=a=>a[random(a.length)];
 const code=()=>Array.from({length:6},()=> 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[random(32)]).join('');
 const btn=(label,action,cls='',disabled=false)=>`<button class="btn ${cls}" data-action="${action}" ${disabled?'disabled title="Salas online indisponíveis"':''}>${label}</button>`;
-const wrap=(html)=>`<div class="hero"><div class="eyebrow">RIVIERA SHOWDOWN • JOGOS COM AMIGOS</div><h1>Seu grupo. <span class="purple">Seu jogo.</span></h1><p class="lead">Entre com um nick, compartilhe o convite e jogue em tempo real. Temas sorteados, rodadas sem repetição e rankings de diferentes tamanhos.</p></div>${html}`;
+const wrap=(html)=>`<div class="hero"><div class="eyebrow">RIVIERA SHOWDOWN • JOGOS COM AMIGOS</div><h1>Seu grupo. <span class="purple">Seu jogo.</span></h1><p class="lead">Entre com um nick, compartilhe o convite e jogue em tempo real. Cinco rodadas, respostas privadas e um pódio para decidir a revanche.</p></div>${html}`;
 // A interface é independente de CDN, Firebase e leitura da base completa.
 let initializeApp,getAuth,signInAnonymously,onAuthStateChanged,getDatabase,ref,set,update,onValue,get,remove;
 const STANDALONE=window.RIVIERA_STANDALONE===true;
@@ -14,8 +17,9 @@ const safeNick=()=>{try{return localStorage.getItem('riviera-nick')||localStorag
 const saveNick=n=>{try{localStorage.setItem('riviera-nick',n)}catch{}};
 let DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]},db=null,auth=null,uid=null,roomId=null,room=null,unsubRoom=null,modeChoice='letters',nick=safeNick(),view='home',busy=false,err='',imported=[],localHints=0;
 let localDemo=false,configured=false,dataReady=false,dataProblem='',connectionState=STANDALONE?'local':'checking',connectionProblem='';
-let roomGateway=null,phraseGame=null,partyGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,selectedWinner='',pendingJoinCode='';
+let roomGateway=null,phraseGame=null,partyGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,pendingJoinCode='';
 let stopGuess=()=>{},stopSubmissions=()=>{},currentGuessRound='',ownGuess='',submitted={},guessDrafts={},rankOverrideReason='';
+let renderedScreen='';
 const onlineReady=()=>!!(uid&&db&&dataReady&&!localDemo);
 function error(e){err=typeof e==='string'?e:e?.message||'Ocorreu um erro';render();}
 function status(){
@@ -48,57 +52,41 @@ return `<section class="panel lobby">
 <div class="invite-card"><div><div class="eyebrow">CÓDIGO DA SALA</div><div class="invite-code">${esc(roomId)}</div><p class="tiny">Compartilhe o código ou envie um convite.</p></div><div class="stack"><label class="label" for="invite">LINK DO CONVITE</label><input class="field" readonly id="invite" value="${localDemo?'DEMONSTRAÇÃO LOCAL • Convites indisponíveis':esc(location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':''))}">${btn('📋 Copiar convite','copy','lime',localDemo)}</div></div>
 <div class="cardline row between"><div><h3>Participantes</h3><p class="tiny">${onlineCount} online · ${count} inscritos</p></div><span class="pill">${esc(room.mode==='letters'?'🧩 Decifre a Frase':room.mode==='mixed'?'🎲 Misturado':'🏆 Ranking')}</span></div>${roster()}
 ${!room.members?.[room.host]?.online?'<p class="notice">Anfitrião desconectado. Esperando o retorno…</p>':''}
-<div class="cardline stack">${room.closed?'<p class="notice">Esta sala foi encerrada.</p>':isHost()?`${btn(canStart?'▶ Iniciar partida':'Modo disponível em breve','start-game','primary',!canStart)}<p class="tiny">Depois de começar, novos jogadores não entram. O anfitrião controla as dicas e a pontuação.</p>${btn('Encerrar sala','close-room','ghost')}`:'<p class="tiny">Aguardando o anfitrião iniciar a partida…</p>'}
+<div class="cardline stack">${room.closed?'<p class="notice">Esta sala foi encerrada.</p>':isHost()?`${btn(canStart?'▶ Iniciar partida':'Modo disponível em breve','start-game','primary',!canStart)}<p class="tiny">Depois de começar, novos jogadores não entram. Cinco rodadas por partida. O anfitrião controla as dicas e a revelação; a pontuação é automática.</p>${btn('Encerrar sala','close-room','ghost')}`:'<p class="tiny">Aguardando o anfitrião iniciar a partida…</p>'}
 ${btn('← Voltar ao início','leave-room','ghost')}</div></section>`;
 }
 function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined||0)-(b.joined||0));}
 function isHost(){return localDemo||room?.host===uid}
 function roster(){return `<div class="roster">${members().map(m=>`<div class="player"><b>${esc(m.nick)} ${m.uid===room.host?'👑':''}</b><span>${m.online?'● Conectado':'○ Desconectado'} · ${room?.scores?.[m.uid]||0} ponto(s)</span></div>`).join('')}</div>`}
 function roomHeader(){
-  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
-  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
+  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1} DE 5</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
+  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0} DE 5</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
 }
 function letters(){
 const r=room.round,p=DATA.puzzles[r.index];
 if(!p)return roomHeader()+'<p>Desafio não encontrado. Atualize a página.</p>';
 const hints=r.hints>0?`<div class="status" role="status"><b>💡 Dica 1:</b> ${esc(p.hints?.[0]||'Sem dica')}${r.hints>1?`<p><b>💡 Dica 2:</b> ${esc(p.hints?.[1]||'Sem dica')}</p>`:''}</div>`:'<p class="tiny muted" style="text-align:center">Aguardando a primeira dica do anfitrião.</p>';
 const answer=`<div class="result" role="status"><div class="eyebrow">RESPOSTA REVELADA</div><strong>${esc(p.answer)}</strong><p>${esc(p.explain||'')}</p></div>`;
-const host=isHost()?`<div class="actions">${btn('💡 Liberar dica '+Math.min(2,r.hints+1)+'/2','hint','ghost',r.hints>=2||r.revealed)}${btn('👁 Revelar resposta','reveal','primary',r.revealed)}</div>`:'<p class="tiny">O anfitrião controla as dicas e a revelação. Combinem as respostas em voz alta.</p>';
-const scoring=r.revealed&&isHost()?(localDemo&&Object.keys(room.members||{}).length<2?btn('Próximo desafio →','next','lime'):`<div class="round-decision"><label class="label" for="letter-winner">Quem acertou? (+1 ponto)</label><select class="field" id="letter-winner"><option value="">Ninguém / sem pontuação</option>${members().map(m=>`<option value="${esc(m.uid)}" ${selectedWinner===m.uid?'selected':''}>${esc(m.nick)}</option>`).join('')}</select><div class="actions">${btn('Próxima rodada →','next','lime')}${btn('🏁 Finalizar partida','finish-game','ghost')}</div></div>`):'';
+const host=isHost()?`<div class="actions">${btn('💡 Liberar dica '+Math.min(2,r.hints+1)+'/2','hint','ghost',r.hints>=2||r.revealed)}${btn('👁 Revelar resposta','reveal','primary',r.revealed)}</div>`:'<p class="tiny">O anfitrião controla as dicas e a revelação.</p>';
+const own=localDemo?room.localGuesses?.local||"":ownGuess;
+const guess=guessDrafts[`${roomId}:${r.id}`]??own;
+const sent=localDemo?Object.keys(room.localGuesses||{}).length:Object.values(submitted||{}).filter(Boolean).length;
+const input=`<label class="stack"><span class="label">Sua resposta</span><input class="field" id="guess" maxlength="120" autocomplete="off" placeholder="Decifre os números e as iniciais" value="${esc(guess)}"></label>${btn(own?'✓ Atualizar minha resposta':'Enviar minha resposta →','guess','lime')}<p class="tiny" role="status">🔒 ${sent}/${members().length} jogadores enviaram. Respostas privadas até a revelação. ${own?'Sua resposta salva: '+esc(own):''}</p>`;
+const scoring=r.revealed?`<div class="cardline"><h3>Resultado da rodada</h3>${r.resultReady?Object.values(r.review||{}).map(row=>`<div class="history-row"><span>${esc(room.members?.[row.uid]?.nick||'Jogador')}: ${esc(row.guess||'Sem resposta')}</span><b>${row.correct?'✓ +1 ponto':'Sem ponto'}</b></div>`).join(''):'<p>Preparando resultado…</p>'}${isHost()?(r.resultReady?advanceButtons():btn('Atualizar apuração','reveal','primary')):''}</div>`:'';
 return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack"><div class="row between"><span class="pill">🧩 RODADA ${room.number}</span><span class="pill">${r.hints}/2 dicas</span></div>
 <div class="options"><span class="pill">${esc(p.topic||'Cultura geral')}</span><span class="pill">${esc(p.level||'Geral')}</span></div>
 <div class="largecode">${esc(p.code)}</div><p class="muted" style="text-align:center">O que significam os números e as iniciais?</p>
-${r.revealed?answer:hints}${!r.revealed?host:''}${scoring}
+${r.revealed?answer:hints}${!r.revealed?input+host:''}${scoring}
 ${!localDemo&&!room.members?.[room.host]?.online?'<div class="notice">⚠ O anfitrião está offline. A rodada continuará quando ele voltar.</div>':''}
 </section>${localDemo&&Object.keys(room.members||{}).length<2?'':`<aside class="panel scoreboard"><div class="eyebrow">PLACAR</div><h3>Quem está liderando?</h3>${roster()}<p class="tiny">${Object.keys(room.roundHistory||{}).length} rodada(s) concluída(s).</p></aside>`}</div>`;
 }
 function rankData(r){return DATA.rankings.find(x=>x.id===r.categoryId)}
 
-function localRankResolve(raw,d,limit){
- const value=norm(raw);
- if(!value)return {status:"empty",position:null};
- const matches=[];
- d.items.forEach((item,index)=>{
-   if([item,...(d.aliases?.[item]||[])].some(label=>norm(label)===value))matches.push(index+1);
- });
- if(matches.length>1)return {status:"ambiguous",position:null};
- if(!matches.length)return {status:"unknown",position:null};
- if(matches[0]>limit)return {status:"out-of-cut",position:null};
- return {status:"valid",position:matches[0]};
-}
-
 function localRankScore(r){
- const list=rankData(r),users=Object.keys(room.members||{}),guesses=room.localGuesses||{},overrides=r.overrides||{};
- const rows=users.map(uid=>{
-   const guess=guesses[uid]||'',override=overrides[uid];
-   const state=override?{position:override.position||null,status:override.position?"corrected":"corrected-out"}:localRankResolve(guess,list,r.limit);
-   return {uid,guess,position:state.position,status:state.status,delta:state.position===null?null:Math.abs(state.position-r.target),...(override?{reason:override.reason}:{})};
- });
- const sorted=rows.filter(x=>x.delta!==null).sort((a,b)=>a.delta-b.delta||a.uid.localeCompare(b.uid));
- let place=0,previous=null;
- sorted.forEach((x,i)=>{if(x.delta!==previous)place=i+1;previous=x.delta;x.place=place;x.points=({1:5,2:3,3:1})[place]||0});
- rows.filter(x=>x.delta===null).forEach(x=>{x.place=null;x.points=0});
- return Object.fromEntries(rows.map(x=>[x.uid,x]));
+ return calculateRanking({list:rankData(r),limit:r.limit,target:r.target,guesses:room.localGuesses||{},members:Object.keys(room.members||{}),overrides:r.overrides||{}});
+}
+function advanceButtons(){
+ return `<div class="actions">${btn(room.number>=5?"🏆 Ver pódio":"Próxima rodada →","next","lime")}${room.number<5?btn("🏁 Finalizar partida","finish-game","ghost"):""}</div>`;
 }
 
 function rankReview(r){
@@ -113,7 +101,7 @@ function rankReview(r){
  <label class="stack"><span class="label">Posição (0 = inválido)</span><input class="field" id="override-pos" type="number" min="0" max="${r.limit}" placeholder="Ex.: 12"></label></div>
  <label class="stack"><span class="label">Por que corrigiu?</span><textarea class="field" id="override-reason" maxlength="180" placeholder="Ex.: nome alternativo do item na 12ª posição"></textarea></label>
  ${btn("Salvar correção antes da pontuação","override","ghost")}</div>
- <div class="actions">${btn("Próxima rodada →","next","lime")}${btn("🏁 Finalizar partida","finish-game","ghost")}</div>`:"<p class='tiny'>O anfitrião pode revisar o resultado e confirmar a pontuação.</p>"}</div>`;
+ ${advanceButtons()}`:"<p class='tiny'>O anfitrião pode revisar o resultado e confirmar a pontuação.</p>"}</div>`;
 }
 
 function ranking(){
@@ -140,21 +128,25 @@ const ranked=members().map(m=>({...m,points:room.scores?.[m.uid]||0})).sort((a,b
 const rounds=Object.values(room.roundHistory||{}).sort((a,b)=>a.number-b.number);
 const best=ranked[0]?.points??0,winners=ranked.filter(x=>x.points===best);
 return `<section class="panel final-screen"><div class="eyebrow">🏁 PARTIDA FINALIZADA</div><h1>Fim de jogo!</h1><p class="lead">${winners.length>1?'Empate na liderança!':'Campeão da noite:'} <strong class="highlight">${esc(winners.map(x=>x.nick).join(' & '))}</strong></p>
-<div class="podium">${ranked.map((m,i)=>`<div class="podium-item"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span><strong>${esc(m.nick)}</strong><b>${m.points} ponto${m.points===1?'':'s'}</b></div>`).join('')}</div>
-<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
-<div class="actions cardline">${btn('← Voltar ao início','leave-room','primary')}${isHost()?btn('Encerrar sala','close-room','ghost',room.closed):''}</div></section>`;
+<div class="podium">${ranked.map((m,i)=>{const place=ranked.findIndex(player=>player.points===m.points)+1;return `<div class="podium-item"><span>${place===1?'🥇':place===2?'🥈':place===3?'🥉':'#'+place}</span><strong>${esc(m.nick)}</strong><b>${m.points} ponto${m.points===1?'':'s'}</b></div>`}).join('')}</div>
+<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:DATA.puzzles[x.index]?.code||"")}</span><b>${x.awarded?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
+<div class="actions cardline">${btn('← Voltar ao início','leave-room','primary')}${isHost()?btn('↻ Jogar revanche','rematch','lime',room.closed):''}${isHost()&&!localDemo?btn('Encerrar sala','close-room','ghost',room.closed):''}</div></section>`;
 }
 function render(){
  status();const active=document.activeElement,focusId=active?.id||null;
  const value=focusId?active.value:null;
+ const previousRound=app.dataset?.round;
  const banner=err?`<div role="alert" class="status error">${esc(err)}</div>`:'';
  err='';
  app.innerHTML=banner+(!room?home():room.phase==='finished'?finishedGame():room.round?(room.round.type==='letters'?letters():ranking()):waiting());
- if(focusId){const el=document.getElementById(focusId);if(el&&!el.disabled){if(value!==null&&el.tagName!=='SELECT'&&focusId!=='invite')el.value=value;el.focus({preventScroll:true})}}
+ const screen=`${roomId||'home'}:${room?.phase||''}:${room?.round?.id||''}`;
+ if(screen!==renderedScreen){renderedScreen=screen;window.scrollTo?.(0,0)}
+ const sameRound=previousRound===room?.round?.id;if(app.dataset)app.dataset.round=room?.round?.id||"";
+ if(focusId&&sameRound){const el=document.getElementById(focusId);if(el&&!el.disabled){if(value!==null&&el.tagName!=='SELECT'&&focusId!=='invite')el.value=value;el.focus({preventScroll:true})}}
 }
 function watchRankingIfNecessary(id,roomValue){
   const r=roomValue?.round;
-  const key=r?.type==="rank"?id+":"+r.id:"";
+  const key=r?.id?id+":"+r.id:"";
   if(key===currentGuessRound)return;
   stopGuess();stopSubmissions();stopGuess=()=>{};stopSubmissions=()=>{};
   currentGuessRound=key;ownGuess="";submitted={};
@@ -165,7 +157,7 @@ function watchRankingIfNecessary(id,roomValue){
 function connectRoom(id){
   if(!roomGateway)throw Error("A conexão da sala ainda não está pronta.");
   currentRoomSubscription?.();clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
-  selectedWinner='';roomId=id;room=null;
+  roomId=id;room=null;
   currentRoomSubscription=roomGateway.watchRoom(id,value=>{room=value;watchRankingIfNecessary(id,value);render()},error);
   clearPresence=roomGateway.markPresence(id,error);
   const params=new URLSearchParams(location.search);
@@ -179,63 +171,26 @@ async function joinRoom(id,name){
 }
 function selectedMode(){return $('#mode')?.value||modeChoice}
 function getNick(){const v=($('#nick')?.value||nick).trim().slice(0,28);if(!v)throw Error('Escolha um nick antes de entrar.');nick=v;saveNick(v);return v}
-function usedKey(type){return type==='letters'?'usedLetters':'usedRanks'}
-function nextChoice(){const current=room.round;let type=room.mode==='mixed'?(current?.type==='letters'?'rank':'letters'):room.mode;if(type==='letters'){const used=room.usedLetters||[];let available=DATA.puzzles.map((_,i)=>i).filter(i=>!used.includes(i));if(!available.length)available=DATA.puzzles.map((_,i)=>i);const index=pick(available);return {type:'letters',index,hints:0,revealed:false,usedLetters:available.length===DATA.puzzles.length&&used.length? [index]:[...used,index]}}
- const pool=[...DATA.rankings,...(room.customRankings||[])];if(!pool.length)throw Error('Não há rankings cadastrados.');const used=room.usedRanks||[];let choices=pool.filter(x=>!used.includes(x.id));if(!choices.length)choices=pool;let c=pick(choices);const limits=[25,50,75,100,250,500,1000].filter(n=>n<=c.items.length);if(!limits.includes(c.items.length))limits.push(c.items.length);const limit=pick(limits);const history=room.targetHistory?.[c.id+'-'+limit]||[];let positions=Array.from({length:limit},(_,i)=>i+1).filter(i=>!history.includes(i));if(!positions.length)positions=Array.from({length:limit},(_,i)=>i+1);const target=pick(positions);const id='r'+Date.now().toString(36)+random(9999);return {type:'rank',categoryId:c.id,custom:room.customRankings?.find(x=>x.id===c.id)||null,limit,target,id,revealed:false,usedRanks:choices.length===pool.length&&used.length?[c.id]:[...used,c.id],targetHistory:{...(room.targetHistory||{}),[c.id+'-'+limit]:positions.length===limit&&history.length?[target]:[...history,target]}}}
-async function nextRound(){if(localDemo){nextLocalRound();return}throw Error('Partidas online serão habilitadas na etapa 3.');if(!isHost())return;let add=nextChoice();const updateData={number:(room.number||0)+1,round:add};if(add.usedLetters)updateData.usedLetters=add.usedLetters;if(add.usedRanks)updateData.usedRanks=add.usedRanks;if(add.targetHistory)updateData.targetHistory=add.targetHistory;delete add.usedLetters;delete add.usedRanks;delete add.targetHistory;if(room.round?.type==='letters'&&room.round.revealed){const winner=$('#letter-winner')?.value;if(winner){updateData[`scores/${winner}`]=(room.scores?.[winner]||0)+1}}if(room.round?.type==='rank'&&room.round.revealed&&!room.round.scored){const ranked=scoreRank(room.round);const scores={...room.scores};ranked.forEach(x=>{if(x.place&&x.place<=3)scores[x.uid]=(scores[x.uid]||0)+({1:5,2:3,3:1}[x.place]||0)});updateData.scores=scores}await update(ref(db,'rooms/'+roomId),updateData)}
-function startDemo(){
-  if(modeChoice!=="letters"){startDemoLobby();startDemoFromLobby();return}
-  currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
-  unsubRoom?.();unsubRoom=null;
-  localDemo=true;roomId="LOCAL";
-  const index=DATA.puzzles.length>1?random(DATA.puzzles.length):0;
-  room={host:"local",mode:"letters",number:1,members:{local:{uid:"local",nick:"Jogador",joined:Date.now()}},scores:{local:0},usedLetters:[index],round:{type:"letters",index,hints:0,revealed:false}};
-  render();
-}
+function startDemo(){startDemoLobby();startDemoFromLobby()}
 function localChooseRound(){
- const nextType=room.mode==="rank"?"rank":room.mode==="mixed"?(room.round?.type==="letters"?"rank":"letters"):"letters";
- const number=(room.number||0)+1;
- if(nextType==="letters"){
-   const pool=DATA.puzzles.map((_,i)=>i).filter(i=>!(room.usedLetters||[]).includes(i));
-   const choices=pool.length?pool:DATA.puzzles.map((_,i)=>i);
-   const index=choices[random(choices.length)];
-   room.usedLetters=pool.length?[...(room.usedLetters||[]),index]:[index];
-   room.round={type:"letters",id:`frase-${number}`,index,hints:0,revealed:false,scored:false};
- }else{
-   const eligible=DATA.rankings.filter(d=>Array.isArray(d.items)&&d.items.length>=25&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
-   if(!eligible.length)throw Error("Nenhuma lista de ranking disponível nesta prévia.");
-   const combinations=[];
-   for(const d of eligible)for(const limit of [25,50,75,100].filter(n=>n<=d.items.length)){
-     for(let target=1;target<=limit;target++)combinations.push({categoryId:d.id,limit,target});
-   }
-   const fresh=combinations.filter(x=>!(room.usedRanks||[]).includes(`${x.categoryId}:${x.limit}:${x.target}`));
-   const choices=fresh.length?fresh:combinations;
-   const selected=choices[random(choices.length)];
-   const key=`${selected.categoryId}:${selected.limit}:${selected.target}`;
-   room.usedRanks=fresh.length?[...(room.usedRanks||[]),key]:[key];
-   room.round={type:"rank",id:`ranking-${number}`,...selected,revealed:false,scored:false,resultReady:false};
-   const d=rankData(room.round),sample=Math.min(selected.limit-1,selected.target+1);
-   room.localGuesses={guest:d.items[sample]};
-   ownGuess="";submitted={guest:true};guessDrafts={};
+ const chooser=createPartyGame({api:{},getPuzzles:()=>DATA.puzzles,getRankings:()=>DATA.rankings,randomIndex:random});
+ Object.assign(room,chooser.chooseRound(room));
+ room.phase="playing";
+ room.localGuesses={};ownGuess="";submitted={};guessDrafts={};
+ // O adversário é explicitamente simulado e nunca é um jogador conectado.
+ if(room.members.guest){
+   const r=room.round;
+   room.localGuesses.guest=r.type==="letters"?DATA.puzzles[r.index].answer:rankData(r).items[Math.min(r.limit-1,r.target+1)];
+   submitted.guest=true;
  }
- room.number=number;room.phase="playing";selectedWinner="";render();
+ render();
 }
-
-function nextLocalRound(){
- if(!localDemo||!room?.round?.revealed)return;
- if(room.localGame){localAdvance(false);return}
- const used=room.usedLetters||[],all=DATA.puzzles.map((_,i)=>i);
- let available=all.filter(i=>!used.includes(i));
- if(!available.length)available=all;
- const index=available[random(available.length)];
- room.usedLetters=available.length===all.length&&used.length?[index]:[...used,index];
- room.number++;room.round={type:"letters",index,hints:0,revealed:false};
- selectedWinner="";render();
-}
+function nextLocalRound(){localAdvance(false)}
 
 function startDemoLobby(){
- localDemo=true;roomId="DEMO45";selectedWinner="";
- room={host:"local",mode:modeChoice,phase:"lobby",number:0,localGame:true,
+ currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
+ localDemo=true;roomId="DEMO45";
+ room={host:"local",mode:modeChoice,phase:"lobby",number:0,match:1,roundLimit:5,localGame:true,
  members:{local:{uid:"local",nick:"Você (demo)",joined:Date.now(),online:true},
  guest:{uid:"guest",nick:"Amigo simulado",joined:Date.now()+1,online:true}},
  scores:{local:0,guest:0},roundHistory:{},usedLetters:[],usedRanks:[]};
@@ -247,7 +202,7 @@ function startDemoFromLobby(){
  localChooseRound();
 }
 
-function localScoreCurrentRound(winner){
+function localScoreCurrentRound(){
  if(room.round.scored)return;
  const r=room.round;
  if(r.type==="rank"){
@@ -260,16 +215,20 @@ function localScoreCurrentRound(winner){
    room.roundHistory[r.id]={id:r.id,number:room.number,type:"rank",categoryId:r.categoryId,
      target:r.target,limit:r.limit,review:r.review,awarded,overrides:r.overrides||{}};
  }else{
-   if(winner&&room.members[winner])room.scores[winner]=(room.scores[winner]||0)+1;
-   room.roundHistory[r.id]={id:r.id,number:room.number,type:"letters",index:r.index,hints:r.hints||0,winner};
+   const awarded={};
+   for(const result of Object.values(r.review||{})){
+     awarded[result.uid]=result.points||0;
+     room.scores[result.uid]=(room.scores[result.uid]||0)+(result.points||0);
+   }
+   room.roundHistory[r.id]={id:r.id,number:room.number,type:"letters",index:r.index,hints:r.hints||0,winner:"",review:r.review,awarded};
  }
  r.scored=true;
 }
 
 function localAdvance(finish){
  if(!localDemo||!room?.round?.revealed||room.round.scored)return;
- localScoreCurrentRound(room.round.type==="letters"?($("#letter-winner")?.value||selectedWinner||""):"");
- if(finish){room.phase="finished";render();return}
+ localScoreCurrentRound();
+ if(finish||room.number>=5){room.phase="finished";render();return}
  localChooseRound();
 }
 
@@ -291,6 +250,9 @@ function localReveal(){
    r.guesses={...(room.localGuesses||{})};
    r.review=localRankScore(r);
    r.resultReady=true;
+ }else{
+   r.review=calculatePhrase({puzzle:DATA.puzzles[r.index],guesses:room.localGuesses||{},members:Object.keys(room.members)});
+   r.resultReady=true;
  }
  render();
 }
@@ -310,13 +272,13 @@ else if(action==="demo-lobby"){startDemoLobby()}
 else if(action==="stop-demo"){localDemo=false;room=null;roomId=null;guessDrafts={};render()}
 else if(action==="leave-room"){
   currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
-  room=null;roomId=null;const q=new URLSearchParams(location.search);q.delete("room");
+  localDemo=false;room=null;roomId=null;const q=new URLSearchParams(location.search);q.delete("room");
   history.replaceState(null,"",location.pathname+(q.size?"?"+q.toString():""));render()
 }
 else if(action==="close-room"){if(!isHost()||!roomGateway)throw Error("Apenas o anfitrião pode encerrar.");await roomGateway.closeRoom(roomId)}
 else if(action==="retry-data"){await loadData()}
 else if(action==="hint"&&localDemo){if(room.round?.type==='letters'){room.round.hints=Math.min(2,room.round.hints+1);render()}}
-else if(action==="reveal"&&localDemo){if(room.round?.type==='rank')localReveal();else{room.round.revealed=true;render()}}
+else if(action==="reveal"&&localDemo){localReveal()}
 else if(['choose-letters','choose-rank','choose-mixed'].includes(action)){modeChoice=action.replace('choose-','').replace('rank','rank');render();const field=$('#mode');if(field)field.value=modeChoice;$('#nick')?.focus()}
 else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode()});connectRoom(result.code)}
 else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||pendingJoinCode||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
@@ -329,12 +291,16 @@ else if(action==='import'&&isHost()){throw Error('Importação de rankings estar
 else if(action==='start-game'&&localDemo){startDemoFromLobby()}
 else if(action==='start-game'){if(!isHost()||!partyGame)throw Error('Somente o anfitrião pode iniciar.');await partyGame.start(roomId)}
 else if(action==='next'&&localDemo){nextLocalRound()}
-else if(action==='next'){if(!partyGame||!isHost())throw Error('Somente o anfitrião avança.');await partyGame.advance(roomId,{winner:room.round?.type==='letters'?($('#letter-winner')?.value||selectedWinner||''):''});selectedWinner=''}
+else if(action==='next'){if(!partyGame||!isHost())throw Error('Somente o anfitrião avança.');await partyGame.advance(roomId)}
 else if(action==='finish-game'&&localDemo){finishLocalDemo()}
-else if(action==='finish-game'){if(!partyGame||!isHost())throw Error('Somente o anfitrião encerra.');await partyGame.advance(roomId,{winner:room.round?.type==='letters'?($('#letter-winner')?.value||selectedWinner||''):'',finish:true});selectedWinner=''}
+else if(action==='finish-game'){if(!partyGame||!isHost())throw Error('Somente o anfitrião encerra.');await partyGame.advance(roomId,{finish:true})}
+else if(action==='rematch'&&isHost()){
+ if(localDemo){room.match++;room.phase="lobby";room.number=0;room.scores={local:0,guest:0};room.roundHistory={};delete room.round;render()}
+ else await partyGame.rematch(roomId);
+}
 else if(action==='hint'&&isHost()&&partyGame){await partyGame.hint(roomId)}
 else if(action==='reveal'&&isHost()&&partyGame){if(room.round?.type==='rank')await partyGame.revealRanking(roomId);else await partyGame.revealPhrase(roomId)}
-else if(action==='guess'&&room?.round?.type==='rank'){
+else if(action==='guess'&&room?.round&&!room.round.revealed){
  const guess=($('#guess')?.value||guessDrafts[roomId+':'+room.round.id]||'').trim();
  if(localDemo)localSubmitGuess(guess);
  else{if(!partyGame)throw Error('Partida indisponível.');ownGuess=await partyGame.submitGuess(roomId,guess);delete guessDrafts[roomId+':'+room.round.id];render()}
@@ -348,7 +314,7 @@ else if(action==='override'&&isHost()&&room?.round?.type==='rank'){
 }
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
-document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='letter-winner')selectedWinner=e.target.value});
+document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value});
 document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value;if(e.target.id==='guess'&&room?.round)guessDrafts[roomId+':'+room.round.id]=e.target.value;if(e.target.id==='override-reason')rankOverrideReason=e.target.value});
 async function loadData(){
   if(STANDALONE){

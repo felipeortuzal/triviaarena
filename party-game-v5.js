@@ -1,5 +1,6 @@
+import {calculatePhrase} from "./phrase-tools.js";
 import {isEligibleRanking,calculateRanking} from "./rank-tools-v5.js";
-// Máquina V5: sorteios, 2 modos, segregação de respostas e apuração atômica.
+// Três modos, cinco rodadas, respostas privadas e apuração atômica.
 export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRankings,randomIndex,calculateRanking,isEligibleRanking}){
   const {ref,get,set,onValue,runTransaction}=api;
   const roomAt=code=>ref(db,`roomPublic/${code}`);
@@ -23,7 +24,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const choices=pool.length?pool:puzzles.map((_,i)=>i);
       const index=choices[random(choices.length)];
       return {number,usedLetters:pool.length?[...used,index]:[index],
-        round:{type:"letters",id:`frase-${number}`,index,hints:0,revealed:false,scored:false,topic:puzzles[index].topic||"Geral",level:puzzles[index].level||"Geral"}};
+        round:{type:"letters",id:`partida-${state.match||1}-frase-${number}`,index,hints:0,revealed:false,scored:false,topic:puzzles[index].topic||"Geral",level:puzzles[index].level||"Geral"}};
     }
     const available=rankings();
     if(!available.length)throw Error("As listas de ranking não estão prontas para jogar.");
@@ -39,7 +40,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     const pick=options[random(options.length)];
     const key=`${pick.categoryId}:${pick.limit}:${pick.target}`;
     return {number,usedRanks:fresh.length?[...used,key]:[key],
-      round:{type:"rank",id:`ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,revealed:false,scored:false,resultReady:false}};
+      round:{type:"rank",id:`partida-${state.match||1}-ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,revealed:false,scored:false,resultReady:false}};
   }
   async function start(code){
     const preview=(await get(roomAt(code))).val();
@@ -56,7 +57,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const old=value||preview;
       if(!old||old.host!==uid||old.phase!=="lobby")return;
       const next=chooseRound(old);
-      return {...old,...next,phase:"playing"};
+      return {...old,...next,phase:"playing",roundLimit:5,match:old.match||1};
     },{applyLocally:false});
     if(t.committed)return t.snapshot.val();
     const current=(await get(roomAt(code))).val();
@@ -73,21 +74,12 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     },{applyLocally:false});
     return t.committed;
   }
-  async function revealPhrase(code){
-    const initial=(await get(roomAt(code))).val();
-    ensureHost(initial);
-    const t=await runTransaction(roomAt(code),value=>{
-      const old=value||initial;
-      if(old.phase!=="playing"||old.round?.type!=="letters"||old.round.revealed)return;
-      return {...old,round:{...old.round,revealed:true}};
-    },{applyLocally:false});
-    return t.committed;
-  }
+  async function revealPhrase(code){ return revealRound(code,"letters"); }
   async function submitGuess(code,guess){
     const answer=String(guess??"").trim();
-    if(!answer||answer.length>120)throw Error("Digite o nome de um item (1–120 caracteres).");
+    if(!answer||answer.length>120)throw Error("Digite uma resposta (1–120 caracteres).");
     const state=(await get(roomAt(code))).val();
-    if(!state||state.phase!=="playing"||state.round?.type!=="rank"||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
+    if(!state||state.phase!=="playing"||!["letters","rank"].includes(state.round?.type)||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
     if(!state.profiles?.[uid])throw Error("Você não está inscrito na sala.");
     const id=state.round.id;
     await set(ref(db,`roomPrivateGuesses/${code}/${id}/${uid}`),answer);
@@ -101,12 +93,17 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
   function watchSubmissions(code,roundId,onStatus,onError){
     return onValue(ref(db,`roomGuessStatus/${code}/${roundId}`),s=>onStatus(s.val()||{}),onError);
   }
-  async function revealRanking(code){
+  async function revealRanking(code){ return revealRound(code,"rank"); }
+  async function revealRound(code,type){
     const current=(await get(roomAt(code))).val();
     ensureHost(current);
-    if(current.phase!=="playing"||current.round?.type!=="rank")throw Error("Esta rodada não é de ranking.");
+    if(current.phase!=="playing"||current.round?.type!==type)throw Error("O tipo da rodada mudou. Atualize a sala.");
     const id=current.round.id;
-    const locked=await runTransaction(ref(db,`roomPublic/${code}/round/revealed`),v=>v===true?undefined:true,{applyLocally:false});
+    const locked=await runTransaction(roomAt(code),value=>{
+      const old=value||current;
+      if(old.phase!=="playing"||old.round?.id!==id||old.round.revealed)return;
+      return {...old,round:{...old.round,revealed:true}};
+    },{applyLocally:false});
     if(!locked.committed){
       const latest=(await get(roomAt(code))).val();
       if(!latest.round?.revealed)throw Error("Falha ao encerrar os palpites.");
@@ -121,10 +118,11 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const s=await get(ref(db,`roomPrivateGuesses/${code}/${id}/${memberUid}`));
       if(s.exists())guesses[memberUid]=s.val();
     }
-    const list=rankings().find(l=>l.id===state.round.categoryId);
-    if(!list)throw Error("Lista não encontrada para apuração.");
-    const review=calculateRanking({list,limit:state.round.limit,target:state.round.target,
-      guesses,members:Object.keys(state.profiles||{})});
+    const list=type==="rank"?rankings().find(l=>l.id===state.round.categoryId):null;
+    if(type==="rank"&&!list)throw Error("Lista não encontrada para apuração.");
+    const review=type==="letters"
+      ?calculatePhrase({puzzle:getPuzzles()[state.round.index],guesses,members:Object.keys(state.profiles||{})})
+      :calculateRanking({list,limit:state.round.limit,target:state.round.target,guesses,members:Object.keys(state.profiles||{})});
     const result=await runTransaction(roomAt(code),value=>{
       const old=value||state;
       if(old.round?.id!==id||old.phase!=="playing"||old.round.resultReady||!old.round.revealed)return;
@@ -154,19 +152,23 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     },{applyLocally:false});
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
-  async function advance(code,{winner="",finish=false}={}){
+  async function advance(code,{finish=false}={}){
     const initial=(await get(roomAt(code))).val();
     ensureHost(initial);
     const t=await runTransaction(roomAt(code),value=>{
       const old=value||initial;
       const r=old.round;
-      if(old.phase!=="playing"||!r?.revealed||r.scored)return;
+      if(old.phase!=="playing"||r?.id!==initial.round?.id||!r?.revealed||r.scored)return;
       const scores={...(old.scores||{})};
       let record;
       if(r.type==="letters"){
-        if(winner&&!old.profiles?.[winner])return;
-        if(winner)scores[winner]=(scores[winner]||0)+1;
-        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,winner:String(winner)};
+        if(!r.resultReady||!r.review)return;
+        const awarded={};
+        for(const [player,result] of Object.entries(r.review)){
+          awarded[player]=result.points||0;
+          if(result.points)scores[player]=(scores[player]||0)+result.points;
+        }
+        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,winner:"",awarded,review:r.review};
       }else{
         if(!r.resultReady||!r.review)return;
         const awarded={};
@@ -180,13 +182,28 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       }
       const history={...(old.roundHistory||{}),[r.id]:record};
       const previous={...old,scores,roundHistory:history,round:{...r,scored:true}};
-      if(finish)return {...previous,phase:"finished",finishedAt:Date.now()};
+      if(finish||old.number>=(old.roundLimit||5))return {...previous,phase:"finished",finishedAt:Date.now()};
       const next=chooseRound(previous);
       return {...previous,...next,phase:"playing"};
     },{applyLocally:false});
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
+  async function rematch(code){
+    const initial=(await get(roomAt(code))).val();
+    ensureHost(initial);
+    const registry=(await get(regAt(code))).val();
+    if(registry?.phase!=="locked")throw Error("Esta sala foi encerrada.");
+    const t=await runTransaction(roomAt(code),value=>{
+      const old=value||initial;
+      if(old.phase!=="finished"||old.match!==initial.match)return;
+      const next={...old,phase:"lobby",number:0,match:(old.match||1)+1,roundLimit:5,
+        scores:Object.fromEntries(Object.keys(old.profiles||{}).map(player=>[player,0]))};
+      delete next.round;delete next.finishedAt;delete next.roundHistory;
+      return next;
+    },{applyLocally:false});
+    return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
+  }
   return {start,hint,revealPhrase,submitGuess,watchMyGuess,watchSubmissions,
-    revealRanking,correctRanking,advance,chooseRound};
+    revealRanking,correctRanking,advance,rematch,chooseRound};
 };
 export const createPartyGame=(args)=>makePartyGame({...args,isEligibleRanking,calculateRanking});

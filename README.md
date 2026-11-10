@@ -2,7 +2,9 @@
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
-Riviera Showdown reúne **Decifre a Frase**, **Estimativa de Ranking** e a proposta de modo misto. A prévia HTML permite jogar **Decifre a Frase, Estimativa de Ranking e Misturado**, incluindo lobby com adversário simulado e placar. O mesmo lobby V2 usa autenticação anônima, convites e presença no Firebase Emulator. A Etapa 5 acrescenta palpites privados, correções com justificativa e placar 5/3/1 na partida online. A Etapa 4 continua pendente de ativação do Pages/Firebase real e testes com aparelhos físicos.
+Riviera Showdown reúne **Decifre a Frase, Estimativa de Ranking e Misturado**, com partidas de **cinco rodadas**, respostas privadas, pontuação automática, pódio e revanche na mesma sala. O HTML local usa as mesmas funções de sorteio e pontuação da versão online.
+
+**Estado em 10/11/2026:** versão local e multiplayer em emulador testados. **O site público ainda retorna HTTP 404 e o multiplayer de produção não está disponível.** A API oficial recusou a habilitação de Pages e o acesso às variáveis com HTTP 403 (`Resource not accessible by integration`). O Firebase CLI não tem autenticação de produção. Veja as ações exatas e as evidências em [Publicação piloto](docs/publicacao-piloto.md).
 
 ## Começar agora
 
@@ -15,7 +17,7 @@ npm run build
 npm test
 ```
 
-O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.json` e `logo.svg`, sem manter outra implementação do jogo. O teste de navegador `node tests/browser-smoke.mjs` exige `playwright-core` e Chrome/Chromium instalados; ele é executado no GitHub Actions. Não confunda uma demonstração local com sala multiplayer validada.
+O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, seus módulos locais compartilhados, `data.json` e `logo.svg`, sem manter outra implementação do jogo. O teste de navegador `node tests/browser-smoke.mjs` exige `playwright-core` e Chrome/Chromium instalados; ele é executado no GitHub Actions. Não confunda uma demonstração local com sala multiplayer validada.
 
 ## Arquivos
 
@@ -51,7 +53,7 @@ Para testar os três modos multiplayer em dois Chromes isolados: `npm run test:b
 
 O deploy oficial já está automatizado por `.github/workflows/deploy-pages.yml`. Ele testa antes de publicar: Node, Chrome, Firebase Emulator e duas sessões reais de Chrome independentes (emulados). O script `scripts/prepare-pages.mjs` gera `dist/` com os arquivos estritamente públicos, base relativa sob `/triviaarena/`, carimbo `release.json` e configuração Web opcional. O único mecanismo previsto é **GitHub Actions → Pages**.
 
-**Para ativar o endereço HTTPS**, com acesso à conta que administra o repositório, é necessário habilitar **Settings → Pages → Build and deployment → Source → GitHub Actions**. A API do conector deste chat não expõe configuração de Pages; a automação não pode habilitar isso sozinha. O endereço esperado, **não garantido até o deploy**, é `https://felipeortuzal.github.io/triviaarena/`. A fonte do site está em `main`, não em uma branch concorrente de publicação.
+**Para ativar o endereço HTTPS**, com acesso à conta que administra o repositório, é necessário habilitar **Settings → Pages → Build and deployment → Source → GitHub Actions**. A tentativa de habilitar Pages pela API oficial em 10/11/2026 foi recusada com HTTP 403 pelo escopo do token disponível. O endereço esperado, **não garantido até o deploy**, é `https://felipeortuzal.github.io/triviaarena/`. A fonte do site está em `main`, não em uma branch concorrente de publicação.
 
 **Para ativar multiplayer público**, é necessário configurar Firebase Web (Authentication anônimo e Realtime Database com `database.rules.json` publicado). Inserir o JSON **público** da configuração Web na variável de repositório `RIVIERA_FIREBASE_WEB_CONFIG`; a pipeline o copia para `dist/firebase-config.js` e não exige colocar credenciais de administrador no código. Sem variável, o site, se publicado, permanece com demo local e aviso de online indisponível.
 
@@ -59,7 +61,7 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 
 ## Catálogo e próximos jogos
 
-- **Frases:** 104 desafios com duas dicas, resposta revelada pelo anfitrião e +1 por acerto.
+- **Frases:** 104 desafios com duas dicas, envio privado e +1 automático para cada resposta correta. Acentos, caixa, artigos, números por extenso, aliases editoriais e uma transposição adjacente em palavra longa são aceitos. Números errados, negações e qualificadores diferentes são rejeitados.
 - **Rankings:** sorteio de categoria, alvo e Top 25/50/75/100 (só recortes cobertos pela fonte). Palpites privados por UID até a revelação, indicador público de envios, nomes PT/EN reconhecidos, distância absoluta e 5/3/1 com empates. Correções do host exigem motivo visível.
 - **Modo misturado:** alterna Frase → Ranking → Frase com um placar único e resultado final.
 - **Anti-repetição:** frases e combinações categoria/Top/alvo não se repetem até esgotar as opções. A política de distribuição entre categorias será refinada na Etapa 7.
@@ -71,6 +73,12 @@ As **etapas exatas, telas, verificações de segurança e roteiro para dois apar
 - O reconhecimento ignora maiúsculas/acentos, usa aliases por lista, identifica ambiguidade/fora de recorte e aceita correção manual justificada pelo anfitrião após revelação. A lista inteira pode ser inspecionada no navegador: não há proteção contra quem consulta o catálogo para trapacear.
 - Não há reconexão com outro ID após apagar dados do navegador, nem troca automática de anfitrião.
 - Não há limite de uso/custo garantido para Firebase; consulte os limites e preços do seu projeto.
+
+## Partida e revanche
+
+O anfitrião revela as respostas e confirma cada rodada. A quinta confirmação abre o pódio; também é possível encerrar antes. A revanche mantém os participantes e a lista de desafios usados, zera o placar e cria novos IDs de rodada para não reutilizar palpites anteriores. O convite permanece fechado para novos participantes depois do primeiro início.
+
+`npm run test:browser-five` testa os três modos em duas sessões independentes (desktop e mobile), cinco rodadas, respostas privadas, reconexão dos dois jogadores, clique duplo, pódio, revanche e o HTML `file://` offline. `node tests/public-site.mjs` faz a verificação somente de leitura do site realmente publicado; um resultado verde não declara o multiplayer de produção homologado.
 
 ## Testes rápidos
 

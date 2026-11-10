@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Instalar dependências de desenvolvimento
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Testes Node e build da prévia
         run: npm test
       - name: Chrome - HTML offline e URL com prefixo
@@ -32,6 +32,8 @@ jobs:
         run: npm run test:browser-room
       - name: Ranking e Misturado em dois Chrome independentes
         run: npm run test:browser-rank
+      - name: Cinco rodadas nos três modos, reconexão e revanche
+        run: npm run test:browser-five
       - name: HTML produzido da mesma revisão do frontend
         run: git diff --exit-code -- riviera-showdown.html
       - name: Arquivo de prévia para abrir no navegador

@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
 import vm from 'node:vm';
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const code=readFileSync(resolve(ROOT,'app.js'),'utf8');
+const code=['phrase-tools.js','rank-tools-v5.js','party-game-v5.js','app.js'].map(name=>readFileSync(resolve(ROOT,name),'utf8').replace(/^import .* from .*;$/gm,'').replace(/^export /gm,'')).join('\n');
 
 function harness({embedded=true,fetchFails=false}={}){
   const main={innerHTML:""},connection={textContent:""};

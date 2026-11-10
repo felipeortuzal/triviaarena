@@ -23,7 +23,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Instalar dependências
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Garantir prévia reproduzível e validar exportação Pages
         run: |
           npm test
@@ -36,6 +36,8 @@ jobs:
         run: npm run test:browser-room
       - name: Ranking e Misturado em dois Chrome independentes
         run: npm run test:browser-rank
+      - name: Cinco rodadas nos três modos, reconexão e revanche
+        run: npm run test:browser-five
       - name: Construir pacote estático com configuração Web pública (se presente)
         env:
           RIVIERA_FIREBASE_WEB_CONFIG: ${{ vars.RIVIERA_FIREBASE_WEB_CONFIG }}
@@ -64,3 +66,14 @@ jobs:
       - name: Publicar no endereço HTTPS do projeto
         id: publish
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar verificador do site publicado
+        run: npm ci --no-audit --no-fund
+      - name: Verificar URL pública, revisão, assets e navegador real
+        env:
+          RIVIERA_PUBLIC_URL: ${{ steps.publish.outputs.page_url }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: node tests/public-site.mjs

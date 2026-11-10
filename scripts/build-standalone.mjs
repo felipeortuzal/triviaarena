@@ -5,7 +5,15 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 let html=read('index.html');
-const code=read('app.js');
+const included=new Set();
+function bundle(name){
+  if(included.has(name))return '';
+  included.add(name);
+  let source=read(name),dependencies='';
+  source=source.replace(/^import .* from ["']\.\/([^"']+)["'];?$/gm,(_,file)=>{dependencies+=bundle(file)+'\n';return ''});
+  return dependencies+source.replace(/^export /gm,'');
+}
+const code=bundle('app.js');
 const data=JSON.parse(read('data.json'));
 const logo='data:image/svg+xml,'+encodeURIComponent(read('logo.svg'));
 const escapedData=JSON.stringify(data).replace(/</g,'\\u003c');

@@ -43,7 +43,7 @@ async function browserChecks(){
       const pathname=new URL(req.url,"http://127.0.0.1").pathname;
       if(!pathname.startsWith("/triviaarena/")){res.writeHead(404);res.end();return}
       const relative=pathname.slice("/triviaarena/".length)||"index.html";
-      const allowed=["index.html","app.js","data.json","logo.svg","firebase-config.js","party-game-v5.js","rank-tools-v5.js"];
+      const allowed=["index.html","app.js","data.json","logo.svg","firebase-config.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js"];
       if(!allowed.includes(relative)){res.writeHead(404);res.end();return}
       const filename=resolve(ROOT,relative);
       if(relative==="firebase-config.js"&&req.headers["x-test-firebase"]==="configured"){
@@ -69,14 +69,16 @@ async function browserChecks(){
     const offlineCtx=await browser.newContext({viewport:{width:375,height:812}});
     await offlineCtx.setOffline(true);
     const offlinePage=await offlineCtx.newPage();
-    await offlinePage.goto(pathToFileURL(resolve(ROOT,"riviera-showdown.html")).href);
+    if(process.env.RIVIERA_INLINE_OFFLINE==='1'){
+      await offlinePage.route(base+'offline.html',route=>route.fulfill({contentType:'text/html',body:readFileSync(resolve(ROOT,'riviera-showdown.html'),'utf8')}));
+      await offlinePage.goto(base+'offline.html');
+    }else await offlinePage.goto(pathToFileURL(resolve(ROOT,"riviera-showdown.html")).href);
     await verifyDemo(offlinePage);
     // Prévia completa do lobby até o pódio, com amigo simulado, offline.
     await offlinePage.locator('[data-action="demo-lobby"]').click();
     await offlinePage.getByText("Sua sala está pronta.").waitFor();
     await offlinePage.locator('[data-action="start-game"]').click();
     await offlinePage.locator('[data-action="reveal"]').click();
-    await offlinePage.locator('#letter-winner').selectOption('guest');
     await offlinePage.locator('[data-action="next"]').click();
     await offlinePage.locator('[data-action="hint"]').click();
     await offlinePage.locator('[data-action="reveal"]').click();
@@ -139,7 +141,7 @@ async function browserChecks(){
     await cdnPage.getByText("Não foi possível conectar às salas.",{exact:false}).waitFor();
     await verifyDemo(cdnPage);
     await cdnCtx.close();
-    console.log("PASS: HTTP prefixado, file:// offline, dicas/revelação/avanço, mobile 375px, falha de dados e falha de CDN");
+    console.log("PASS: HTTP prefixado, "+(process.env.RIVIERA_INLINE_OFFLINE==='1'?'HTML interceptado offline':'file:// offline')+", dicas/revelação/avanço, mobile 375px, falha de dados e falha de CDN");
   }catch(error){failures.push(error);throw error}
   finally{
     if(server)await new Promise(resolve=>server.close(resolve));

@@ -76,7 +76,8 @@ test("Modo misto mantém placar único, alterna frases/rank e conta última roda
  const code="RVMB25";
  let s=await host.game.start(code);
  assert.equal(s.round.type,"letters");
- await assert.rejects(set(ref(guest.db,`roomPrivateGuesses/${code}/${s.round.id}/${guest.uid}`),"Palpite em frase"),/permission/i);
+ await guest.game.submitGuess(code,puzzles[s.round.index].answer);
+ await assert.rejects(get(ref(host.db,`roomPrivateGuesses/${code}/${s.round.id}/${guest.uid}`)),/permission/i);
  await host.game.revealPhrase(code);
  s=await host.game.advance(code,{winner:guest.uid});
  assert.equal(s.round.type,"rank");
@@ -89,6 +90,7 @@ test("Modo misto mantém placar único, alterna frases/rank e conta última roda
  assert.equal(s.round.type,"letters");
  assert.equal(s.scores[host.uid],5);
  assert.equal(s.scores[guest.uid],4);
+ await host.game.submitGuess(code,puzzles[s.round.index].answer);
  await host.game.hint(code);
  await host.game.revealPhrase(code);
  s=await host.game.advance(code,{winner:host.uid,finish:true});
@@ -124,4 +126,45 @@ test("envio concorrente ao fechamento não permite palpite depois da revelação
   const value=(await get(ref(guest.db,`roomPrivateGuesses/${code}/${state.round.id}/${guest.uid}`))).val();
   assert.equal(value||"",state.round.guesses?.[guest.uid]||"");
   assert.ok(["fulfilled","rejected"].includes(sent.status));
+});
+
+test('cinco rodadas, reconexão, empate e revanche sem reaproveitar respostas ou pontos',async()=>{
+ const host=await client('five-host','RVFV25'),guest=await client('five-guest');
+ const code='RVFV25';
+ await host.gateway.createRoom({nick:'Host',mode:'letters'});
+ await guest.gateway.joinRoom({code,nick:'Guest'});
+ let state=await host.game.start(code);
+ const firstId=state.round.id;
+ for(let round=1;round<=5;round++){
+   assert.equal(state.number,round);
+   await host.game.submitGuess(code,puzzles[state.round.index].answer);
+   await guest.game.submitGuess(code,puzzles[state.round.index].answer);
+   await assert.rejects(get(ref(host.db,`roomPrivateGuesses/${code}/${state.round.id}/${guest.uid}`)),/permission/i);
+   await assert.rejects(guest.game.revealPhrase(code),/Somente/);
+   state=await host.game.revealPhrase(code);
+   assert.equal(state.round.review[guest.uid].points,1);
+   await assert.rejects(guest.game.submitGuess(code,'Depois da revelação'),/não aceita/);
+   await Promise.all([host.game.advance(code),host.game.advance(code)]);
+   state=(await get(ref(host.db,`roomPublic/${code}`))).val();
+   assert.equal(state.scores[host.uid],round);
+   assert.equal(state.scores[guest.uid],round);
+   assert.equal(await guest.gateway.resumeRoom(code),true);
+ }
+ assert.equal(state.phase,'finished');
+ assert.equal(state.number,5);
+ assert.equal(Object.keys(state.roundHistory).length,5);
+ await assert.rejects(guest.game.rematch(code),/Somente/);
+ await Promise.all([host.game.rematch(code),host.game.rematch(code)]);
+ state=(await get(ref(host.db,`roomPublic/${code}`))).val();
+ assert.equal(state.match,2);
+ assert.equal(state.phase,'lobby');
+ assert.equal(state.scores[guest.uid],0);
+ state=await host.game.start(code);
+ assert.notEqual(state.round.id,firstId);
+ state=await host.game.revealPhrase(code);
+ assert.equal(state.round.review[guest.uid].guess,'');
+ assert.equal(state.round.review[guest.uid].points,0);
+ await host.game.advance(code,{finish:true});
+ await host.gateway.closeRoom(code);
+ await assert.rejects(host.game.rematch(code),/encerrada/);
 });
