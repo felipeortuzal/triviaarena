@@ -41,14 +41,14 @@ try{
   guest.on("pageerror",e=>errors.push("guest: "+e.message));
   other.on("pageerror",e=>errors.push("stranger: "+e.message));
   await host.goto(base,{waitUntil:"domcontentloaded"});
-  await host.locator("#connection").getByText("Online",{exact:false}).waitFor({timeout:30000});
+  await host.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:30000});
   await host.locator("#nick").fill("Felipe");
   await host.locator('[data-action="create"]').click();
   await host.locator(".invite-code").waitFor({timeout:20000});
   const invite=await host.locator("#invite").inputValue();
   assert.match(invite,/^http:\/\/127\.0\.0\.1:\d+\/triviaarena\/\?room=[A-HJ-NP-Z2-9]{6}&emulator=1$/);
   await guest.goto(invite,{waitUntil:"domcontentloaded"});
-  await guest.locator("#connection").getByText("Online",{exact:false}).waitFor({timeout:30000});
+  await guest.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:30000});
   await guest.locator("#nick").fill("Amigo");
   await guest.locator('[data-action="join"]').click();
   await guest.locator(".invite-code").waitFor({timeout:20000});
@@ -86,7 +86,7 @@ try{
   assert.ok(guestWidth<=1,"overflow mobile: "+guestWidth);
   await host.locator('[data-action="close-room"]').click();
   await other.goto(invite,{waitUntil:"domcontentloaded"});
-  await other.locator("#connection").getByText("Online",{exact:false}).waitFor({timeout:30000});
+  await other.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:30000});
   await other.locator("#nick").fill("Intruso");
   await other.locator('[data-action="join"]').click();
   await other.locator('[role="alert"]').getByText("encerrada",{exact:false}).waitFor();
