@@ -28,6 +28,9 @@ O gerador `scripts/build-standalone.mjs` combina `index.html`, `app.js`, `data.j
 - `rooms-v2.js` — admissão via slots transacionais, perfis e reconexão com mesmo UID
 - `database.rules.json` — regras de acesso por papéis e isolamento de palpites V2
 - `firebase.json` e `.firebaserc` — emuladores de Auth e Realtime Database com projeto `demo-riviera-showdown`
+- `scripts/prepare-pages.mjs` — pacote público do Pages; lê somente configuração Web Firebase opcional
+- `.github/workflows/deploy-pages.yml` — testes, publicação automatizada e URL HTTPS após configuração de Pages
+- `docs/publicacao-piloto.md` — guia de ativação e teste físico
 - `docs/arquitetura-salas-v2.md` — matriz de permissões, formato de dados e configuração segura
 
 ## Testar lobby com os emuladores (sem credenciais de produção)
@@ -39,17 +42,17 @@ npm run test:rooms
 
 Para testar manualmente: inicie `npx firebase emulators:start --only auth,database --project demo-riviera-showdown`, sirva o site com `python -m http.server 8000` e abra `http://localhost:8000/?emulator=1`. A configuração de emulador só é ativada quando você opta pelo parâmetro em `localhost`/`127.0.0.1`. Isso **não liga Firebase de produção**. Ver [arquitetura de salas](docs/arquitetura-salas-v2.md).
 
-## Publicar online (GitHub Pages + Firebase)
+## Publicação HTTPS — Etapa 04 (pendente de habilitação externa)
 
-1. Crie um projeto em https://console.firebase.google.com/.
-2. Em **Authentication > Sign-in method**, habilite **Anonymous**.
-3. Em **Build > Realtime Database**, crie um banco e copie a URL do banco.
-4. Em **Realtime Database > Rules**, publique as regras de `database.rules.json` **antes de habilitar salas**. O caminho V1 `/rooms` fica bloqueado, os caminhos V2 têm autorização por UID.
-5. Em **Project settings > Your apps**, registre um **Web app** e copie os campos para `firebase-config.js`. `databaseURL` deve ser a URL do Realtime Database, não do Firestore.
-6. Crie um repositório público no GitHub e envie todos os arquivos para a raiz. Em **Settings > Pages**, selecione **Deploy from a branch**, `main`, `/ (root)`.
-7. Confira o deploy do GitHub Pages e o link HTTPS. Em seguida, valide lobby online em dois navegadores/perfis distintos. Rodadas e aprovação final entre dois celulares são etapas 3 e 4.
+**Para jogar/testar imediatamente**, abra `riviera-showdown.html` no navegador. Ele é uma experiência interativa local; o botão **Testar lobby e placar** simula a partida com um amigo para conferir layout e mecânicas. Não gera sala real sem Firebase.
 
-**Atenção:** o HTML offline **não ativa multiplayer**. A configuração pública do app Web Firebase não substitui as regras de acesso e não deve incluir credenciais administrativas. Em produção, só habilite as salas depois de validar o banco e autenticação anônima. Convites para uma sala existente não expõem apelidos ou placar antes da admissão.
+O deploy oficial já está automatizado por `.github/workflows/deploy-pages.yml`. Ele testa antes de publicar: Node, Chrome, Firebase Emulator e duas sessões reais de Chrome independentes (emulados). O script `scripts/prepare-pages.mjs` gera `dist/` com os arquivos estritamente públicos, base relativa sob `/triviaarena/`, carimbo `release.json` e configuração Web opcional. O único mecanismo previsto é **GitHub Actions → Pages**.
+
+**Para ativar o endereço HTTPS**, com acesso à conta que administra o repositório, é necessário habilitar **Settings → Pages → Build and deployment → Source → GitHub Actions**. A API do conector deste chat não expõe configuração de Pages; a automação não pode habilitar isso sozinha. O endereço esperado, **não garantido até o deploy**, é `https://felipeortuzal.github.io/triviaarena/`. A fonte do site está em `main`, não em uma branch concorrente de publicação.
+
+**Para ativar multiplayer público**, é necessário configurar Firebase Web (Authentication anônimo e Realtime Database com `database.rules.json` publicado). Inserir o JSON **público** da configuração Web na variável de repositório `RIVIERA_FIREBASE_WEB_CONFIG`; a pipeline o copia para `dist/firebase-config.js` e não exige colocar credenciais de administrador no código. Sem variável, o site, se publicado, permanece com demo local e aviso de online indisponível.
+
+As **etapas exatas, telas, verificações de segurança e roteiro para dois aparelhos físicos** estão em [Publicação piloto](docs/publicacao-piloto.md). Dois navegadores independentes no emulador não são substitutos de dois aparelhos físicos conectados ao serviço real.
 
 ## Catálogo e próximos jogos
 
