@@ -33,7 +33,8 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
         if(fresh.val()?.phase!=="locked")throw Error("Não foi possível bloquear novas entradas nesta sala.");
       }
     }else if(register.val().phase!=="locked"){throw Error("Esta sala já foi encerrada.");}
-    const t=await runTransaction(where(code),old=>{
+    const t=await runTransaction(where(code),current=>{
+      const old=current||preview.val();
       if(!old||old.host!==uid||old.mode!=="letters"||old.phase!=="lobby")return;
       const next=select(old);
       return {...old,...next,phase:"playing"};
@@ -46,14 +47,18 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
     return t.snapshot.val();
   }
   async function hint(code){
-    const t=await runTransaction(where(code),old=>{
+    const initial=(await get(where(code))).val();
+    const t=await runTransaction(where(code),current=>{
+      const old=current||initial;
       if(!old||old.host!==uid||old.phase!=="playing"||old.round?.type!=="letters"||old.round.revealed||old.round.hints>=2)return;
       return {...old,round:{...old.round,hints:(old.round.hints||0)+1}};
     },{applyLocally:false});
     return t.committed;
   }
   async function reveal(code){
-    const t=await runTransaction(where(code),old=>{
+    const initial=(await get(where(code))).val();
+    const t=await runTransaction(where(code),current=>{
+      const old=current||initial;
       if(!old||old.host!==uid||old.phase!=="playing"||!old.round||old.round.revealed)return;
       return {...old,round:{...old.round,revealed:true}};
     },{applyLocally:false});
@@ -61,8 +66,10 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
   }
   async function transition(code,{winner="",finish=false}={}){
     const chosen=String(winner||"");
+    const initial=(await get(where(code))).val();
     // Todas as alterações (placar + histórico + nova rodada/resultado) são ATÔMICAS.
-    const t=await runTransaction(where(code),old=>{
+    const t=await runTransaction(where(code),current=>{
+      const old=current||initial;
       if(!old||old.host!==uid||old.mode!=="letters"||old.phase!=="playing"||!old.round?.revealed||old.round.scored)return;
       if(chosen&&!old.profiles?.[chosen])return;
       const r=old.round;
