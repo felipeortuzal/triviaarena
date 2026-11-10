@@ -14,6 +14,7 @@ const safeNick=()=>{try{return localStorage.getItem('riviera-nick')||localStorag
 const saveNick=n=>{try{localStorage.setItem('riviera-nick',n)}catch{}};
 let DATA={puzzles:[FALLBACK_PUZZLE],rankings:[]},db=null,auth=null,uid=null,roomId=null,room=null,unsubRoom=null,modeChoice='letters',nick=safeNick(),view='home',busy=false,err='',imported=[],localHints=0;
 let localDemo=false,configured=false,dataReady=false,dataProblem='',connectionState=STANDALONE?'local':'checking',connectionProblem='';
+let selectedRounds=5;
 let roomGateway=null,phraseGame=null,partyGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,selectedWinner='',pendingJoinCode='';
 let stopGuess=()=>{},stopSubmissions=()=>{},currentGuessRound='',ownGuess='',submitted={},guessDrafts={},rankOverrideReason='';
 const onlineReady=()=>!!(uid&&db&&dataReady&&!localDemo);
@@ -36,7 +37,7 @@ function home(){
   return wrap(`<div class="grid modes"><button class="panel mode ${modeChoice==="letters"?"selected":""}" data-action="choose-letters"><div class="emoji">🧩</div><h2>Decifre a Frase</h2><p>Descubra expressões e curiosidades com números e iniciais. Duas dicas e revelação da resposta.</p></button><button class="panel mode orange ${modeChoice==="rank"?"selected":""}" data-action="choose-rank"><div class="emoji">🏆</div><h2>Estimativa de Ranking</h2><p>Acerte posições em rankings reais: países, filmes e economias. Dispute pontos com seu grupo.</p></button><button class="panel mode ${modeChoice==="mixed"?"selected":""}" data-action="choose-mixed"><div class="emoji">🎲</div><h2>Modo Misturado</h2><p>Alterne rodadas de frases e rankings, com um placar compartilhado.</p></button></div>
 <section class="panel homejoin" aria-label="Jogar neste aparelho"><div class="row between"><div><div class="eyebrow">PRÉVIA LOCAL • SEM CADASTRO</div><h2>Jogar neste aparelho</h2></div><span class="pill">🎲 Três modos</span></div><p>Experimente os três modos. Você pode jogar frases, estimar posições e alternar jogos com placar simulado, sem internet.</p><div class="actions">${btn("▶ Jogar neste aparelho","demo","lime")}${btn("👑 Testar lobby e placar","demo-lobby","ghost")}${dataProblem?btn("↻ Tentar carregar conteúdo","retry-data","ghost"):""}</div>${dataProblem?`<p class="notice" role="status">${esc(dataProblem)}. Uma rodada de reserva está disponível.</p>`:""}</section>
 <section class="panel homejoin" aria-label="Salas online"><div class="row between"><div><div class="eyebrow">SALA ONLINE</div><h2>Crie ou entre com um convite</h2></div><span class="pill">${online?"● Disponível":"○ Indisponível"}</span></div><p class="tiny" role="status">${esc(help)}</p>${connectionProblem?`<p class="notice tiny">${esc(connectionProblem)}</p>`:""}
-<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><label><span class="label">Modo da sala</span><select class="field" id="mode"><option value="letters" ${modeChoice==="letters"?"selected":""}>🧩 Decifre a Frase</option><option value="rank" ${modeChoice==="rank"?"selected":""}>🏆 Ranking</option><option value="mixed" ${modeChoice==="mixed"?"selected":""}>🎲 Misturado</option></select></label>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
+<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><label><span class="label">Modo da sala</span><select class="field" id="mode"><option value="letters" ${modeChoice==="letters"?"selected":""}>🧩 Decifre a Frase</option><option value="rank" ${modeChoice==="rank"?"selected":""}>🏆 Ranking</option><option value="mixed" ${modeChoice==="mixed"?"selected":""}>🎲 Misturado</option></select></label><label><span class="label">Rodadas por partida</span><select class="field" id="round-count"><option value="3" ${selectedRounds===3?"selected":""}>3 rodadas • rápida</option><option value="5" ${selectedRounds===5?"selected":""}>5 rodadas • padrão</option><option value="7" ${selectedRounds===7?"selected":""}>7 rodadas • longa</option></select></label>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
 <div class="stack"><label><span class="label">Código de convite</span><input class="field" id="join-code" maxlength="10" placeholder="Ex.: TRV7XK" value="${esc(pendingJoinCode||new URLSearchParams(location.search).get("room")||"")}"></label><p class="tiny">Quem recebe o link abre o site, escolhe um nick e entra na sala.</p>${btn("Entrar na sala →","join","primary",!online)}</div></div></section>
 <p class="footer">🎲 Desafios com sorteio sem repetição • 📱 Celular e computador • 🔒 Sem cadastro pessoal</p>`);
 }
@@ -44,9 +45,17 @@ function waiting(){
 const count=members().length, onlineCount=members().filter(m=>m.online).length;
 const canStart=!room.closed&&(['letters','rank','mixed'].includes(room.mode));
 return `<section class="panel lobby">
-<div class="row between"><div><div class="eyebrow">LOBBY PRIVADO</div><h2>Sua sala está pronta.</h2><p>Convide os amigos e comece a disputa!</p></div><span class="pill lobby-count">${count}/20 jogadores</span></div>
+<div class="row between"><div><div class="eyebrow">LOBBY PRIVADO · ${room.totalRounds||5} RODADAS</div><h2>Sua sala está pronta.</h2><p>Convide os amigos e comece a disputa! Ao completar ${room.totalRounds||5} rodadas, o pódio aparece automaticamente.</p></div><span class="pill lobby-count">${count}/20 jogadores</span></div>
 <div class="invite-card"><div><div class="eyebrow">CÓDIGO DA SALA</div><div class="invite-code">${esc(roomId)}</div><p class="tiny">Compartilhe o código ou envie um convite.</p></div><div class="stack"><label class="label" for="invite">LINK DO CONVITE</label><input class="field" readonly id="invite" value="${localDemo?'DEMONSTRAÇÃO LOCAL • Convites indisponíveis':esc(location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':''))}">${btn('📋 Copiar convite','copy','lime',localDemo)}</div></div>
 <div class="cardline row between"><div><h3>Participantes</h3><p class="tiny">${onlineCount} online · ${count} inscritos</p></div><span class="pill">${esc(room.mode==='letters'?'🧩 Decifre a Frase':room.mode==='mixed'?'🎲 Misturado':'🏆 Ranking')}</span></div>${roster()}
+${isHost()&&['rank','mixed'].includes(room.mode)?`<details class="custom-ranking" ${Object.keys(room.customRankings||{}).length?"":" "}><summary>＋ Adicionar ranking próprio (opcional)</summary>
+<p class="tiny">Até 3 listas, de 10 a 1.000 itens, com fonte e data. A lista do anfitrião será identificada como personalizada.</p>
+<div class="grid"><label class="stack"><span class="label">Título</span><input class="field" id="custom-title" placeholder="Ex.: Maiores cidades do Brasil"></label><label class="stack"><span class="label">Fonte</span><input class="field" id="custom-source" placeholder="Nome da publicação"></label>
+<label class="stack"><span class="label">URL HTTPS da fonte</span><input class="field" id="custom-url" placeholder="https://..."></label><label class="stack"><span class="label">Edição/data</span><input class="field" id="custom-snapshot" placeholder="Ex.: 2026-11"></label></div>
+<label class="stack"><span class="label">Critério e desempate</span><input class="field" id="custom-about" placeholder="Universo, indicador e desempate em caso de empate"></label>
+<label class="stack"><span class="label">Itens ordenados, uma linha por posição</span><textarea class="field" rows="5" id="custom-items" placeholder="1. 12 Angry Men&#10;2. Cidade de Deus&#10;3. ..."></textarea></label>
+${btn("✓ Validar e importar lista","import","ghost")}
+${Object.values(room.customRankings||{}).map(d=>`<p class="tiny">✓ ${esc(d.title)} · ${d.items.length} itens · fonte: ${esc(d.source)}</p>`).join("")}</details>`:""}
 ${!room.members?.[room.host]?.online?'<p class="notice">Anfitrião desconectado. Esperando o retorno…</p>':''}
 <div class="cardline stack">${room.closed?'<p class="notice">Esta sala foi encerrada.</p>':isHost()?`${btn(canStart?'▶ Iniciar partida':'Modo disponível em breve','start-game','primary',!canStart)}<p class="tiny">Depois de começar, novos jogadores não entram. O anfitrião controla as dicas e a pontuação.</p>${btn('Encerrar sala','close-room','ghost')}`:'<p class="tiny">Aguardando o anfitrião iniciar a partida…</p>'}
 ${btn('← Voltar ao início','leave-room','ghost')}</div></section>`;
@@ -55,8 +64,8 @@ function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined
 function isHost(){return localDemo||room?.host===uid}
 function roster(){return `<div class="roster">${members().map(m=>`<div class="player"><b>${esc(m.nick)} ${m.uid===room.host?'👑':''}</b><span>${m.online?'● Conectado':'○ Desconectado'} · ${room?.scores?.[m.uid]||0} ponto(s)</span></div>`).join('')}</div>`}
 function roomHeader(){
-  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
-  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
+  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1} DE ${room?.totalRounds||5}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
+  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0} DE ${room?.totalRounds||5}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
 }
 function letters(){
 const r=room.round,p=DATA.puzzles[r.index];
@@ -72,7 +81,7 @@ ${r.revealed?answer:hints}${!r.revealed?host:''}${scoring}
 ${!localDemo&&!room.members?.[room.host]?.online?'<div class="notice">⚠ O anfitrião está offline. A rodada continuará quando ele voltar.</div>':''}
 </section>${localDemo&&Object.keys(room.members||{}).length<2?'':`<aside class="panel scoreboard"><div class="eyebrow">PLACAR</div><h3>Quem está liderando?</h3>${roster()}<p class="tiny">${Object.keys(room.roundHistory||{}).length} rodada(s) concluída(s).</p></aside>`}</div>`;
 }
-function rankData(r){return DATA.rankings.find(x=>x.id===r.categoryId)}
+function rankData(r){return r.listSnapshot||room?.customRankings?.[r.categoryId]||DATA.rankings.find(x=>x.id===r.categoryId)}
 
 function localRankResolve(raw,d,limit){
  const value=norm(raw);
@@ -318,7 +327,7 @@ else if(action==="retry-data"){await loadData()}
 else if(action==="hint"&&localDemo){if(room.round?.type==='letters'){room.round.hints=Math.min(2,room.round.hints+1);render()}}
 else if(action==="reveal"&&localDemo){if(room.round?.type==='rank')localReveal();else{room.round.revealed=true;render()}}
 else if(['choose-letters','choose-rank','choose-mixed'].includes(action)){modeChoice=action.replace('choose-','').replace('rank','rank');render();const field=$('#mode');if(field)field.value=modeChoice;$('#nick')?.focus()}
-else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode()});connectRoom(result.code)}
+else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode(),totalRounds:selectedRounds});connectRoom(result.code)}
 else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||pendingJoinCode||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
 else if(action==='copy'){
  const url=location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':'');
@@ -348,7 +357,7 @@ else if(action==='override'&&isHost()&&room?.round?.type==='rank'){
 }
 }catch(e){error(e)}finally{busy=false}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handle(b.dataset.action)});
-document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='letter-winner')selectedWinner=e.target.value});
+document.addEventListener('change',e=>{if(e.target.id==='mode')modeChoice=e.target.value;if(e.target.id==='round-count')selectedRounds=Number(e.target.value);if(e.target.id==='letter-winner')selectedWinner=e.target.value});
 document.addEventListener('input',e=>{if(e.target.id==='nick')nick=e.target.value;if(e.target.id==='join-code')pendingJoinCode=e.target.value;if(e.target.id==='guess'&&room?.round)guessDrafts[roomId+':'+room.round.id]=e.target.value;if(e.target.id==='override-reason')rankOverrideReason=e.target.value});
 async function loadData(){
   if(STANDALONE){
