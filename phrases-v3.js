@@ -87,9 +87,9 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
     if(!t.committed){
       const current=await get(where(code));
       const state=current.val();
-      if(state?.phase==="finished"&&finish)return state;
-      if(state?.phase==="playing"&&!finish&&state.round?.revealed===false)return state;
-      throw Error("Esta rodada já foi processada ou ainda não foi revelada.");
+      // Uma ação simultânea ou repetida pode ser abortada pela transação.
+      // Nunca converta isso em pontuação duplicada nem em erro para o jogador.
+      return state;
     }
     return t.snapshot.val();
   }
