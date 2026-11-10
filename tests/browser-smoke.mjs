@@ -85,6 +85,38 @@ async function browserChecks(){
     await offlinePage.getByText("Resumo das 2 rodadas").waitFor();
     await offlinePage.locator('[data-action="leave-room"]').click();
     await offlinePage.locator('[data-action="demo"]').waitFor();
+    // Ranking jogável offline: envio, resolução com fonte e placar final.
+    await offlinePage.locator('[data-action="choose-rank"]').click();
+    await offlinePage.locator('[data-action="demo-lobby"]').click();
+    await offlinePage.locator('[data-action="start-game"]').click();
+    await offlinePage.locator(".rank-target strong").waitFor();
+    await offlinePage.locator("#guess").fill("Brasil");
+    await offlinePage.locator('[data-action="guess"]').click();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.getByText("Quem chegou mais perto?").waitFor();
+    await offlinePage.locator('[data-action="finish-game"]').click();
+    await offlinePage.getByText("Fim de jogo!").waitFor();
+    await offlinePage.locator('[data-action="leave-room"]').click();
+    // Misto alterna Frase → Ranking → Frase com placar e histórico únicos.
+    await offlinePage.locator('[data-action="choose-mixed"]').click();
+    await offlinePage.locator('[data-action="demo-lobby"]').click();
+    await offlinePage.locator('[data-action="start-game"]').click();
+    await offlinePage.locator(".largecode").waitFor();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.locator('[data-action="next"]').click();
+    await offlinePage.locator(".rank-target strong").waitFor();
+    await offlinePage.locator("#guess").fill("Brasil");
+    await offlinePage.locator('[data-action="guess"]').click();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.getByText("Quem chegou mais perto?").waitFor();
+    await offlinePage.locator('[data-action="next"]').click();
+    await offlinePage.locator(".largecode").waitFor();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.locator('[data-action="finish-game"]').click();
+    await offlinePage.getByText("Resumo das 3 rodadas").waitFor();
+    assert.equal(await offlinePage.locator(".history-row").count(),3);
+    const mobileWidth=await offlinePage.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+    assert.ok(mobileWidth<=1,"overflow horizontal nos três modos: "+mobileWidth);
     await offlineCtx.close();
     // Simula falha de conteúdo: a tela inicial e uma rodada-reserva continuam disponíveis.
     const fallbackCtx=await browser.newContext({viewport:{width:375,height:812}});
