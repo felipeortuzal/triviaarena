@@ -1,4 +1,4 @@
-name: Riviera Showdown · Qualidade e salas seguras
+name: Riviera Showdown · Etapa 3 Jogo multiplayer
 on:
   push:
     branches: [main, "feat/**"]
@@ -30,3 +30,10 @@ jobs:
         run: npm run test:rooms
       - name: HTML produzido da mesma revisão do frontend
         run: git diff --exit-code -- riviera-showdown.html
+      - name: Arquivo de prévia para abrir no navegador
+        uses: actions/upload-artifact@v4
+        with:
+          name: riviera-showdown-preview
+          path: riviera-showdown.html
+          if-no-files-found: error
+          retention-days: 30
