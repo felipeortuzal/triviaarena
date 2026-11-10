@@ -25,7 +25,7 @@ async function browserChecks(){
     await page.locator('[data-action="hint"]').click();
     await page.getByText("Dica 2:",{exact:false}).waitFor();
     await page.locator('[data-action="reveal"]').click();
-    await page.getByText("RESPOSTA",{exact:true}).waitFor();
+    await page.getByText("RESPOSTA REVELADA",{exact:true}).waitFor();
     await page.locator('[data-action="next"]').click();
     await page.getByText("RODADA 2",{exact:false}).waitFor();
     await page.locator('[data-action="stop-demo"]').click();
