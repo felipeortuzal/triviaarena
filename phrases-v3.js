@@ -21,6 +21,9 @@ export const makePhraseGame=function makePhraseGame({db,uid,api,getPuzzles,rando
     if(state.mode!=="letters")throw Error("Este modo ainda não foi habilitado para partidas online.");
   }
   async function start(code){
+    const preview=await get(where(code));
+    if(!preview.exists()||preview.val().host!==uid)throw Error("Somente o anfitrião pode iniciar.");
+    if(preview.val().mode!=="letters")throw Error("Este modo ainda não está disponível para partidas online.");
     const register=await get(reg(code));
     if(!register.exists()||register.val().host!==uid)throw Error("Somente o anfitrião pode iniciar.");
     if(register.val().phase==="open"){
