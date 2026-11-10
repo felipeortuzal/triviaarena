@@ -17,7 +17,7 @@ async function client(name,code){
   const db=getDatabase(app);connectDatabaseEmulator(db,"127.0.0.1",9000);
   const uid=(await signInAnonymously(auth)).user.uid;
   const gateway=makeRoomGateway({db,uid,api,...(code?{generateCode:()=>code}:{})});
-  const game=createPartyGame({db,uid,api,getPuzzles:()=>puzzles,getRankings:()=>[fixture],randomIndex:()=>code?4:0});
+  const game=createPartyGame({db,uid,api,getPuzzles:()=>puzzles,getRankings:()=>[fixture],randomIndex:n=>(code?4:0)%n});
   clients.push({app,auth,db});
   return {uid,db,gateway,game};
 }
