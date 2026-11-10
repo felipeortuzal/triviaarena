@@ -237,7 +237,7 @@ function importLocalRanking(fields){
  if(!fields.title||fields.title.trim().length<5||!fields.source||fields.source.trim().length<4||
    !fields.url?.startsWith("https://")||!fields.snapshot||fields.snapshot.trim().length<4||
    !fields.about||fields.about.trim().length<12)throw Error("Preencha título, fonte, URL HTTPS, data e critério.");
- const id="custom-"+norm(fields.title).replace(/ /g,"-").slice(0,36);
+ const id="host-"+norm(fields.title).replace(/ /g,"-").slice(0,36);
  const list={id,title:fields.title.trim(),source:fields.source.trim(),url:fields.url.trim(),
   snapshot:fields.snapshot.trim(),about:fields.about.trim(),items,origin:"host",aliases:{},
   itemIds:items.map((_,i)=>id+"-"+(i+1))};
@@ -367,6 +367,7 @@ function gradePhraseDemo(guess,puzzle){
  const a=tokens(answer),b=tokens(raw);
  const critical=new Set(["antigo","antiga","moderno","moderna","ocidental","oriental","bissexto","completa","permanente"]);
  if(a.some(x=>critical.has(x)&&!b.includes(x)))return {status:"review",points:0,reason:"Termo essencial ausente"};
+ if(a.length>=2&&!b.includes(a[1]))return {status:"review",points:0,reason:"Termo principal ausente"};
  const matches=a.filter(x=>b.includes(x)).length;
  if(a.length>=3&&b.length>=3&&matches/a.length>=.75&&matches/b.length>=.7&&b.length<=a.length+2)
    return {status:"approx",points:1,reason:"Resposta aproximada reconhecida"};
