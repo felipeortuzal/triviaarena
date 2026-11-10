@@ -5,7 +5,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
   const roomAt=code=>ref(db,`roomPublic/${code}`);
   const regAt=code=>ref(db,`roomRegistry/${code}`);
   const ensureHost=state=>{if(!state||state.host!==uid)throw Error("Somente o anfitrião pode conduzir a partida.");};
-  const rankings=()=>getRankings().filter(isEligibleRanking);
+  const rankings=()=>getRankings().filter(l=>l.status!=="candidate-unverified"&&isEligibleRanking(l));
   const random=n=>{
     if(n<1)throw Error("Catálogo sem desafios disponíveis.");
     const result=randomIndex(n);
