@@ -27,4 +27,23 @@
 .history-row b{color:var(--text);text-align:right}
 @media(max-width:860px){.game-layout{grid-template-columns:1fr}.scoreboard{position:static}.round-panel .largecode{min-height:155px}}
 @media(max-width:480px){.podium-item{grid-template-columns:39px minmax(0,1fr) auto;padding:12px 10px}.podium-item span{font-size:23px}.podium-item strong,.podium-item b{font-size:15px}.history-row{flex-direction:column;gap:5px}.history-row b{text-align:left}.round-panel .largecode{font-size:clamp(35px,9vw,62px)}}
+
+/* Estimativa de Ranking + Misturado — edição Riviera Showdown */
+.modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+.modes .mode{min-height:245px;border-color:#665182;background:linear-gradient(160deg,#281c46,#151125)}
+.modes .mode.orange{background:linear-gradient(150deg,#352340,#191429)}
+.modes .mode.selected{border-color:var(--lime)!important;box-shadow:0 0 0 2px #b9eb5455,0 18px 45px #0003}
+.modes .emoji{display:inline-flex;align-items:center;justify-content:center;width:66px;height:66px;border-radius:20px;background:#39285e}
+.rank-category{text-align:center}.rank-category h2{font-size:clamp(27px,3.5vw,44px);margin:8px 0}.rank-category p{max-width:600px;margin:auto}
+.rank-target{display:grid;justify-items:center;padding:25px 16px;border:1px solid #7452b1;border-radius:20px;background:radial-gradient(ellipse at 50% 60%,#432e73 0%,#16142c 76%);gap:3px}
+.rank-target span{font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:850;color:#c9b9eb;text-align:center}
+.rank-target strong{font-size:clamp(76px,11vw,142px);letter-spacing:-.07em;line-height:1.1;color:var(--lime);text-shadow:0 0 45px #baf76544}
+.rank-source{font-size:13px;color:#c7bcd8;text-align:center;border-top:1px solid var(--line);padding:15px 0;line-height:1.7}
+.rank-source a{display:inline-block;text-underline-offset:4px}
+.round-panel .board th,.round-panel .board td{white-space:normal;overflow-wrap:anywhere}
+.round-panel .board td{vertical-align:top}
+.round-panel .board td:last-child{font-weight:950}
+.round-panel textarea.field{min-height:82px;resize:vertical}
+@media(max-width:850px){.modes{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.modes{grid-template-columns:1fr}.modes .mode{min-height:175px}.rank-target strong{font-size:clamp(72px,20vw,115px)}}
 </style></head><body><header><div class="top"><a href="./" aria-label="Riviera Showdown — início"><img class="logo" src="logo.svg" alt="Riviera Showdown"></a><span class="pill" id="connection">Modo local</span></div></header><main class="shell" id="app"><p>Preparando Riviera Showdown…</p><noscript><p>Ative o JavaScript para jogar.</p></noscript></main><script type="module" src="app.js"></script></body></html>
