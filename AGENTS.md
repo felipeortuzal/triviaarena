@@ -6,6 +6,10 @@ Este repositório é a fonte de continuidade do projeto. O nome público é **Ri
 
 **Felipe quer abrir e experimentar o SITE PRONTO, não navegar pelo repositório ou visualizar o código no GitHub.** Em cada etapa priorize um link direto da experiência interativa no navegador, ou um arquivo `.html` autocontido **anexado à resposta** e abrível por duplo clique, em vez de usar links para páginas do GitHub como entrega principal. Repositório, commit, PR e CI são apenas rastreabilidade secundária. Se não houver hospedagem HTTPS verificada, diga isso claramente; nunca apresente link do GitHub como se fosse um site publicado. Preserve o layout premium de jogos sociais: visual noturno, roxo e lima, tipografia expressiva, cards e botões próprios, responsividade mobile e sem aparência genérica de IA.
 
+## Regra do produto — partidas fechadas e correção aproximada (10/11/2026)
+
+**Partidas sempre têm 3, 5 ou 7 rodadas, com 5 por padrão.** Uma rodada de Ranking distribui 5/3/1 pontos por colocação e mantém placar acumulado; nunca prolongar rankings indefinidamente. A última rodada precisa somar seus pontos e **encerrar automaticamente** com um pódio. Decifre a Frase oferece respostas digitadas privadas e pontuação **exata +2 / aproximada +1 / incorreta 0**, preservando números e palavras essenciais, com revisão manual justificada do anfitrião quando a equivalência for discutível. Regras iguais em demo local, Firebase Emulator e publicação real. Não quebrar partidas que já começaram com gabarito antigo.
+
 ## Quando Felipe disser “execute etapa N”
 
 1. Resolva o número no [índice de execução](docs/etapas/README.md). Aceite “etapa1”, “etapa 1”, “etapa 01” e equivalentes sem diferenciar maiúsculas. Para “retome a etapa N”, use o registro de progresso e continue da primeira pendência após verificá-la. Uma consulta de status pede apenas leitura e relato. Um pedido para executar autoriza implementar, testar e salvar aquela etapa. Se Felipe indicar mais de uma, siga a ordem de dependência e reporte cada resultado.
