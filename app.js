@@ -63,9 +63,16 @@ ${btn('← Voltar ao início','leave-room','ghost')}</div></section>`;
 function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined||0)-(b.joined||0));}
 function isHost(){return localDemo||room?.host===uid}
 function roster(){return `<div class="roster">${members().map(m=>`<div class="player"><b>${esc(m.nick)} ${m.uid===room.host?'👑':''}</b><span>${m.online?'● Conectado':'○ Desconectado'} · ${room?.scores?.[m.uid]||0} ponto(s)</span></div>`).join('')}</div>`}
+function matchMeter(){
+ const total=room?.totalRounds||5,current=Math.max(0,Math.min(total,room?.number||0));
+ return `<div class="match-meter" aria-label="Progresso de rodada ${current} de ${total}">
+  <div class="row between"><span class="eyebrow">PARTIDA · ${total} RODADAS</span><span class="tiny">Rodada ${current}/${total}</span></div>
+  <div class="match-track"><span style="width:${100*current/total}%"></span></div>
+ </div>`;
+}
 function roomHeader(){
-  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1} DE ${room?.totalRounds||5}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>`;
-  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0} DE ${room?.totalRounds||5}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>`;
+  if(localDemo)return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">JOGAR NESTE APARELHO • RODADA ${room?.number||1} DE ${room?.totalRounds||5}</div><h2>Demonstração: ${room.mode==="rank"?"Estimativa de Ranking":room.mode==="mixed"?"Modo Misturado":"Decifre a Frase"}</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>${matchMeter()}`;
+  return `<div class="row between" style="margin-bottom:20px"><div><div class="eyebrow">SALA ${esc(roomId)} • RODADA ${room?.number||0} DE ${room?.totalRounds||5}</div><h2>${room?.mode==="mixed"?"Modo misturado":room?.mode==="rank"?"Estimativa de Ranking":"Decifre a Frase"}</h2></div>${btn("📋 Convidar","copy","ghost")}</div>${matchMeter()}`;
 }
 function phraseReview(r){
  if(!r.resultReady)return `<div class="notice">🔎 ${isHost()?"Preparando as respostas. Tente revelar novamente se necessário.":"O anfitrião está avaliando as respostas."}</div>${isHost()?btn("Atualizar avaliação","reveal","ghost"):""}`;
