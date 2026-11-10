@@ -125,3 +125,35 @@ test("envio concorrente ao fechamento não permite palpite depois da revelação
   assert.equal(value||"",state.round.guesses?.[guest.uid]||"");
   assert.ok(["fulfilled","rejected"].includes(sent.status));
 });
+
+test("partida de 3 rodadas termina sozinha, aceita aproximação +0,5 e congela o gabarito",async()=>{
+ const host=await client("round-host","RVRT25"),guest=await client("round-guest");
+ await host.gateway.createRoom({nick:"Host",mode:"letters",roundLimit:3});
+ await guest.gateway.joinRoom({code:"RVRT25",nick:"Visitante"});
+ const code="RVRT25";
+ let state=await host.game.start(code);
+ assert.equal(state.roundLimit,3);
+ assert.equal(state.round.type,"letters");
+ assert.equal(state.round.content.answer,puzzles[state.round.index].answer);
+ assert.equal(state.round.content.code,puzzles[state.round.index].code);
+ await assert.rejects(set(ref(host.db,"roomPublic/"+code+"/roundLimit"),10),/permission/i);
+ await host.game.revealPhrase(code);
+ state=await host.game.advance(code,{winner:guest.uid,winnerPoints:0.5});
+ assert.equal(state.number,2);
+ assert.equal(state.scores[guest.uid],0.5);
+ assert.equal(state.roundHistory["frase-1"].winnerPoints,0.5);
+ await host.game.revealPhrase(code);
+ state=await host.game.advance(code,{winner:host.uid,winnerPoints:1});
+ assert.equal(state.number,3);
+ assert.equal(state.scores[host.uid],1);
+ await host.game.revealPhrase(code);
+ state=await host.game.advance(code,{winner:guest.uid,winnerPoints:0.5});
+ assert.equal(state.phase,"finished","terceira rodada deve abrir o pódio automaticamente");
+ assert.equal(state.scores[guest.uid],1);
+ assert.equal(Object.keys(state.roundHistory).length,3);
+ const repeated=await host.game.advance(code,{winner:guest.uid,winnerPoints:1});
+ assert.equal(repeated.scores[guest.uid],1,"pontuação não deve duplicar após fim");
+ const fromGuest=(await get(ref(guest.db,"roomPublic/"+code))).val();
+ assert.equal(fromGuest.phase,"finished");
+ assert.equal(fromGuest.scores[guest.uid],1);
+});
