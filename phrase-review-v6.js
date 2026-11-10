@@ -33,7 +33,10 @@ export function gradePhrase(guess,puzzle){
  if(expected.length<3||given.length<3)return {status:"review",points:0,reason:"Resposta curta demais para aproximação automática"};
  // Termos que alteram significado não podem desaparecer na resposta incompleta.
  if(expected.some(x=>critical.has(x)&&!given.includes(x)))return {status:"review",points:0,reason:"Termo essencial não informado"};
- const matched=expected.filter(x=>given.some(y=>x===y||x.length>=6&&y.length>=6&&editDistance(x,y)<=1)).length;
+ const similar=(x,y)=>x===y||x.length>=6&&y.length>=6&&editDistance(x,y)<=1;
+ if(expected.length>=2&&!given.some(y=>similar(expected[1],y)))
+   return {status:"review",points:0,reason:"Termo principal da frase ausente ou substituído"};
+ const matched=expected.filter(x=>given.some(y=>similar(x,y))).length;
  const recall=matched/expected.length,precision=matched/given.length;
  if(recall>=0.75&&precision>=0.7&&given.length<=expected.length+2){
    return {status:"approx",points:1,reason:"Resposta equivalente ou incompleta, mas com elementos essenciais"};
