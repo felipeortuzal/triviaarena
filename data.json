@@ -2625,6 +2625,184 @@
       "edition": "01/11/2026",
       "ties": "Empates, quando existentes, seguem a ordem numerada da fonte; não presumir ordem em valores iguais sem referência.",
       "method": "Ordem de classificação do instantâneo indicado pela fonte; sem reordenar ou recalcular valores no cliente."
+    },
+    {
+      "id": "ifpi-artist-2025",
+      "title": "Artistas globais mais vendidos em 2025",
+      "eyebrow": "MÚSICA GLOBAL",
+      "emoji": "🎵",
+      "question": "Qual artista ficou nessa posição?",
+      "category": "Música",
+      "source": "IFPI — Global Recording Artist Chart 2025",
+      "url": "https://www.ifpi.org/our-industry/global-charts/",
+      "snapshot": "Edição anual 2025 (divulgada em 2026)",
+      "edition": "2025",
+      "observedAt": "2026-11-10",
+      "about": "Artistas mais vendidos globalmente em 2025, somando consumo de catálogo em formatos físicos, downloads e streaming segundo metodologia de unidades equivalentes IFPI. Ordem oficial, sem recalcular.",
+      "items": [
+        "Taylor Swift",
+        "Stray Kids",
+        "Drake",
+        "The Weeknd",
+        "Bad Bunny",
+        "Kendrick Lamar",
+        "Morgan Wallen",
+        "Sabrina Carpenter",
+        "Billie Eilish",
+        "Lady Gaga"
+      ],
+      "aliases": {
+        "The Weeknd": [
+          "Weeknd",
+          "Abel Tesfaye"
+        ],
+        "Bad Bunny": [
+          "Benito Antonio Martínez Ocasio"
+        ]
+      },
+      "revision": "ifpi-global-artist-2025",
+      "verifiedPrefix": 10,
+      "verificationNote": "Posições 1 a 10 conferidas na lista oficial IFPI Global Recording Artist Chart 2025, consulta 10/11/2026.",
+      "method": "Consumo equivalente do catálogo do artista em todos os formatos durante o ano civil de 2025, conforme publicação IFPI.",
+      "ties": "Aplicar apenas a ordem oficial publicada pela IFPI, sem desempate por estimativa.",
+      "origin": "official",
+      "itemIds": [
+        "ifpi-artist-2025-0001",
+        "ifpi-artist-2025-0002",
+        "ifpi-artist-2025-0003",
+        "ifpi-artist-2025-0004",
+        "ifpi-artist-2025-0005",
+        "ifpi-artist-2025-0006",
+        "ifpi-artist-2025-0007",
+        "ifpi-artist-2025-0008",
+        "ifpi-artist-2025-0009",
+        "ifpi-artist-2025-0010"
+      ]
+    },
+    {
+      "id": "wipo-innovation-2026",
+      "title": "Economias mais inovadoras em 2026",
+      "eyebrow": "TECNOLOGIA E INOVAÇÃO",
+      "emoji": "💡",
+      "question": "Qual economia está nesta posição?",
+      "category": "Tecnologia",
+      "source": "WIPO — Global Innovation Index 2026",
+      "url": "https://www.wipo.int/pressroom/en/articles/2026/article_0014.html",
+      "snapshot": "Global Innovation Index 2026, edição de 29/09/2026",
+      "edition": "2026",
+      "observedAt": "2026-11-10",
+      "about": "Índice composto de inovação com 79 indicadores nas dimensões de insumos e resultados; 20 primeiras economias do ranking oficial da WIPO em 2026.",
+      "items": [
+        "Suíça",
+        "Suécia",
+        "Estados Unidos",
+        "Coreia do Sul",
+        "Singapura",
+        "Reino Unido",
+        "Países Baixos",
+        "Finlândia",
+        "Dinamarca",
+        "China",
+        "Alemanha",
+        "Japão",
+        "França",
+        "Hong Kong (China)",
+        "Israel",
+        "Canadá",
+        "Estônia",
+        "Áustria",
+        "Irlanda",
+        "Austrália"
+      ],
+      "aliases": {
+        "Suíça": [
+          "Switzerland"
+        ],
+        "Suécia": [
+          "Sweden"
+        ],
+        "Estados Unidos": [
+          "USA",
+          "United States"
+        ],
+        "Coreia do Sul": [
+          "Republic of Korea",
+          "South Korea"
+        ],
+        "Singapura": [
+          "Singapore"
+        ],
+        "Reino Unido": [
+          "United Kingdom",
+          "UK"
+        ],
+        "Países Baixos": [
+          "Netherlands",
+          "Holland"
+        ],
+        "Finlândia": [
+          "Finland"
+        ],
+        "Dinamarca": [
+          "Denmark"
+        ],
+        "Alemanha": [
+          "Germany"
+        ],
+        "Japão": [
+          "Japan"
+        ],
+        "França": [
+          "France"
+        ],
+        "Hong Kong (China)": [
+          "Hong Kong China",
+          "Hong Kong, China"
+        ],
+        "Canadá": [
+          "Canada"
+        ],
+        "Estônia": [
+          "Estonia"
+        ],
+        "Áustria": [
+          "Austria"
+        ],
+        "Irlanda": [
+          "Ireland"
+        ],
+        "Austrália": [
+          "Australia"
+        ]
+      },
+      "revision": "wipo-gii-2026",
+      "verifiedPrefix": 20,
+      "verificationNote": "Posições 1 a 20 comparadas à listagem oficial da WIPO na edição GII 2026 (29/09/2026).",
+      "method": "Ranking composto WIPO GII 2026 de 139 economias; recorte preserva só posições 1 a 20 publicadas na referência.",
+      "ties": "Ordem sequencial do relatório WIPO para 2026; não derivar novos empates.",
+      "origin": "official",
+      "itemIds": [
+        "wipo-innovation-2026-0001",
+        "wipo-innovation-2026-0002",
+        "wipo-innovation-2026-0003",
+        "wipo-innovation-2026-0004",
+        "wipo-innovation-2026-0005",
+        "wipo-innovation-2026-0006",
+        "wipo-innovation-2026-0007",
+        "wipo-innovation-2026-0008",
+        "wipo-innovation-2026-0009",
+        "wipo-innovation-2026-0010",
+        "wipo-innovation-2026-0011",
+        "wipo-innovation-2026-0012",
+        "wipo-innovation-2026-0013",
+        "wipo-innovation-2026-0014",
+        "wipo-innovation-2026-0015",
+        "wipo-innovation-2026-0016",
+        "wipo-innovation-2026-0017",
+        "wipo-innovation-2026-0018",
+        "wipo-innovation-2026-0019",
+        "wipo-innovation-2026-0020"
+      ]
     }
   ]
 }
