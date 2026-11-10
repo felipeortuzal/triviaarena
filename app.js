@@ -184,6 +184,7 @@ function nextChoice(){const current=room.round;let type=room.mode==='mixed'?(cur
  const pool=[...DATA.rankings,...(room.customRankings||[])];if(!pool.length)throw Error('Não há rankings cadastrados.');const used=room.usedRanks||[];let choices=pool.filter(x=>!used.includes(x.id));if(!choices.length)choices=pool;let c=pick(choices);const limits=[25,50,75,100,250,500,1000].filter(n=>n<=c.items.length);if(!limits.includes(c.items.length))limits.push(c.items.length);const limit=pick(limits);const history=room.targetHistory?.[c.id+'-'+limit]||[];let positions=Array.from({length:limit},(_,i)=>i+1).filter(i=>!history.includes(i));if(!positions.length)positions=Array.from({length:limit},(_,i)=>i+1);const target=pick(positions);const id='r'+Date.now().toString(36)+random(9999);return {type:'rank',categoryId:c.id,custom:room.customRankings?.find(x=>x.id===c.id)||null,limit,target,id,revealed:false,usedRanks:choices.length===pool.length&&used.length?[c.id]:[...used,c.id],targetHistory:{...(room.targetHistory||{}),[c.id+'-'+limit]:positions.length===limit&&history.length?[target]:[...history,target]}}}
 async function nextRound(){if(localDemo){nextLocalRound();return}throw Error('Partidas online serão habilitadas na etapa 3.');if(!isHost())return;let add=nextChoice();const updateData={number:(room.number||0)+1,round:add};if(add.usedLetters)updateData.usedLetters=add.usedLetters;if(add.usedRanks)updateData.usedRanks=add.usedRanks;if(add.targetHistory)updateData.targetHistory=add.targetHistory;delete add.usedLetters;delete add.usedRanks;delete add.targetHistory;if(room.round?.type==='letters'&&room.round.revealed){const winner=$('#letter-winner')?.value;if(winner){updateData[`scores/${winner}`]=(room.scores?.[winner]||0)+1}}if(room.round?.type==='rank'&&room.round.revealed&&!room.round.scored){const ranked=scoreRank(room.round);const scores={...room.scores};ranked.forEach(x=>{if(x.place&&x.place<=3)scores[x.uid]=(scores[x.uid]||0)+({1:5,2:3,3:1}[x.place]||0)});updateData.scores=scores}await update(ref(db,'rooms/'+roomId),updateData)}
 function startDemo(){
+  if(modeChoice!=="letters"){startDemoLobby();startDemoFromLobby();return}
   currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();
   unsubRoom?.();unsubRoom=null;
   localDemo=true;roomId="LOCAL";
@@ -191,39 +192,118 @@ function startDemo(){
   room={host:"local",mode:"letters",number:1,members:{local:{uid:"local",nick:"Jogador",joined:Date.now()}},scores:{local:0},usedLetters:[index],round:{type:"letters",index,hints:0,revealed:false}};
   render();
 }
+function localChooseRound(){
+ const nextType=room.mode==="rank"?"rank":room.mode==="mixed"?(room.round?.type==="letters"?"rank":"letters"):"letters";
+ const number=(room.number||0)+1;
+ if(nextType==="letters"){
+   const pool=DATA.puzzles.map((_,i)=>i).filter(i=>!(room.usedLetters||[]).includes(i));
+   const choices=pool.length?pool:DATA.puzzles.map((_,i)=>i);
+   const index=choices[random(choices.length)];
+   room.usedLetters=pool.length?[...(room.usedLetters||[]),index]:[index];
+   room.round={type:"letters",id:`frase-${number}`,index,hints:0,revealed:false,scored:false};
+ }else{
+   const eligible=DATA.rankings.filter(d=>Array.isArray(d.items)&&d.items.length>=25&&d.url?.startsWith("https://")&&d.source&&d.snapshot);
+   if(!eligible.length)throw Error("Nenhuma lista de ranking disponível nesta prévia.");
+   const combinations=[];
+   for(const d of eligible)for(const limit of [25,50,75,100].filter(n=>n<=d.items.length)){
+     for(let target=1;target<=limit;target++)combinations.push({categoryId:d.id,limit,target});
+   }
+   const fresh=combinations.filter(x=>!(room.usedRanks||[]).includes(`${x.categoryId}:${x.limit}:${x.target}`));
+   const choices=fresh.length?fresh:combinations;
+   const selected=choices[random(choices.length)];
+   const key=`${selected.categoryId}:${selected.limit}:${selected.target}`;
+   room.usedRanks=fresh.length?[...(room.usedRanks||[]),key]:[key];
+   room.round={type:"rank",id:`ranking-${number}`,...selected,revealed:false,scored:false,resultReady:false};
+   const d=rankData(room.round),sample=Math.min(selected.limit-1,selected.target+1);
+   room.localGuesses={guest:d.items[sample]};
+   ownGuess="";submitted={guest:true};guessDrafts={};
+ }
+ room.number=number;room.phase="playing";selectedWinner="";render();
+}
+
 function nextLocalRound(){
-  if(!localDemo||!room?.round?.revealed)return;
-  if(Object.keys(room.members||{}).length>1){const winner=$('#letter-winner')?.value||selectedWinner||'';localScoreCurrentRound(winner)}
-  const used=room.usedLetters||[],all=DATA.puzzles.map((_,i)=>i);
-  let available=all.filter(i=>!used.includes(i));
-  if(!available.length)available=all;
-  const index=available[random(available.length)];
-  room.usedLetters=available.length===all.length&&used.length?[index]:[...used,index];
-  room.number++;
-  room.round={type:"letters",index,hints:0,revealed:false};
-  selectedWinner='';render();
+ if(!localDemo||!room?.round?.revealed)return;
+ if(room.localGame){localAdvance(false);return}
+ const used=room.usedLetters||[],all=DATA.puzzles.map((_,i)=>i);
+ let available=all.filter(i=>!used.includes(i));
+ if(!available.length)available=all;
+ const index=available[random(available.length)];
+ room.usedLetters=available.length===all.length&&used.length?[index]:[...used,index];
+ room.number++;room.round={type:"letters",index,hints:0,revealed:false};
+ selectedWinner="";render();
 }
+
 function startDemoLobby(){
- localDemo=true;roomId='DEMO45';selectedWinner='';
- room={host:'local',mode:'letters',phase:'lobby',number:0,
- members:{local:{uid:'local',nick:'Você (demo)',joined:Date.now(),online:true},guest:{uid:'guest',nick:'Amigo simulado',joined:Date.now()+1,online:true}},
- scores:{local:0,guest:0},roundHistory:{},usedLetters:[]};render();
+ localDemo=true;roomId="DEMO45";selectedWinner="";
+ room={host:"local",mode:modeChoice,phase:"lobby",number:0,localGame:true,
+ members:{local:{uid:"local",nick:"Você (demo)",joined:Date.now(),online:true},
+ guest:{uid:"guest",nick:"Amigo simulado",joined:Date.now()+1,online:true}},
+ scores:{local:0,guest:0},roundHistory:{},usedLetters:[],usedRanks:[]};
+ render();
 }
+
 function startDemoFromLobby(){
- if(!localDemo||room?.phase!=='lobby')return;
- const available=DATA.puzzles.map((_,i)=>i),index=available[random(available.length)];
- room.number=1;room.phase='playing';room.usedLetters=[index];room.round={type:'letters',id:'frase-1',index,hints:0,revealed:false};render();
+ if(!localDemo||room?.phase!=="lobby")return;
+ localChooseRound();
 }
+
 function localScoreCurrentRound(winner){
  if(room.round.scored)return;
- if(winner&&room.members[winner])room.scores[winner]=(room.scores[winner]||0)+1;
- room.round.scored=true;room.round.winner=winner;
- room.roundHistory??={};room.roundHistory['frase-'+room.number]={id:'frase-'+room.number,number:room.number,index:room.round.index,hints:room.round.hints,winner};
+ const r=room.round;
+ if(r.type==="rank"){
+   if(!r.resultReady)throw Error("Revele os palpites antes de pontuar.");
+   const awarded={};
+   for(const result of Object.values(r.review||{})){
+     awarded[result.uid]=result.points||0;
+     room.scores[result.uid]=(room.scores[result.uid]||0)+(result.points||0);
+   }
+   room.roundHistory[r.id]={id:r.id,number:room.number,type:"rank",categoryId:r.categoryId,
+     target:r.target,limit:r.limit,review:r.review,awarded,overrides:r.overrides||{}};
+ }else{
+   if(winner&&room.members[winner])room.scores[winner]=(room.scores[winner]||0)+1;
+   room.roundHistory[r.id]={id:r.id,number:room.number,type:"letters",index:r.index,hints:r.hints||0,winner};
+ }
+ r.scored=true;
 }
-function finishLocalDemo(){
- if(!localDemo||!room.round?.revealed)return;
- localScoreCurrentRound($('#letter-winner')?.value||selectedWinner||'');
- room.phase='finished';render();
+
+function localAdvance(finish){
+ if(!localDemo||!room?.round?.revealed||room.round.scored)return;
+ localScoreCurrentRound(room.round.type==="letters"?($("#letter-winner")?.value||selectedWinner||""):"");
+ if(finish){room.phase="finished";render();return}
+ localChooseRound();
+}
+
+function finishLocalDemo(){localAdvance(true)}
+
+function localSubmitGuess(guess){
+ const text=String(guess||"").trim();
+ if(!text||text.length>120)throw Error("Digite um palpite entre 1 e 120 caracteres.");
+ room.localGuesses??={};
+ room.localGuesses.local=text;ownGuess=text;submitted.local=true;
+ render();
+}
+
+function localReveal(){
+ const r=room.round;
+ if(r.revealed){render();return}
+ r.revealed=true;
+ if(r.type==="rank"){
+   r.guesses={...(room.localGuesses||{})};
+   r.review=localRankScore(r);
+   r.resultReady=true;
+ }
+ render();
+}
+
+function localCorrectRanking({player,position,reason}){
+ const r=room.round;
+ if(r.type!=="rank"||!r.resultReady||r.scored)throw Error("Esta rodada não permite correções.");
+ const pos=Number(position),explanation=String(reason||"").trim();
+ if(!Number.isInteger(pos)||pos<0||pos>r.limit)throw Error("Informe a posição de 0 até "+r.limit);
+ if(explanation.length<8)throw Error("Escreva uma justificativa com pelo menos 8 caracteres.");
+ if(!room.members[player])throw Error("Jogador não encontrado.");
+ r.overrides??={};r.overrides[player]={position:pos,reason:explanation};
+ r.review=localRankScore(r);render();
 }
 async function handle(action){if(busy)return;busy=true;try{if(action==="demo"){startDemo()}
 else if(action==="demo-lobby"){startDemoLobby()}
