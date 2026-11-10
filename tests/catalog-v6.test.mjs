@@ -54,6 +54,5 @@ test("importador recusa fonte vazia, ordem incompleta, duplicatas e aliases ambÃ
  assert.throws(()=>importRanking({...valid,url:"javascript:alert(1)"}),/URL/i);
  assert.throws(()=>importRanking({...valid,rawItems:"Item 1\nItem 2"}),/Quantidade/i);
  assert.throws(()=>importRanking({...valid,rawItems:items.slice(0,9).concat("Item 1").join("\n")}),/duplicad/i);
- const list=importRanking({...valid,aliases:{"Item 1":["apelido"],"Item 2":["Apelido"]}});
- assert.ok(validateRanking(list).some(x=>x.toLowerCase().includes("alias")));
+ assert.throws(()=>importRanking({...valid,aliases:{"Item 1":["apelido"],"Item 2":["Apelido"]}}),/Alias/i);
 });
