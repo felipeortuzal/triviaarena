@@ -18,3 +18,15 @@
 - Jogar três rodadas. Abrir as duas dicas em uma delas, recarregar o celular durante outra, atribuir um acerto, encerrar após a última revelação e comparar o placar final nos dois aparelhos.
 - Reabrir o convite da partida encerrada. Verificar estado compreensível, ausência de vaga fantasma no fluxo definido e inexistência de erros fatais no console acessível.
 - Entregar o endereço HTTPS que abriu o jogo, HTML da revisão, commit publicado, testes feitos e eventual ação externa. Registrar “Validada” apenas com a evidência dos dois aparelhos.
+
+## Execução registrada — 09/11/2026
+
+**Estado: Parcial.** Adicionados um mecanismo único de publicação (`.github/workflows/deploy-pages.yml` com `actions/configure-pages` + `upload-pages-artifact` + `deploy-pages`), pacote estático versionado (`scripts/prepare-pages.mjs`), validação de configuração Web Firebase pública via variável `RIVIERA_FIREBASE_WEB_CONFIG`, e testes de caminhos relativos, release e rejeição de URL insegura. O deploy só ocorre a partir de `main` após verificações; não há credenciais administrativas no repositório. `firebase-config.js` original não foi configurado com dados inventados.
+
+**Evidência dos testes:** [GitHub Actions #42730703040](https://github.com/felipeortuzal/triviaarena/actions/runs/42730703040), aprovado: 3 testes Node de inicialização, 3 testes da exportação Pages, 7 testes SDK Firebase Auth + Realtime Database emulators, Chrome file:// offline, HTTP prefixado, viewport 375px e **navegadores Chrome isolados (desktop 1280px e mobile 390px)** numa partida real de 3 rodadas usando convite, autenticação anônima e emuladores; nomes sincronizados, controle do anfitrião, recarga do convidado na 2ª rodada, dicas, revelação, resultado final idêntico, nova sessão bloqueada após fechar, e ausência de exceções fatais.
+
+**Por que ainda não é “Validada”:** O GitHub informa `has_pages=false`, logo **não há HTTPS público comprovado** neste repositório. O conector de GitHub usado não expõe a ativação de Pages/alteração de Settings; o Firebase real não foi fornecido nem configurado (`apiKey: COLE_AQUI`); tampouco temos acesso a dois aparelhos físicos para homologar. Etapa 04 permanece **Parcial** até o endereço público abrir, o serviço online de produção funcionar e a partida terminar em dois aparelhos reais. Evitar dizer que Chrome isolado equivale a celular físico.
+
+**Ação mínima externa:** habilitar **GitHub Settings → Pages → Source → GitHub Actions**; preparar o Firebase gratuito (Anonymous + Realtime Database com regras versionadas) e definir a variável pública `RIVIERA_FIREBASE_WEB_CONFIG`. Em seguida, executar a pipeline de publicação novamente, conferir a URL pública e o `release.json`, e efetuar teste PC+iPhone em redes distintas. Passos detalhados em [Publicação piloto](../publicacao-piloto.md).
+
+**Prévia para Felipe:** anexe `riviera-showdown.html` diretamente à resposta (abrível por duplo clique) e priorize o site jogável, não links do repositório. A prévia oferece rodadas rápidas e modo `Testar lobby e placar` com convidado simulado.
