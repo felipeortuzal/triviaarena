@@ -104,7 +104,7 @@
           }
         },
         "round": {
-          ".validate": "newData.hasChildren(['id','type','revealed','scored']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && newData.child('revealed').isBoolean() && newData.child('scored').isBoolean() && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','topic','level','hints']) && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('index').val() < 10000 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','resultReady']) && newData.child('categoryId').isString() && newData.child('categoryId').val().length >= 1 && newData.child('limit').isNumber() && newData.child('limit').val() >= 1 && newData.child('limit').val() <= 100 && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val() && newData.child('resultReady').isBoolean()))"
+          ".validate": "newData.hasChildren(['id','type','revealed','scored']) && newData.child('id').isString() && newData.child('id').val().length >= 1 && newData.child('id').val().length <= 64 && newData.child('revealed').isBoolean() && newData.child('scored').isBoolean() && ((newData.child('type').val() === 'letters' && newData.hasChildren(['index','topic','level','hints']) && newData.child('index').isNumber() && newData.child('index').val() >= 0 && newData.child('index').val() < 10000 && newData.child('hints').isNumber() && newData.child('hints').val() >= 0 && newData.child('hints').val() <= 2) || (newData.child('type').val() === 'rank' && newData.hasChildren(['categoryId','limit','target','resultReady']) && newData.child('categoryId').isString() && newData.child('categoryId').val().length >= 1 && newData.child('limit').isNumber() && newData.child('limit').val() >= 1 && newData.child('limit').val() <= 1000 && newData.child('target').isNumber() && newData.child('target').val() >= 1 && newData.child('target').val() <= newData.child('limit').val() && newData.child('resultReady').isBoolean()))"
         },
         "$other": {
           ".validate": false
@@ -126,6 +126,19 @@
           "$index": {
             ".validate": "newData.isString() && newData.val().length >= 5 && newData.val().length <= 70"
           }
+        },
+        "totalRounds": {
+          ".validate": "newData.isNumber() && (newData.val() === 3 || newData.val() === 5 || newData.val() === 7)"
+        },
+        "customRankings": {
+          "$list": {
+            ".validate": "newData.hasChildren(['id','title','source','url','snapshot','about','items','origin']) && newData.child('id').val() === $list && newData.child('origin').val() === 'host' && newData.child('title').isString() && newData.child('title').val().length >= 5 && newData.child('source').isString() && newData.child('source').val().length >= 4 && newData.child('url').isString() && newData.child('url').val().beginsWith('https://') && newData.child('snapshot').isString() && newData.child('snapshot').val().length >= 4 && newData.child('about').isString() && newData.child('about').val().length >= 12",
+            "items": {
+              "$i": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 140"
+              }
+            }
+          }
         }
       }
     },
@@ -134,7 +147,7 @@
         "$round": {
           "$uid": {
             ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && ($uid === auth.uid || (root.child('roomRegistry').child($code).child('host').val() === auth.uid && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === true))",
-            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists() && root.child('roomPublic').child($code).child('round').child('type').val() === 'rank'",
+            ".write": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists() && $uid === auth.uid && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && newData.exists() && (root.child('roomPublic').child($code).child('round').child('type').val() === 'rank' || root.child('roomPublic').child($code).child('round').child('type').val() === 'letters')",
             ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
           }
         }
@@ -172,7 +185,7 @@
         ".read": "auth != null && root.child('roomMembers').child($code).child(auth.uid).exists()",
         "$round": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($code).child(auth.uid).exists() && root.child('roomPublic').child($code).child('phase').val() === 'playing' && root.child('roomPublic').child($code).child('round').child('type').val() === 'rank' && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && root.child('roomPrivateGuesses').child($code).child($round).child($uid).exists() && newData.val() === true",
+            ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($code).child(auth.uid).exists() && root.child('roomPublic').child($code).child('phase').val() === 'playing' && (root.child('roomPublic').child($code).child('round').child('type').val() === 'rank' || root.child('roomPublic').child($code).child('round').child('type').val() === 'letters') && root.child('roomPublic').child($code).child('round').child('id').val() === $round && root.child('roomPublic').child($code).child('round').child('revealed').val() === false && root.child('roomPrivateGuesses').child($code).child($round).child($uid).exists() && newData.val() === true",
             ".validate": "newData.val() === true"
           }
         }
