@@ -8,7 +8,7 @@ const root=resolve(import.meta.dirname,'..');
 const data=JSON.parse(readFileSync(resolve(root,'data.json')));
 const browser=await chromium.launch({headless:true,executablePath:['/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync),args:['--no-sandbox']});
 const errors=[];
-const allowed=['index.html','app.js','firebase-config.js','logo.svg','data.json','rooms-v2.js','phrases-v3.js','party-game-v5.js','rank-tools-v5.js','phrase-tools.js'];
+const allowed=['index.html','app.js','firebase-config.js','logo.svg','data.json','rooms-v2.js','phrases-v3.js','party-game-v5.js','rank-tools-v5.js','phrase-tools.js','catalog-v6.js'];
 const server=createServer((req,res)=>{
  const name=new URL(req.url,'http://localhost').pathname.replace(/^\/triviaarena\//,'')||'index.html';
  if(!allowed.includes(name)){res.writeHead(404);res.end();return}
