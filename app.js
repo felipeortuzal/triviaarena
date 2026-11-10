@@ -157,7 +157,7 @@ function rankReview(r){
  <label class="stack"><span class="label">Posição (0 = inválido)</span><input class="field" id="override-pos" type="number" min="0" max="${r.limit}" placeholder="Ex.: 12"></label></div>
  <label class="stack"><span class="label">Por que corrigiu?</span><textarea class="field" id="override-reason" maxlength="180" placeholder="Ex.: nome alternativo do item na 12ª posição"></textarea></label>
  ${btn("Salvar correção antes da pontuação","override","ghost")}</div>
- <div class="actions">${btn("Próxima rodada →","next","lime")}${btn("🏁 Finalizar partida","finish-game","ghost")}</div>`:"<p class='tiny'>O anfitrião pode revisar o resultado e confirmar a pontuação.</p>"}</div>`;
+ ${roundAdvanceControls()}`:"<p class='tiny'>O anfitrião pode revisar o resultado e confirmar a pontuação.</p>"}</div>`;
 }
 
 function ranking(){
@@ -168,10 +168,12 @@ function ranking(){
  const sourceLink=/^https:\/\//i.test(d.url||"")?`<a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">↗ Conferir ranking original</a>`:"Fonte indisponível";
  const locked=!!r.revealed;
  return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack">
- <div class="row between"><span class="pill">🏆 ESTIMATIVA DE RANKING</span><span class="pill">TOP ${r.limit}</span></div>
+ <div class="row between"><span class="pill">🏆 ESTIMATIVA DE RANKING · RODADA ${room.number}/${room.totalRounds||5}</span><span class="pill">TOP ${r.limit}</span></div>
  <div class="rank-category"><div class="eyebrow">${esc(d.eyebrow||"RANKING DO DIA")}</div><h2>${esc(d.title)}</h2><p>${esc(d.about||"")}</p></div>
  <div class="rank-target"><span>QUAL ITEM ESTÁ NA POSIÇÃO</span><strong>${r.target}º</strong><span>NO TOP ${r.limit}?</span></div>
- <div class="rank-source"><b>${esc(d.source||"Fonte")}</b> · ${esc(d.snapshot||"Data não informada")} · ${sourceLink}</div>
+ <div class="rank-source"><b>${esc(d.source||"Fonte")}</b> · ${esc(d.snapshot||"Data não informada")} · ${sourceLink}
+ ${d.origin==="host"?'<p class="tiny">⚑ Lista fornecida pelo anfitrião · ordem não verificada pela Riviera</p>':
+ d.verifiedPrefix&&r.limit>d.verifiedPrefix?'<p class="tiny">⚠ Ranking editorial: parte do recorte ainda requer conferência integral com a fonte.</p>':""}</div>
  ${locked?`<div class="result" role="status"><div class="eyebrow">RESPOSTA DA POSIÇÃO ${r.target}º</div><strong>${esc(d.items[r.target-1])}</strong><p>Referência: ${esc(d.source||"")}</p></div>${rankReview(r)}`:
  `<label class="stack"><span class="label">Seu palpite — escreva o nome de um item</span><input class="field" id="guess" maxlength="120" placeholder="Ex.: Brasil, Japão, O Poderoso Chefão..." value="${esc(guess)}" autocomplete="off"></label>
  <div class="actions">${btn(own?"✓ Atualizar meu palpite":"Enviar meu palpite →","guess","lime")}</div>
@@ -185,7 +187,7 @@ const rounds=Object.values(room.roundHistory||{}).sort((a,b)=>a.number-b.number)
 const best=ranked[0]?.points??0,winners=ranked.filter(x=>x.points===best);
 return `<section class="panel final-screen"><div class="eyebrow">🏁 PARTIDA FINALIZADA</div><h1>Fim de jogo!</h1><p class="lead">${winners.length>1?'Empate na liderança!':'Campeão da noite:'} <strong class="highlight">${esc(winners.map(x=>x.nick).join(' & '))}</strong></p>
 <div class="podium">${ranked.map((m,i)=>`<div class="podium-item"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span><strong>${esc(m.nick)}</strong><b>${m.points} ponto${m.points===1?'':'s'}</b></div>`).join('')}</div>
-<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
+<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(x.listSnapshot?.title||DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:x.puzzleSnapshot?.code||DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
 <div class="actions cardline">${btn('← Voltar ao início','leave-room','primary')}${isHost()?btn('Encerrar sala','close-room','ghost',room.closed):''}</div></section>`;
 }
 function render(){
