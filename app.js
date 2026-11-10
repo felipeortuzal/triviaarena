@@ -142,7 +142,7 @@ const rounds=Object.values(room.roundHistory||{}).sort((a,b)=>a.number-b.number)
 const best=ranked[0]?.points??0,winners=ranked.filter(x=>x.points===best);
 return `<section class="panel final-screen"><div class="eyebrow">🏁 PARTIDA FINALIZADA · ${rounds.length} / ${room.roundLimit||rounds.length} RODADAS</div><h1>Fim de jogo!</h1><p class="lead">${winners.length>1?'Empate na liderança!':'Campeão da noite:'} <strong class="highlight">${esc(winners.map(x=>x.nick).join(' & '))}</strong></p>
 <div class="podium">${ranked.map((m,i)=>`<div class="podium-item"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span><strong>${esc(m.nick)}</strong><b>${m.points} ponto${m.points===1?'':'s'}</b></div>`).join('')}</div>
-<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?room.members?.[x.winner]?.nick||"Jogador":"Sem vencedor")}</b></div>`).join("")}</div>
+<div class="cardline"><h3>Resumo das ${rounds.length} rodadas</h3>${rounds.map(x=>`<div class="history-row"><span>${x.type==="rank"?"🏆":"🧩"} Rodada ${x.number} · ${esc(x.type==="rank"?(x.catalog?.title||DATA.rankings.find(d=>d.id===x.categoryId)?.title||"Ranking")+" · alvo "+x.target+"º / Top "+x.limit:x.content?.code||DATA.puzzles[x.index]?.code||"")}</span><b>${x.type==="rank"?esc(Object.entries(x.awarded||{}).map(([key,points])=>(room.members?.[key]?.nick||"Jogador")+": +"+points).join(" · ")):esc(x.winner?(room.members?.[x.winner]?.nick||"Jogador")+" (+"+(x.winnerPoints??1)+")":"Sem vencedor")}</b></div>`).join("")}</div>
 <div class="actions cardline">${btn('← Voltar ao início','leave-room','primary')}${isHost()?btn('Encerrar sala','close-room','ghost',room.closed):''}</div></section>`;
 }
 function render(){
@@ -189,8 +189,11 @@ function startDemo(){
   currentRoomSubscription?.();currentRoomSubscription=null;clearPresence();stopGuess();stopSubmissions();currentGuessRound="";
   unsubRoom?.();unsubRoom=null;
   localDemo=true;roomId="LOCAL";
-  const index=DATA.puzzles.length>1?random(DATA.puzzles.length):0;
-  room={host:"local",mode:"letters",number:1,members:{local:{uid:"local",nick:"Jogador",joined:Date.now()}},scores:{local:0},usedLetters:[index],round:{type:"letters",index,hints:0,revealed:false}};
+  const eligible=DATA.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.status!=="inactive").map(x=>x.i);
+  const index=eligible[random(eligible.length)];
+  room={host:"local",mode:"letters",number:1,roundLimit:roundLimitChoice,phase:"playing",
+    members:{local:{uid:"local",nick:"Jogador",joined:Date.now(),online:true}},scores:{local:0},roundHistory:{},
+    usedLetters:[index],round:{type:"letters",id:"frase-1",index,hints:0,revealed:false,scored:false,content:{...DATA.puzzles[index]}}};
   render();
 }
 function localChooseRound(){
@@ -226,12 +229,17 @@ function localChooseRound(){
 function nextLocalRound(){
  if(!localDemo||!room?.round?.revealed)return;
  if(room.localGame){localAdvance(false);return}
- const used=room.usedLetters||[],all=DATA.puzzles.map((_,i)=>i);
+ if(room.roundLimit&&room.number>=room.roundLimit){
+   room.roundHistory??={};
+   const r=room.round;room.roundHistory["frase-"+room.number]={id:"frase-"+room.number,type:"letters",number:room.number,index:r.index,hints:r.hints||0,winner:"",winnerPoints:0,content:r.content||null};
+   room.phase="finished";render();return;
+ }
+ const used=room.usedLetters||[],all=DATA.puzzles.map((p,i)=>p.status!=="inactive"?i:null).filter(i=>i!==null);
  let available=all.filter(i=>!used.includes(i));
  if(!available.length)available=all;
  const index=available[random(available.length)];
  room.usedLetters=available.length===all.length&&used.length?[index]:[...used,index];
- room.number++;room.round={type:"letters",index,hints:0,revealed:false};
+ room.number++;room.round={type:"letters",id:"frase-"+room.number,index,hints:0,revealed:false,scored:false,content:{...DATA.puzzles[index]}};
  selectedWinner="";render();
 }
 
