@@ -7,7 +7,7 @@ import {spawnSync} from "node:child_process";
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
 const file=name=>resolve(root,"dist",name);
 test("exportação do Pages contém só os recursos essenciais",()=>{
-  for(const path of ["index.html","app.js","data.json","logo.svg","firebase-config.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","riviera-showdown.html","release.json",".nojekyll"]){
+  for(const path of ["index.html","app.js","data.json","logo.svg","firebase-config.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","catalog-v6.js","phrase-review-v6.js","riviera-showdown.html","release.json",".nojekyll"]){
     assert.ok(existsSync(file(path)),path+" não encontrado");
   }
   const html=readFileSync(file("index.html"),"utf8");
