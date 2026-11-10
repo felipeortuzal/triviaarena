@@ -23,7 +23,7 @@ try{
     const path=new URL(req.url,"http://127.0.0.1").pathname;
     if(!path.startsWith("/triviaarena/")){res.writeHead(404);res.end();return}
     const name=path.slice("/triviaarena/".length)||"index.html";
-    const allow=["index.html","app.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","data.json","logo.svg","firebase-config.js"];
+    const allow=["index.html","app.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","catalog-v6.js","data.json","logo.svg","firebase-config.js"];
     if(!allow.includes(name)){res.writeHead(404);res.end();return}
     const file=resolve(root,name);
     res.writeHead(200,{"content-type":mime[extname(file)]||"text/plain"});
