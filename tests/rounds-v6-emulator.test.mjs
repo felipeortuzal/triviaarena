@@ -83,7 +83,7 @@ test("partida completa de cinco rodadas termina sozinha, pontua frase exata e ap
  assert.equal(Object.keys(state.roundHistory).length,5);
  assert.equal(state.scores[host.uid],9);
  assert.equal(state.scores[guest.uid],6);
- assert.ok(final.every(x=>x.phase==="finished"));
+ assert.equal(state.phase,"finished","o banco deve terminar uma vez mesmo com duas requisições simultâneas");
  assert.equal(state.round.scored,true);
  assert.deepEqual((await get(ref(guest.db,"roomPublic/"+code))).val().scores,state.scores);
 });
