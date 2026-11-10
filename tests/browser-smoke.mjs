@@ -119,6 +119,44 @@ async function browserChecks(){
     assert.equal(await offlinePage.locator(".history-row").count(),3);
     const mobileWidth=await offlinePage.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
     assert.ok(mobileWidth<=1,"overflow horizontal nos três modos: "+mobileWidth);
+    // Nova duração selecionável e correção explícita sem afetar acertos automáticos.
+    await offlinePage.locator('[data-action="leave-room"]').click();
+    await offlinePage.locator('[data-action="choose-letters"]').click();
+    await offlinePage.locator('#round-limit-local').selectOption('3');
+    await offlinePage.locator('[data-action="demo-lobby"]').click();
+    await offlinePage.locator('[data-action="start-game"]').click();
+    await offlinePage.locator('#guess').fill('Resposta aproximada proposital');
+    await offlinePage.locator('[data-action="guess"]').click();
+    await offlinePage.locator('[data-action="reveal"]').click();
+    await offlinePage.locator('#phrase-override-player').selectOption('local');
+    await offlinePage.locator('#phrase-override-points').selectOption('0.5');
+    await offlinePage.locator('#phrase-override-reason').fill('Acertou o núcleo da ideia, mas sem contexto');
+    await offlinePage.locator('[data-action="correct-phrase"]').click();
+    await offlinePage.getByText('≈ +0,5 ponto',{exact:false}).first().waitFor();
+    await offlinePage.locator('[data-action="next"]').click();
+    for(let round=2;round<=3;round++){
+      await offlinePage.getByText('RODADA '+round+' DE 3',{exact:false}).first().waitFor();
+      await offlinePage.locator('[data-action="reveal"]').click();
+      await offlinePage.locator('[data-action="next"]').click();
+    }
+    await offlinePage.getByText('Resumo das 3 rodadas').waitFor();
+    assert.match(await offlinePage.locator('.podium').innerText(),/0.5 ponto/);
+    await offlinePage.locator('[data-action="leave-room"]').click();
+    // Uma lista comunitária com nome começando por número mantém o título original.
+    await offlinePage.locator('[data-action="toggle-import"]').click();
+    await offlinePage.locator('#import-title').fill('Top 10 filmes do grupo');
+    await offlinePage.locator('#import-source').fill('Dados do grupo');
+    await offlinePage.locator('#import-url').fill('https://example.org/ranking');
+    await offlinePage.locator('#import-snapshot').fill('Edição novembro 2026');
+    await offlinePage.locator('#import-observed').fill('2026-11-10');
+    await offlinePage.locator('#import-method').fill('Classificação ordenada por votação');
+    await offlinePage.locator('#import-items').fill(['1. O Poderoso Chefão','2. 12 Angry Men',...Array.from({length:8},(_,i)=>(i+3)+'. Filme '+(i+3))].join('\\n'));
+    await offlinePage.locator('[data-action="import-user"]').click();
+    await offlinePage.getByText('Lista validada para demonstração local',{exact:false}).waitFor();
+    await offlinePage.locator('[data-action="demo-lobby"]').click();
+    await offlinePage.locator('[data-action="start-game"]').click();
+    await offlinePage.getByText('Top 10 filmes do grupo').waitFor();
+    await offlinePage.locator('.rank-target strong').waitFor();
     await offlineCtx.close();
     // Simula falha de conteúdo: a tela inicial e uma rodada-reserva continuam disponíveis.
     const fallbackCtx=await browser.newContext({viewport:{width:375,height:812}});
