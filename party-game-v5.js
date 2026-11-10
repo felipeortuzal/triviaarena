@@ -6,7 +6,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
   const roomAt=code=>ref(db,`roomPublic/${code}`);
   const regAt=code=>ref(db,`roomRegistry/${code}`);
   const ensureHost=state=>{if(!state||state.host!==uid)throw Error("Somente o anfitrião pode conduzir a partida.");};
-  const rankings=()=>getRankings().filter(isEligibleRanking);
+  const rankings=()=>getRankings().filter(l=>l.status!=="candidate-unverified"&&isEligibleRanking(l));
   const random=n=>{
     if(n<1)throw Error("Catálogo sem desafios disponíveis.");
     const result=randomIndex(n);
@@ -20,18 +20,24 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const puzzles=getPuzzles();
       if(!puzzles.length)throw Error("Não há frases disponíveis.");
       const used=Array.isArray(state.usedLetters)?state.usedLetters:[];
-      const pool=puzzles.map((_,i)=>i).filter(i=>!used.includes(i));
-      const choices=pool.length?pool:puzzles.map((_,i)=>i);
+      const eligible=puzzles.map((p,i)=>({p,i})).filter(x=>x.p.status!=="inactive").map(x=>x.i);
+      const pool=eligible.filter(i=>!used.includes(i));
+      const choices=pool.length?pool:eligible;
       const index=choices[random(choices.length)];
       return {number,usedLetters:pool.length?[...used,index]:[index],
-        round:{type:"letters",id:`partida-${state.match||1}-frase-${number}`,index,hints:0,revealed:false,scored:false,topic:puzzles[index].topic||"Geral",level:puzzles[index].level||"Geral"}};
+        round:{type:"letters",id:`partida-${state.match||1}-frase-${number}`,index,hints:0,revealed:false,scored:false,
+          topic:puzzles[index].topic||"Geral",level:puzzles[index].level||"Geral",content:{
+            id:puzzles[index].id||"legacy-"+index,code:puzzles[index].code,answer:puzzles[index].answer,
+            explain:puzzles[index].explain||"",hints:puzzles[index].hints||[],topic:puzzles[index].topic||"Geral",
+            level:puzzles[index].level||"Geral",aliases:puzzles[index].aliases||[]
+          }}};
     }
     const available=rankings();
     if(!available.length)throw Error("As listas de ranking não estão prontas para jogar.");
     const used=Array.isArray(state.usedRanks)?state.usedRanks:[];
     const all=[];
     for(const list of available){
-      for(const limit of [25,50,75,100].filter(n=>n<=list.items.length)){
+      for(const limit of (list.allowedCuts||[25,50,75,100]).filter(n=>n<=list.items.length)){
         for(let target=1;target<=limit;target++)all.push({categoryId:list.id,limit,target});
       }
     }
@@ -40,7 +46,8 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     const pick=options[random(options.length)];
     const key=`${pick.categoryId}:${pick.limit}:${pick.target}`;
     return {number,usedRanks:fresh.length?[...used,key]:[key],
-      round:{type:"rank",id:`partida-${state.match||1}-ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,revealed:false,scored:false,resultReady:false}};
+      round:{type:"rank",id:`partida-${state.match||1}-ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,
+        revealed:false,scored:false,resultReady:false,catalog:{...available.find(l=>l.id===pick.categoryId)}}};
   }
   async function start(code){
     const preview=(await get(roomAt(code))).val();
@@ -57,7 +64,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const old=value||preview;
       if(!old||old.host!==uid||old.phase!=="lobby")return;
       const next=chooseRound(old);
-      return {...old,...next,phase:"playing",roundLimit:5,match:old.match||1};
+      return {...old,...next,phase:"playing",roundLimit:old.roundLimit||5,match:old.match||1};
     },{applyLocally:false});
     if(t.committed)return t.snapshot.val();
     const current=(await get(roomAt(code))).val();
@@ -118,10 +125,10 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const s=await get(ref(db,`roomPrivateGuesses/${code}/${id}/${memberUid}`));
       if(s.exists())guesses[memberUid]=s.val();
     }
-    const list=type==="rank"?rankings().find(l=>l.id===state.round.categoryId):null;
+    const list=type==="rank"?(state.round.catalog||rankings().find(l=>l.id===state.round.categoryId)):null;
     if(type==="rank"&&!list)throw Error("Lista não encontrada para apuração.");
     const review=type==="letters"
-      ?calculatePhrase({puzzle:getPuzzles()[state.round.index],guesses,members:Object.keys(state.profiles||{})})
+      ?calculatePhrase({puzzle:state.round.content||getPuzzles()[state.round.index],guesses,members:Object.keys(state.profiles||{})})
       :calculateRanking({list,limit:state.round.limit,target:state.round.target,guesses,members:Object.keys(state.profiles||{})});
     const result=await runTransaction(roomAt(code),value=>{
       const old=value||state;
@@ -140,7 +147,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     if(round?.type!=="rank"||!round.resultReady||round.scored||!round.review)throw Error("Resultado ainda não está em revisão.");
     if(!Object.hasOwn(state.profiles||{},player))throw Error("Jogador desconhecido.");
     if(!Number.isInteger(pos)||pos<0||pos>round.limit)throw Error("Posição inválida para o recorte.");
-    const list=rankings().find(l=>l.id===round.categoryId);
+    const list=round.catalog||rankings().find(l=>l.id===round.categoryId);
     if(!list)throw Error("Lista de referência indisponível.");
     const t=await runTransaction(roomAt(code),value=>{
       const old=value||state;
@@ -149,6 +156,26 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
       const review=calculateRanking({list,limit:round.limit,target:round.target,
         guesses:old.round.guesses||{},members:Object.keys(old.profiles||{}),overrides});
       return {...old,round:{...old.round,overrides,review}};
+    },{applyLocally:false});
+    return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
+  }
+  async function correctPhrase(code,{player,points,reason=""}){
+    const state=(await get(roomAt(code))).val();
+    ensureHost(state);
+    if(!state||state.phase!=="playing"||state.round?.type!=="letters"||!state.round?.revealed||!state.round?.resultReady||state.round?.scored)throw Error("Frase não está disponível para revisão.");
+    if(!Object.hasOwn(state.profiles||{},player))throw Error("Jogador desconhecido.");
+    const score=Number(points),note=String(reason||"").trim().slice(0,180);
+    if(![0,0.5,1].includes(score))throw Error("Pontuação válida: 0, 0,5 ou 1.");
+    if(score===0.5&&note.length<8)throw Error("Justifique a resposta aproximada em pelo menos 8 caracteres.");
+    const t=await runTransaction(roomAt(code),value=>{
+      const old=value||state;
+      if(old.round?.id!==state.round.id||old.round.scored||!old.round.resultReady)return;
+      const previous=old.round.review?.[player];
+      if(!previous)return;
+      const updated={...previous,points:score,correct:score===1,approximate:score===0.5,...(note?{reason:note}:{})};
+      const review={...old.round.review,[player]:updated};
+      const overrides={...(old.round.overrides||{}),[player]:{points:score,reason:note||"Avaliação do anfitrião"}};
+      return {...old,round:{...old.round,review,overrides}};
     },{applyLocally:false});
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
@@ -168,7 +195,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
           awarded[player]=result.points||0;
           if(result.points)scores[player]=(scores[player]||0)+result.points;
         }
-        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,winner:"",awarded,review:r.review};
+        record={id:r.id,type:"letters",number:old.number,index:r.index,hints:r.hints||0,winner:"",awarded,review:r.review,overrides:r.overrides||{},content:r.content||null};
       }else{
         if(!r.resultReady||!r.review)return;
         const awarded={};
@@ -178,7 +205,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
           if(points)scores[memberUid]=(scores[memberUid]||0)+points;
         }
         record={id:r.id,type:"rank",number:old.number,categoryId:r.categoryId,
-          limit:r.limit,target:r.target,awarded,review:r.review,overrides:r.overrides||{}};
+          limit:r.limit,target:r.target,awarded,review:r.review,overrides:r.overrides||{},catalog:r.catalog||null};
       }
       const history={...(old.roundHistory||{}),[r.id]:record};
       const previous={...old,scores,roundHistory:history,round:{...r,scored:true}};
@@ -196,7 +223,7 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     const t=await runTransaction(roomAt(code),value=>{
       const old=value||initial;
       if(old.phase!=="finished"||old.match!==initial.match)return;
-      const next={...old,phase:"lobby",number:0,match:(old.match||1)+1,roundLimit:5,
+      const next={...old,phase:"lobby",number:0,match:(old.match||1)+1,roundLimit:old.roundLimit||5,
         scores:Object.fromEntries(Object.keys(old.profiles||{}).map(player=>[player,0]))};
       delete next.round;delete next.finishedAt;delete next.roundHistory;
       return next;
@@ -204,6 +231,6 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     return t.committed?t.snapshot.val():(await get(roomAt(code))).val();
   }
   return {start,hint,revealPhrase,submitGuess,watchMyGuess,watchSubmissions,
-    revealRanking,correctRanking,advance,rematch,chooseRound};
+    revealRanking,correctRanking,correctPhrase,advance,rematch,chooseRound};
 };
 export const createPartyGame=(args)=>makePartyGame({...args,isEligibleRanking,calculateRanking});
