@@ -70,7 +70,8 @@ test('falha de data.json mantém início e prévia acessíveis',async function s
   assert.match(a.main.innerHTML,/Jogar neste aparelho/);
   await new Promise(resolve=>setImmediate(resolve));
   assert.match(a.main.innerHTML,/Os desafios completos não carregaram/);
-  assert.match(a.main.innerHTML,/Criar sala e gerar convite/);
+  assert.match(a.main.innerHTML,/Criar sala clássica/);
+  assert.match(a.main.innerHTML,/data-action="create-live"/);
   assert.match(a.main.innerHTML,/disabled title=/);
   assert.match(a.main.innerHTML,/data-action="demo" disabled/);
   assert.match(a.main.innerHTML,/Recarregue o conteúdo para jogar Ranking/);
