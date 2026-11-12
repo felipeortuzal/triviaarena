@@ -20,6 +20,28 @@ let localDemo=false,configured=false,dataReady=false,dataProblem='',connectionSt
 let roomGateway=null,phraseGame=null,partyGame=null,clearPresence=()=>{},currentRoomSubscription=null,emulatorMode=false,pendingJoinCode='';
 let stopGuess=()=>{},stopSubmissions=()=>{},currentGuessRound='',ownGuess='',submitted={},guessDrafts={},rankOverrideReason='';
 let renderedScreen='';
+let serverClockOffset=0,liveRetryAt=0;
+function liveRemaining(round=room?.round){
+ if(!round?.deadlineAt)return null;
+ return Math.max(0,Math.ceil((round.deadlineAt-Date.now()-serverClockOffset)/1000));
+}
+function updateLiveCountdown(){
+ const round=room?.round;
+ if(!room?.live||!round||round.revealed)return;
+ const seconds=liveRemaining(round);
+ const timer=$('#round-countdown');
+ if(timer){timer.textContent=String(seconds).padStart(2,'0')+'s';timer.parentElement?.classList.toggle('critical',seconds<=10);}
+ if(seconds>0)return;
+ for(const selector of ['[data-action="guess"]','[data-action="skip-guess"]','#guess']){
+  const element=$(selector);if(element)element.disabled=true;
+ }
+ const note=$('#live-time-message');
+ if(note)note.textContent="Tempo encerrado. Aguardando a revelação.";
+ if(!localDemo&&isHost()&&partyGame&&!busy&&Date.now()+serverClockOffset>=round.deadlineAt+1200&&Date.now()>=liveRetryAt){
+  liveRetryAt=Date.now()+3500;
+  partyGame.revealRanking(roomId).catch(()=>{liveRetryAt=Date.now()+3500});
+ }
+}
 let travelNames=['Você','Amigo'],travelTurnOpen=false,storageUnavailable=false;
 const TRAVEL_SAVE='riviera-travel-v1';
 function savedTravel(){
@@ -96,10 +118,10 @@ function home(){
     :connectionState==="connecting"||connectionState==="checking"
     ?"Verificando a conexão. Você já pode experimentar a demonstração local."
     :"Conexão pronta para criar uma sala e compartilhar convites.";
-  return wrap(`<section class="rules-section" aria-label="Como funciona o jogo"><div class="section-top"><div><div class="eyebrow">SIMPLES DE JOGAR · DIFÍCIL DE GANHAR</div><h2>Três passos até a resenha.</h2></div><span class="pill">UM JOGO DE PALPITES, NÃO DE VELOCIDADE</span></div><div class="rules-grid"><article class="rule-card"><span class="rule-count">01</span><h3>O ranking aparece</h3><p>Uma categoria e uma posição são sorteadas. Qual item você acha que está ali?</p></article><article class="rule-card"><span class="rule-count">02</span><h3>Palpites secretos</h3><p>Cada amigo responde sem mostrar. Nada é revelado antes de todo mundo jogar ou passar.</p></article><article class="rule-card"><span class="rule-count">03</span><h3>Revelação e pódio</h3><p>Quem chegar mais perto ganha 5, 3 ou 1 ponto. Depois de cinco rodadas, sai o campeão.</p></article></div></section><section class="panel ranking-intro" aria-label="Modo de jogo ativo"><div><div class="eyebrow">MODO DE JOGO · 01</div><h2>Estimativa de Ranking</h2><p>A estrela do Riviera Showdown. Partidas curtas, respostas privadas e aquela disputa que pede revanche.</p></div><div class="options"><span class="pill">✓ 5 rodadas</span><span class="pill">✓ Palpites privados</span><span class="pill">✓ Ranking surpresa</span></div></section>
+  return wrap(`<section class="rules-section" aria-label="Como funciona o jogo"><div class="section-top"><div><div class="eyebrow">SIMPLES DE JOGAR · DIFÍCIL DE GANHAR</div><h2>Três passos até a resenha.</h2></div><span class="pill">UM JOGO DE PALPITES, NÃO DE VELOCIDADE</span></div><div class="rules-grid"><article class="rule-card"><span class="rule-count">01</span><h3>O ranking aparece</h3><p>Uma categoria e uma posição são sorteadas. Qual item você acha que está ali?</p></article><article class="rule-card"><span class="rule-count">02</span><h3>Palpites secretos</h3><p>Na arena online, todos respondem simultaneamente em 30 segundos. Palpites repetidos são bloqueados.</p></article><article class="rule-card"><span class="rule-count">03</span><h3>Revelação e pódio</h3><p>Quem chegar mais perto ganha 5, 3 ou 1 ponto. Depois de cinco rodadas, sai o campeão.</p></article></div></section><section class="panel ranking-intro" aria-label="Modo de jogo ativo"><div><div class="eyebrow">MODO DE JOGO · 01</div><h2>Estimativa de Ranking</h2><p>A estrela do Riviera Showdown. Partidas curtas, respostas privadas e aquela disputa que pede revanche.</p></div><div class="options"><span class="pill">✓ 5 rodadas</span><span class="pill">✓ Palpites privados</span><span class="pill">✓ Ranking surpresa</span></div></section>
 ${travelSetup()}
 <details class="online-options" ${online||pendingJoinCode||new URLSearchParams(location.search).get("room")?'open':''}><summary>🌐 Jogar em aparelhos separados ${online?'· disponível':'· modo online'}</summary><section class="panel homejoin" aria-label="Salas online"><div class="row between"><div><div class="eyebrow">SALA ONLINE</div><h2>Crie ou entre com um convite</h2></div><span class="pill">${online?"● Disponível":"○ Indisponível"}</span></div><p class="tiny" role="status">${esc(help)}</p>${connectionProblem?`<p class="notice tiny">${esc(connectionProblem)}</p>`:""}
-<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><p class="tiny">Sala de Estimativa de Ranking · cinco rodadas</p>${btn("Criar sala e gerar convite →","create","lime",!online)}</div>
+<div class="grid"><div class="stack"><label><span class="label">Seu nick</span><input class="field" id="nick" maxlength="28" placeholder="Como quer aparecer?" value="${esc(nick)}"></label><p class="tiny">Arena de Ranking · 5 rodadas · 30 segundos cada</p>${btn("⚡ Criar Arena Ao Vivo · 30s","create-live","lime",!online)}<p class="tiny">Ou experimente o modo clássico sem cronômetro:</p>${btn("Criar sala clássica","create","ghost",!online)}</div>
 <div class="stack"><label><span class="label">Código de convite</span><input class="field" id="join-code" maxlength="10" placeholder="Ex.: TRV7XK" value="${esc(pendingJoinCode||new URLSearchParams(location.search).get("room")||"")}"></label><p class="tiny">Compartilhe o convite e convide a turma para entrar.</p>${btn("Entrar na sala →","join","primary",!online)}</div></div></section></details>
 <p class="footer">RIVIERA SHOWDOWN · JOGOS QUE RENDEM HISTÓRIA · RODADAS DE CINCO · SEM CADASTRO PESSOAL</p>`);
 }
@@ -111,7 +133,7 @@ return `<section class="panel lobby">
 <div class="invite-card"><div><div class="eyebrow">CÓDIGO DA SALA</div><div class="invite-code">${esc(roomId)}</div><p class="tiny">Compartilhe o código ou envie um convite.</p></div><div class="stack"><label class="label" for="invite">LINK DO CONVITE</label><input class="field" readonly id="invite" value="${localDemo?'DEMONSTRAÇÃO LOCAL • Convites indisponíveis':esc(location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':''))}">${btn('📋 Copiar convite','copy','lime',localDemo)}</div></div>
 <div class="cardline row between"><div><h3>Participantes</h3><p class="tiny">${onlineCount} online · ${count} inscritos</p></div><span class="pill">${esc(room.mode==='letters'?'🧩 Decifre a Frase':room.mode==='mixed'?'🎲 Misturado':'🏆 Ranking')}</span></div>${roster()}
 ${!room.members?.[room.host]?.online?'<p class="notice">Anfitrião desconectado. Esperando o retorno…</p>':''}
-<div class="cardline stack">${room.closed?'<p class="notice">Esta sala foi encerrada.</p>':isHost()?`${btn(canStart?'▶ Iniciar partida':'Modo disponível em breve','start-game','primary',!canStart)}<p class="tiny">Depois de começar, novos jogadores não entram. Cinco rodadas por partida. O anfitrião controla as dicas e a revelação; a pontuação é automática.</p>${!localDemo?btn('Encerrar sala','close-room','ghost'):''}`:'<p class="tiny">Aguardando o anfitrião iniciar a partida…</p>'}
+<div class="cardline stack">${room.closed?'<p class="notice">Esta sala foi encerrada.</p>':isHost()?`${btn(canStart?'▶ Iniciar partida':'Modo disponível em breve','start-game','primary',!canStart)}<p class="tiny">Depois de começar, novos jogadores não entram. ${room.live?'Arena simultânea: 30 segundos por rodada, uma resposta por pessoa, sem palpites repetidos; quem perder o prazo recebe zero.':'Modo clássico: cinco rodadas, palpites ocultos e revelação após todos responderem.'} O placar é automático.</p>${!localDemo?btn('Encerrar sala','close-room','ghost'):''}`:'<p class="tiny">Aguardando o anfitrião iniciar a partida…</p>'}
 ${btn('← Voltar ao início','leave-room','ghost')}</div></section>`;
 }
 function members(){return Object.values(room?.members||{}).sort((a,b)=>(a.joined||0)-(b.joined||0));}
@@ -157,8 +179,9 @@ function rankReview(r){
  if(!r.resultReady||!r.review)return `<div class="notice" role="status">🔎 ${isHost()?"Preparando resultado. Se necessário, toque em Revelar novamente.":"O anfitrião está calculando as distâncias."}</div>${isHost()?btn("Atualizar apuração","reveal","ghost"):""}`;
  const ordered=Object.values(r.review).sort((a,b)=>(a.delta??Infinity)-(b.delta??Infinity)||a.uid.localeCompare(b.uid));
  const rows=ordered.map(row=>`<tr><td>${row.place?"#"+row.place:"—"}</td><td>${esc(room.members?.[row.uid]?.nick||room.profiles?.[row.uid]?.nick||"Jogador")}</td><td>${esc(row.guess||"Sem palpite")}${row.reason?`<div class="tiny highlight">✎ ${esc(row.reason)}</div>`:""}</td><td>${row.position||"—"}</td><td>${row.delta??"—"}</td><td class="highlight">+${row.points||0}</td></tr>`).join("");
+ const cards=room.live?`<div class="guess-wall">${ordered.map(row=>`<article class="guess-card ${row.place===1?'winner':''}"><div class="guess-card-top"><span class="guess-place">${row.place?"#"+row.place:"—"}</span><b>${esc(room.members?.[row.uid]?.nick||room.profiles?.[row.uid]?.nick||"Jogador")}</b><strong>+${row.points||0} pts</strong></div><div class="guess-answer">${esc(row.guess||"Sem palpite · prazo encerrado")}</div><div class="guess-meta">Posição real: ${row.position||"—"} · Distância: ${row.delta??"—"}${row.reason?" · Correção: "+esc(row.reason):""}</div></article>`).join("")}</div>`:"";
  return `<div class="cardline"><div class="eyebrow">RESULTADOS · DISTÂNCIA ABSOLUTA</div><h3>Quem chegou mais perto?</h3>
- <div class="tablewrap"><table class="board"><thead><tr><th>Lugar</th><th>Jogador</th><th>Palpite</th><th>Posição</th><th>Distância</th><th>Pontos</th></tr></thead><tbody>${rows}</tbody></table></div>
+ ${cards}${room.live?'<details class="how-to"><summary>Ver tabela detalhada</summary>':""}<div class="tablewrap"><table class="board"><thead><tr><th>Lugar</th><th>Jogador</th><th>Palpite</th><th>Posição</th><th>Distância</th><th>Pontos</th></tr></thead><tbody>${rows}</tbody></table></div>${room.live?"</details>":""}
  <p class="tiny">Diferença absoluta da posição-alvo. 1º +5 · 2º +3 · 3º +1. Empates dividem a colocação; respostas inválidas não pontuam.</p>
  ${isHost()?`${room.localShared?'<details class="how-to"><summary>Revisar um palpite</summary>':''}<div class="round-decision"><div class="eyebrow">AJUSTE MANUAL JUSTIFICADO</div><p class="tiny">Use somente quando uma tradução ou sinônimo for reconhecido. A justificativa ficará visível a todos.</p>
  <div class="grid"><label class="stack"><span class="label">Jogador</span><select class="field" id="override-player">${ordered.map(x=>`<option value="${esc(x.uid)}">${esc(room.members?.[x.uid]?.nick||"Jogador")}</option>`).join("")}</select></label>
@@ -176,16 +199,20 @@ function ranking(){
  const pending=members().filter(m=>localDemo?!Object.hasOwn(room.localGuesses||{},m.uid):submitted[m.uid]!==true).map(m=>m.nick);
  const sourceLink=/^https:\/\//i.test(d.url||"")?`<a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">↗ Conferir ranking original</a>`:"Fonte indisponível";
  const locked=!!r.revealed;
+ const live=room.live===true&&!room.localShared&&!localDemo&&!!r.deadlineAt;
+ const remaining=liveRemaining(r);
+ const expired=live&&remaining===0,confirmed=live&&submitted[uid]===true;
+ const liveClock=live&&!locked?`<div class="live-clock"><div><span class="eyebrow">⚡ ARENA AO VIVO</span><p>Mesmo desafio para todo mundo · uma resposta por pessoa</p></div><div class="live-clock-value" role="timer"><span id="round-countdown">${String(remaining).padStart(2,"0")}s</span></div></div>`:"";
  return `${roomHeader()}<div class="game-layout"><section class="panel round-panel stack">
  <div class="row between"><span class="pill">🏆 ESTIMATIVA DE RANKING</span><span class="pill">TOP ${r.limit}</span></div>
- <div class="rank-category"><div class="eyebrow">${esc(d.eyebrow||"RANKING DO DIA")}</div><h2>${esc(d.title)}</h2><p>${esc(d.about||"")}</p></div>
+ ${liveClock}<div class="rank-category"><div class="eyebrow">${esc(d.eyebrow||"RANKING DO DIA")}</div><h2>${esc(d.title)}</h2><p>${esc(d.about||"")}</p></div>
  <div class="rank-target"><span>QUAL ITEM ESTÁ NA POSIÇÃO</span><strong>${r.target}º</strong><span>NO TOP ${r.limit}?</span></div>
  <div class="rank-source"><b>${esc(d.source||"Fonte")}</b> · ${esc(d.snapshot||"Data não informada")} · ${!locked?'Lista incluída no jogo · sem internet':sourceLink}</div>
  ${!locked&&room.localShared?travelControls():locked?`<div class="result" role="status"><div class="eyebrow">RESPOSTA DA POSIÇÃO ${r.target}º</div><strong>${esc(d.items[r.target-1])}</strong><p>Referência: ${esc(d.source||"")}</p></div>${rankReview(r)}`:
- `<label class="stack"><span class="label">Seu palpite — escreva o nome de um item</span><input class="field" id="guess" maxlength="120" placeholder="Ex.: Brasil, Japão, O Poderoso Chefão..." value="${esc(guess)}" autocomplete="off"></label>
- <div class="actions">${btn(own?"✓ Atualizar meu palpite":"Enviar meu palpite →","guess","lime")}${btn("Não sei · passar vez","skip-guess","ghost")}</div>
+ `${confirmed?`<div class="live-submitted"><b>✓ Seu palpite está registrado.</b><p>O texto só será mostrado aos outros depois da revelação. Boa sorte!</p></div>`:expired?`<div class="live-submitted" id="live-time-message"><b>Tempo encerrado.</b><p>Aguardando o resultado da rodada.</p></div>`:`<label class="stack"><span class="label">Seu palpite — escreva o nome de um item</span><input class="field" id="guess" maxlength="120" placeholder="Ex.: Brasil, Japão, O Poderoso Chefão..." value="${esc(guess)}" autocomplete="off"></label>
+ <div class="actions">${btn(live?"🔒 Confirmar resposta única":own?"✓ Atualizar meu palpite":"Enviar meu palpite →","guess","lime")}${btn("Não sei · passar vez","skip-guess","ghost")}</div>`}
  <p class="tiny" role="status">🔒 ${sent}/${total} jogadores enviaram. Os textos ficam privados até a revelação. ${own?"Seu último palpite salvo: "+esc(own):""}</p>
- ${sent<total?`<p class="tiny">Aguardando: ${esc(pending.join(", "))}.</p>`:"<p class='tiny highlight'>Todos enviaram. A revelação está liberada.</p>"}${isHost()?btn("👁 Revelar palpites de todos","reveal","primary",sent<total):"<p class='tiny'>Os resultados aparecerão juntos quando o anfitrião revelar.</p>"}`}
+ ${sent<total?`<p class="tiny">Aguardando: ${esc(pending.join(", "))}.</p>`:"<p class='tiny highlight'>Todos enviaram. A revelação está liberada.</p>"}${isHost()?btn("👁 Revelar palpites de todos","reveal","primary",sent<total&&!expired):"<p class='tiny'>Os resultados aparecerão juntos quando o anfitrião revelar.</p>"}`}
  </section><aside class="panel scoreboard"><div class="eyebrow">PARTIDA EM ANDAMENTO</div><h3>Placar acumulado</h3>${roster()}</aside></div>`;
 }
 function finishedGame(){
@@ -370,7 +397,7 @@ else if(action==="retry-data"){await loadData()}
 else if(action==="hint"&&localDemo){if(room.round?.type==='letters'){room.round.hints=Math.min(2,room.round.hints+1);render()}}
 else if(action==="reveal"&&localDemo){localReveal()}
 else if(action==='choose-rank'){modeChoice='rank';render()}
-else if(action==='create'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode()});connectRoom(result.code)}
+else if(action==='create'||action==='create-live'){if(!onlineReady()||!roomGateway)throw Error('Salas online indisponíveis. Use Jogar neste aparelho ou configure o Firebase.');const name=getNick();const result=await roomGateway.createRoom({nick:name,mode:selectedMode(),live:action==='create-live'});connectRoom(result.code)}
 else if(action==='join'){if(!onlineReady())throw Error('Salas online indisponíveis. Use Jogar neste aparelho.');const name=getNick();const id=($('#join-code')?.value||pendingJoinCode||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(id.length!==6)throw Error('Digite um código de sala válido com 6 caracteres.');await joinRoom(id,name)}
 else if(action==='copy'){
  const url=location.origin+location.pathname+'?room='+roomId+(emulatorMode?'&emulator=1':'');
@@ -468,6 +495,7 @@ async function bootNetwork(){
       au.connectAuthEmulator(auth,"http://127.0.0.1:9099",{disableWarnings:true});
       da.connectDatabaseEmulator(db,"127.0.0.1",9000);
     }
+    da.onValue(da.ref(db,".info/serverTimeOffset"),snap=>{serverClockOffset=Number(snap.val())||0;});
     onAuthStateChanged(auth,async user=>{
       try{
         if(!user){uid=null;roomGateway=null;phraseGame=null;partyGame=null;connectionState="unavailable";connectionProblem="Autenticação indisponível.";render();return}
@@ -499,3 +527,4 @@ async function init(){
   await bootNetwork();
 }
 init();
+if(!STANDALONE&&typeof setInterval==='function')setInterval(updateLiveCountdown,250);
