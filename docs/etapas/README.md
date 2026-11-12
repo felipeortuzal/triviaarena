@@ -24,6 +24,10 @@ Para retomar, envie **“retome a etapa N”**. Para consultar sem implementar, 
 
 A etapa 4 concentra permissões de infraestrutura e acesso a aparelhos físicos. Se faltar apenas essa validação, o desenvolvimento das etapas 5–7 pode continuar contra o emulador. A liberação pública segue pendente. A etapa 9 é opcional e pode ser solicitada depois da primeira versão completa.
 
+## Arena Ao Vivo 30s (12/11/2026)
+
+Novo modo online: categoria simultânea, cronômetro de 30 segundos, palpites únicos por transação e placar com os palpites após a revelação. Ver `docs/live-arena-30s.md`. O clássico offline continua; produção depende da hospedagem e Firebase real.
+
 ## Foco atual
 
 Por decisão de Felipe em 10/11/2026, **somente Ranking está ativo**. Frase e Misturado estão pausados; os registros históricos abaixo descrevem entregas anteriores e não autorização para reativá-los. Para uma futura retomada, Frase será simultâneo, com um ponto para quem acertar primeiro.

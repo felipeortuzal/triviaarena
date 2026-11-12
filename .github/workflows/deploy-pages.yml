@@ -36,6 +36,8 @@ jobs:
         run: npm run test:rooms
       - name: Ranking em dois Chrome independentes
         run: npm run test:browser-rank
+      - name: Arena Ao Vivo em dois navegadores, unicidade e placar
+        run: npm run test:browser-live
       - name: Cinco rodadas de Ranking, reconexão e revanche
         run: npm run test:browser-five
       - name: Construir pacote estático com configuração Web pública (se presente)

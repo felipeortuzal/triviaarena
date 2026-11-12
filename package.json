@@ -14,7 +14,8 @@
     "test:pages": "node --test tests/pages-build.test.mjs",
     "test:browser-rank": "firebase emulators:exec --project demo-riviera-showdown --only auth,database -- 'node tests/browser-rank-emulator.mjs'",
     "test:browser-five": "firebase emulators:exec --project demo-riviera-showdown --only auth,database -- 'node tests/browser-five-rounds.mjs'",
-    "test:browser-travel": "node tests/browser-travel.mjs"
+    "test:browser-travel": "node tests/browser-travel.mjs",
+    "test:browser-live": "firebase emulators:exec --project demo-riviera-showdown --only auth,database -- 'node tests/browser-live-round.mjs'"
   },
   "devDependencies": {
     "firebase": "11.6.0",
