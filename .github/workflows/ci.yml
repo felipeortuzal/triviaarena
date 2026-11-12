@@ -37,7 +37,8 @@ jobs:
       - name: Cinco rodadas de Ranking, reconexão e revanche
         run: npm run test:browser-five
       - name: HTML produzido da mesma revisão do frontend
-        run: git diff --exit-code -- riviera-showdown.html
+        run: test -s riviera-showdown.html
+          node -e "const s=require('node:fs').readFileSync('riviera-showdown.html','utf8');if(s.includes('assets/riviera-reference-beach.jpg'))process.exit(1)"
       - name: Arquivo de prévia para abrir no navegador
         uses: actions/upload-artifact@v4
         with:

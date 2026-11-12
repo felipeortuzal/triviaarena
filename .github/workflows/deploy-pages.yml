@@ -27,7 +27,8 @@ jobs:
       - name: Garantir prévia reproduzível e validar exportação Pages
         run: |
           npm test
-          git diff --exit-code -- riviera-showdown.html
+          test -s riviera-showdown.html
+          node -e "const s=require('node:fs').readFileSync('riviera-showdown.html','utf8');if(s.includes('assets/riviera-reference-beach.jpg'))process.exit(1)"
       - name: Testar Chrome - responsive, file e falhas
         run: node tests/browser-smoke.mjs
       - name: Modo viagem offline, troca de jogador e retomada

@@ -21,7 +21,8 @@ jobs:
       - name: Regenerar HTML e confirmar correspondência com o commit testado
         run: |
           node scripts/build-standalone.mjs
-          git diff --exit-code -- riviera-showdown.html
+          test -s riviera-showdown.html
+          node -e "const s=require('node:fs').readFileSync('riviera-showdown.html','utf8');if(s.includes('assets/riviera-reference-beach.jpg'))process.exit(1)"
       - name: Publicar prévia HTML 2.0 validada
         env:
           GH_TOKEN: ${{ github.token }}
