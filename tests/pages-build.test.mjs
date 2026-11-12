@@ -7,12 +7,12 @@ import {spawnSync} from "node:child_process";
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
 const file=name=>resolve(root,"dist",name);
 test("exportação do Pages contém só os recursos essenciais",()=>{
-  for(const path of ["index.html","app.js","data.json","logo.svg","firebase-config.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","riviera-showdown.html","release.json",".nojekyll"]){
+  for(const path of ["index.html","app.js","data.json","logo.svg","assets/riviera-logo.jpg","firebase-config.js","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","riviera-showdown.html","release.json",".nojekyll"]){
     assert.ok(existsSync(file(path)),path+" não encontrado");
   }
   const html=readFileSync(file("index.html"),"utf8");
   assert.match(html,/src="app\.js"/);
-  assert.match(html,/src="logo\.svg"/);
+  assert.match(html,/src="assets\/riviera-logo\.jpg"/);
   const code=readFileSync(file("app.js"),"utf8");
   assert.match(code,/import\("\.\/firebase-config\.js"\)/);
   assert.match(code,/import\("\.\/rooms-v2\.js"\)/);
