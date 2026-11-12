@@ -9,7 +9,7 @@ const data=JSON.parse(readFileSync(resolve(root,"data.json")));
 const browser=await chromium.launch({headless:true,executablePath:["/usr/bin/google-chrome","/usr/bin/chromium"].find(existsSync),args:["--no-sandbox"]});
 const allowed=new Set(["index.html","app.js","firebase-config.js","logo.svg","data.json","rooms-v2.js","phrases-v3.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js"]);
 const server=createServer((req,res)=>{
- const name=new URL(req.url,"http://localhost").pathname.replace(/^\\/triviaarena\\//,"")||"index.html";
+ const name=new URL(req.url,"http://localhost").pathname.replace(/^\/triviaarena\//,"")||"index.html";
  if(!allowed.has(name)){res.writeHead(404);res.end();return}
  res.setHeader("content-type",({".html":"text/html",".js":"text/javascript",".json":"application/json",".svg":"image/svg+xml"})[extname(name)]);
  res.end(readFileSync(resolve(root,name)));
@@ -35,7 +35,7 @@ try{
  await host.locator('[data-action="start-game"]').click();
  for(const p of [host,guest]){
    await p.locator("#round-countdown").waitFor();
-   assert.match(await p.locator("#round-countdown").innerText(),/^\\d{2}s$/);
+   assert.match(await p.locator("#round-countdown").innerText(),/^\d{2}s$/);
    assert.equal(await p.locator(".guess-wall").count(),0);
  }
  const category=await host.locator(".rank-category h2").innerText();
