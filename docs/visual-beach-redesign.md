@@ -1,0 +1,3 @@
+# Riviera Showdown — Sunset Beach Theme
+
+Atualização de 12/11/2026. Logo original fornecida pelo usuário no cabeçalho, hero e rodapé. Praia e ondas animadas com SVG/CSS; sem dependências externas, loop reduzido para `prefers-reduced-motion`. Identidade cromática: dourado, coral, magenta, azul do mar e roxo escuro. Mantém motor da Arena Ao Vivo, modo clássico, ranking e acessibilidade. A prévia `riviera-showdown.html` embute a foto em base64 para abrir offline; build Pages copia `assets/riviera-logo.jpg`. O arquivo GIF de referência separado não é necessário para a animação no site (SVG é mais fluido e leve).
