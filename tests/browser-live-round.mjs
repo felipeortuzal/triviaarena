@@ -22,13 +22,13 @@ try{
  const host=await contexts[0].newPage(),guest=await contexts[1].newPage();
  for(const p of [host,guest])p.on("pageerror",e=>errors.push(e.message));
  await host.goto(base);
- await host.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:45000});
+ await host.locator("#connection").filter({hasText:"Online"}).waitFor({state:"attached",timeout:45000});
  await host.locator("#nick").fill("Host Ao Vivo");
  await host.locator('[data-action="create-live"]').click();
  await host.locator("#invite").waitFor();
  const invite=await host.locator("#invite").inputValue();
  await guest.goto(invite);
- await guest.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:45000});
+ await guest.locator("#connection").filter({hasText:"Online"}).waitFor({state:"attached",timeout:45000});
  await guest.locator("#nick").fill("Guest Ao Vivo");
  await guest.locator('[data-action="join"]').click();
  await guest.locator("#invite").waitFor();

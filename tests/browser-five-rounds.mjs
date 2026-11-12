@@ -17,7 +17,7 @@ const server=createServer((req,res)=>{
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=process.env.RIVIERA_PUBLIC_URL||`http://127.0.0.1:${server.address().port}/triviaarena/?emulator=1`;
-async function ready(page){await page.locator('#connection').filter({hasText:'Online'}).waitFor({timeout:45000})}
+async function ready(page){await page.locator('#connection').filter({hasText:'Online'}).waitFor({state:'attached',timeout:45000})}
 async function submitCorrect(page){
  const phrase=await page.locator('.largecode').count();
  let text;

@@ -11,7 +11,7 @@ const browser=await chromium.launch({headless:true,executablePath:executable,arg
 const failures=[];
 let server;
 async function online(page){
-  await page.locator("#connection").filter({hasText:"Online"}).waitFor({timeout:30000});
+  await page.locator("#connection").filter({hasText:"Online"}).waitFor({state:"attached",timeout:30000});
 }
 async function newRoom(page,mode,nick){
   await page.goto(url,{waitUntil:"domcontentloaded"});
