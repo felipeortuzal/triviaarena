@@ -22,6 +22,37 @@ async function browserChecks(){
     await page.getByText("Demonstração: Estimativa de Ranking").waitFor();
     assert.equal(await page.locator('[data-action="choose-letters"], [data-action="choose-mixed"]').count(),0);
     assert.ok(await page.locator('[data-action="reveal"]').isDisabled());
+    // HUD regression: progress labels must never inherit neon bars; score names and statuses stay aligned.
+    for(const width of [320,375,768,1280]){
+      await page.setViewportSize({width,height:900});
+      const hud=await page.evaluate(()=>{
+        const meter=document.querySelector('.round-meter');
+        const label=meter?.querySelector('.round-meter-label');
+        const bars=meter?.querySelectorAll('span[aria-hidden="true"]')||[];
+        const card=document.querySelector('.round-panel');
+        const board=document.querySelector('.scoreboard');
+        const name=board?.querySelector('.player b');
+        const state=board?.querySelector('.player span');
+        const bound=el=>el?.getBoundingClientRect();
+        return {bars:bars.length,labelBorder:label&&getComputedStyle(label).borderTopWidth,
+          labelHeight:bound(label)?.height||0,
+          meterLeft:bound(meter)?.left,meterRight:bound(meter)?.right,
+          cardLeft:bound(card)?.left,cardRight:bound(card)?.right,
+          boardLeft:bound(board)?.left,boardRight:bound(board)?.right,
+          nameLeft:bound(name)?.left,stateLeft:bound(state)?.left,
+          nameTop:bound(name)?.top,stateTop:bound(state)?.top,
+          horizontalOverflow:Math.max(0,document.documentElement.scrollWidth-innerWidth)};
+      });
+      assert.equal(hud.bars,5,"HUD deve mostrar cinco barras de rodada");
+      assert.equal(hud.labelBorder,'0px',"legenda do progresso não pode ganhar borda neon");
+      assert.ok(hud.labelHeight>=11,"legenda do progresso deve permanecer legível");
+      assert.ok(hud.stateLeft>=hud.nameLeft-1,"status do jogador deve estar sob o nome, não sob a medalha");
+      assert.ok(hud.stateTop>=hud.nameTop,"status do jogador deve ficar após o nome");
+      for(const edge of ['meter','card','board']){
+        assert.ok(hud[edge+'Left']>=-1&&hud[edge+'Right']<=width+1,edge+' fora da viewport '+width+': '+JSON.stringify(hud));
+      }
+      assert.ok(hud.horizontalOverflow<=1,"overflow horizontal no HUD "+width+"px: "+JSON.stringify(hud));
+    }
     await page.locator('#guess').fill('Brasil');
     await page.locator('[data-action="guess"]').click();
     await page.locator('[data-action="reveal"]').click();
