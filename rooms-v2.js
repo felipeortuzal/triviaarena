@@ -73,7 +73,7 @@ export const makeRoomGateway=function makeRoomGateway({db,uid,api,now=()=>Date.n
   }
   throw Error("Muitas entradas simultâneas. Reabra o convite e tente novamente.");
 }
-async function createRoom({nick,mode}){
+async function createRoom({nick,mode,live=false}){
     const name=checkName(nick);
     if(!["letters","rank","mixed"].includes(mode))throw Error("Modo de jogo inválido.");
     for(let i=0;i<16;i++){
@@ -89,7 +89,7 @@ async function createRoom({nick,mode}){
         const slot=await claimSeat(code);
         const member=await get(at(p.member(code,uid)));
         const joined=member.val()?.joined||timestamp;
-        await set(at(p.public(code)),{version:2,host:uid,mode,phase:"lobby",createdAt:timestamp,number:0,
+        await set(at(p.public(code)),{version:2,host:uid,mode,phase:"lobby",...(mode==="rank"&&live?{live:true}:{}),createdAt:timestamp,number:0,
           profiles:{[uid]:{uid,nick:name,joined}},scores:{[uid]:0}});
         return {code,slot,created:true};
       }catch(e){

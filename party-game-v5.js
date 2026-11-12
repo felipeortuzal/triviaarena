@@ -1,5 +1,5 @@
 import {calculatePhrase} from "./phrase-tools.js";
-import {isEligibleRanking,calculateRanking} from "./rank-tools-v5.js";
+import {isEligibleRanking,calculateRanking,normalizeItem} from "./rank-tools-v5.js";
 // Três modos, cinco rodadas, respostas privadas e apuração atômica.
 export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRankings,randomIndex,calculateRanking,isEligibleRanking}){
   const {ref,get,set,onValue,runTransaction}=api;
@@ -7,6 +7,12 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
   const regAt=code=>ref(db,`roomRegistry/${code}`);
   const ensureHost=state=>{if(!state||state.host!==uid)throw Error("Somente o anfitrião pode conduzir a partida.");};
   const rankings=()=>getRankings().filter(isEligibleRanking);
+  // Uma chave canônica por resposta. Transação atômica: só a primeira inscrição vence.
+  const uniqueGuessKey=(answer,list)=>{
+    const key=normalizeItem(answer);
+    const canonical=list.items.find(item=>[item,...(list.aliases?.[item]||[])].some(alias=>normalizeItem(alias)===key));
+    return normalizeItem(canonical||answer).replace(/\s+/g,"_");
+  };
   const random=n=>{
     if(n<1)throw Error("Catálogo sem desafios disponíveis.");
     const result=randomIndex(n);
@@ -40,7 +46,8 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     const pick=options[random(options.length)];
     const key=`${pick.categoryId}:${pick.limit}:${pick.target}`;
     return {number,usedRanks:fresh.length?[...used,key]:[key],
-      round:{type:"rank",id:`partida-${state.match||1}-ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,revealed:false,scored:false,resultReady:false}};
+      round:{type:"rank",id:`partida-${state.match||1}-ranking-${number}`,categoryId:pick.categoryId,limit:pick.limit,target:pick.target,revealed:false,scored:false,resultReady:false,
+        ...(state.live===true?{deadlineAt:Date.now()+30000}:{})}};
   }
   async function start(code){
     const preview=(await get(roomAt(code))).val();
@@ -82,9 +89,34 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     if(!state||state.phase!=="playing"||!["letters","rank"].includes(state.round?.type)||state.round.revealed)throw Error("Esta rodada não aceita novos palpites.");
     if(!state.profiles?.[uid])throw Error("Você não está inscrito na sala.");
     const id=state.round.id;
-    await set(ref(db,`roomPrivateGuesses/${code}/${id}/${uid}`),answer);
-    // Status é um booleano público, NUNCA o texto enviado.
-    await set(ref(db,`roomGuessStatus/${code}/${id}/${uid}`),true);
+    const privateRef=ref(db,`roomPrivateGuesses/${code}/${id}/${uid}`);
+    const live=state.live===true&&state.round.type==="rank";
+    let claimRef=null,claimMade=false;
+    if(live){
+      if(Date.now()>state.round.deadlineAt)throw Error("Tempo esgotado. Aguarde o resultado.");
+      if((await get(privateRef)).exists())throw Error("Você já confirmou seu palpite nesta rodada.");
+      if(answer){
+        const list=rankings().find(item=>item.id===state.round.categoryId);
+        if(!list)throw Error("Ranking indisponível.");
+        const key=uniqueGuessKey(answer,list);
+        if(!key)throw Error("Palpite inválido.");
+        claimRef=ref(db,`roomRankClaims/${code}/${id}/${key}`);
+        const claim=await runTransaction(claimRef,value=>value===null?uid:undefined,{applyLocally:false});
+        if(!claim.committed)throw Error("Esse palpite já foi usado por alguém. Escolha outro!");
+        claimMade=true;
+      }
+    }
+    try{
+      await set(privateRef,answer);
+      // O status é só um booleano. O texto não vaza para os outros jogadores.
+      await set(ref(db,`roomGuessStatus/${code}/${id}/${uid}`),true);
+    }catch(e){
+      // Recupera uma reserva vazia se uma falha aconteceu ANTES de salvar a resposta.
+      if(claimMade)try{
+        if(!(await get(privateRef)).exists())await runTransaction(claimRef,value=>value===uid?null:undefined,{applyLocally:false});
+      }catch{}
+      throw e;
+    }
     return answer;
   }
   function watchMyGuess(code,roundId,onGuess,onError){
@@ -101,7 +133,8 @@ export const makePartyGame=function makePartyGame({db,uid,api,getPuzzles,getRank
     const id=current.round.id;
     if(type==='rank'&&!current.round.revealed){
       const sent=(await get(ref(db,`roomGuessStatus/${code}/${id}`))).val()||{};
-      if(Object.keys(current.profiles||{}).some(player=>sent[player]!==true))throw Error('Espere todos enviarem um palpite ou passarem a vez antes de revelar.');
+      const timedOut=current.live===true&&Number.isFinite(current.round.deadlineAt)&&Date.now()>=current.round.deadlineAt;
+      if(!timedOut&&Object.keys(current.profiles||{}).some(player=>sent[player]!==true))throw Error('Espere todos enviarem um palpite ou passarem a vez antes de revelar.');
     }
     const locked=await runTransaction(roomAt(code),value=>{
       const old=value||current;
