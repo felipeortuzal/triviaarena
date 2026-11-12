@@ -123,7 +123,7 @@ function matchMeter(){
 }
 function roomHeader(){
  if(room?.localShared)return `<div class="row between travel-header"><div><div class="eyebrow">MODO VIAGEM · RODADA ${room.number} DE 5</div><h2>Estimativa de Ranking</h2></div>${btn('Pausar e sair','travel-pause','ghost')}</div>${matchMeter()}`;
- if(localDemo)return `<div class="row between travel-header"><div><div class="eyebrow">PRÉVIA LOCAL · RODADA ${room?.number||1} DE 5</div><h2>Estimativa de Ranking</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>${matchMeter()}`;
+ if(localDemo)return `<div class="row between travel-header"><div><div class="eyebrow">PRÉVIA LOCAL · RODADA ${room?.number||1} DE 5</div><h2>Demonstração: Estimativa de Ranking</h2></div>${btn("← Sair da prévia","stop-demo","ghost")}</div>${matchMeter()}`;
  return `<div class="row between travel-header"><div><div class="eyebrow">SALA ${esc(roomId)} · RODADA ${room?.number||0} DE 5</div><h2>Estimativa de Ranking</h2></div>${btn("📋 Convidar","copy","ghost")}</div>${matchMeter()}`;
 }
 function letters(){
