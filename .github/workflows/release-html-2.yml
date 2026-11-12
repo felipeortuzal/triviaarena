@@ -1,0 +1,38 @@
+name: Riviera Showdown · HTML offline 2.0 validado
+on:
+  workflow_run:
+    workflows: ["Riviera Showdown · Etapa 3 Jogo multiplayer"]
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerar HTML e confirmar correspondência com o commit testado
+        run: |
+          node scripts/build-standalone.mjs
+          git diff --exit-code -- riviera-showdown.html
+      - name: Publicar prévia HTML 2.0 validada
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          TAG="riviera-showdown-2.0-preview"
+          NOTES="HTML local do Riviera Showdown 2.0, gerado e validado no commit $SOURCE_SHA. Baixe o arquivo riviera-showdown.html e abra com duplo clique para jogar Ranking com 2 a 8 amigos no mesmo aparelho. Cinco rodadas, palpites secretos, pódio e revanche. Frase e Misturado continuam pausados. Esta prévia NÃO habilita automaticamente o Firebase de produção ou multiplayer entre dispositivos."
+          if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" riviera-showdown.html --clobber --repo "$REPOSITORY"
+            gh release edit "$TAG" --notes "$NOTES" --repo "$REPOSITORY"
+          else
+            gh release create "$TAG" riviera-showdown.html --repo "$REPOSITORY" --target "$SOURCE_SHA" --title "Riviera Showdown 2.0 — prévia offline" --notes "$NOTES" --prerelease
+          fi
