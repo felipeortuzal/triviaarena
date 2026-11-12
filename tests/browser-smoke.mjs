@@ -15,6 +15,14 @@ async function browserChecks(){
   const failures=[];
   async function verifyDemo(page){
     const errors=[];
+    // Regressão do fundo: a arte era referenciada no template JS e ficava
+    // quebrada ao abrir riviera-showdown.html via file:// sem pasta assets.
+    const artwork=page.locator('.reference-desktop .reference-art');
+    await artwork.waitFor({state:'attached',timeout:10000});
+    await page.waitForFunction(()=>document.querySelector('.reference-art')?.complete);
+    const image=await artwork.evaluate(img=>({width:img.naturalWidth,height:img.naturalHeight,src:img.currentSrc}));
+    assert.ok(image.width>=1000&&image.height>=500,
+      'Imagem da praia deve carregar, inclusive no HTML offline: '+image.src.slice(0,120));
     page.on("pageerror",e=>errors.push(e.message));
     await page.locator('[data-action="demo"]').waitFor({state:"visible",timeout:10000});
     assert.equal(await page.title(),"Riviera Showdown — Jogue com seus amigos");

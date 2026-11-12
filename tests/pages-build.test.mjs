@@ -40,3 +40,10 @@ test("recusa URLs estranhas e nunca incorpora configuração insegura",()=>{
   const reset=spawnSync(process.execPath,["scripts/prepare-pages.mjs"],{cwd:root,env:{...process.env,RIVIERA_FIREBASE_WEB_CONFIG:""},encoding:"utf8"});
   assert.equal(reset.status,0,reset.stderr);
 });
+
+test("HTML offline incorpora a praia e a logo geradas pelo template JS",()=>{
+  const html=readFileSync(file("riviera-showdown.html"),"utf8");
+  assert.match(html,/src="data:image\\/jpeg;base64,[A-Za-z0-9+/=]+" class="reference-art"/);
+  assert.doesNotMatch(html,/assets\\/riviera-reference-beach\\.jpg/);
+  assert.doesNotMatch(html,/assets\\/riviera-logo-transparent\\.png/);
+});

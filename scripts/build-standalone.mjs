@@ -31,6 +31,16 @@ html=html.replace(/src="assets\/riviera-logo-transparent\.png"/g,()=>`src="${cut
 html=html.replace(/src="assets\/riviera-reference-beach\.jpg"/g,()=>`src="${reference}"`);
 html=html.replace(/url\(\x27assets\/riviera-reference-beach\.jpg\x27\)/g,()=>`url(\x27${reference}\x27)`);
 html=html.replace(external,boot+'\n'+inline);
+// Os caminhos dentro do template do app.js só aparecem DEPOIS do script ser
+// embutido. Substitua os assets também no JS inline, não apenas no HTML/CSS.
+for(const [asset,uri] of [
+  ['assets/riviera-logo.jpg',brand],
+  ['assets/riviera-logo-transparent.png',cutout],
+  ['assets/riviera-reference-beach.jpg',reference],
+]){
+  html=html.replaceAll(asset,uri);
+  if(html.includes(asset))throw new Error('Asset offline não embutido: '+asset);
+}
 const out=path.join(root,'riviera-showdown.html');
 fs.writeFileSync(out,html);
 console.log('Gerado '+out+' ('+Buffer.byteLength(html)+' bytes)');
