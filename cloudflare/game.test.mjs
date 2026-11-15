@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards} from "./worker.mjs";
+import {BANKS,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -51,4 +51,33 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const r=make();r.players.a.matchStats={played:1,exact:1,valid:1,distanceSum:0,fastestExactMs:100,turboWins:0};
  r.players.b.matchStats={played:1,exact:1,valid:1,distanceSum:0,fastestExactMs:200,turboWins:0};
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
+});
+
+test("41 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,41);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,41);
+ for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
+ assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
+ assert.ok(BANKS.some(b=>b.id==="f1-2025"));
+ assert.ok(BANKS.some(b=>b.id==="movies-2010s"));
+});
+test("sorteio alterna categorias e não repete a mesma pergunta",()=>{
+ const r=make();r.config={durationSeconds:30,categoryIds:BANKS.map(b=>b.id),turbo:false};
+ let previous=null;const used=new Set();
+ for(let i=0;i<100;i++){chooseQuestion(r);assert.notEqual(r.question.bi,previous,"não deve repetir categoria consecutiva");assert.equal(used.has(r.question.key),false,"não deve repetir pergunta");used.add(r.question.key);previous=r.question.bi;}
+});
+test("recortes regionais preservam a ordem do ranking mundial original",()=>{
+ for(const id of ["area","population","gdp"]){
+  const original=BANKS.find(b=>b.id===id);
+  for(const region of ["americas","europa","africa","asia"]){
+   const b=BANKS.find(b=>b.id===id+"-"+region);
+   assert.ok(b&&b.items.length>=8);
+   let prev=-1;
+   for(const name of b.items){const pos=original.items.indexOf(name);assert.ok(pos>prev);prev=pos;}
+  }
+ }
+});
+test("rankings antigos funcionam após novas perguntas",()=>{
+ const r=make();r.config={durationSeconds:20,categoryIds:["pokemon"],turbo:false};
+ chooseQuestion(r);assert.equal(BANKS[r.question.bi].id,"pokemon");
 });

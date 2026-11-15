@@ -14,6 +14,10 @@ try{
  await pa.goto(base,{waitUntil:"networkidle"});
  await pa.locator(".hero-logo").waitFor({state:"visible"});
  assert.ok(await pa.locator(".hero-logo").evaluate(img=>img.complete&&img.naturalWidth>200),"Logo aprovada deve carregar");
+ await pa.locator('[data-op="how"]').first().click();
+ assert.equal(await pa.locator('#how-dialog').evaluate(d=>d.open),true);
+ await pa.locator('[data-op="close-how"]').click();
+ assert.equal(await pa.locator('#how-dialog').evaluate(d=>d.open),false);
  await pa.locator('[data-op="create"]').click();
  await pa.locator('#create-form [name="nick"]').fill("Afonso");
  await pa.locator('#create-form [name="target"]').fill("1");
@@ -25,7 +29,9 @@ try{
  assert.equal(await pa.locator('#create-form [name="mode"]').inputValue(),"rounds");
  await pa.locator('#create-form [name="target"]').fill("1");
  await pa.locator('#create-form [name="durationSeconds"]').selectOption("20");
+ await pa.locator('#advanced-options > summary').click();
  await pa.locator('[data-op="categories-none"]').click();
+ await pa.locator('details.category-group:has(input[value="pokemon"]) > summary').click();
  await pa.locator('input[name="categoryIds"][value="pokemon"]').check();
  assert.equal(await pa.locator('input[name="categoryIds"]:checked').count(),1);
  await pa.locator('#create-form button[type="submit"]').click();
@@ -49,6 +55,8 @@ try{
  await pa.locator('[data-op="react"][data-emoji="🔥"]').click();
  await pb.locator('.reaction-bubble .bubble-emoji').getByText("🔥").waitFor({state:"visible",timeout:12000});
  assert.ok(await pb.locator('.reaction-bubble').count()>0,"Reactions are synchronized between browsers");
+ assert.equal(await pa.locator('[data-op="start"]').isDisabled(),true,"Everyone must be ready before start");
+ await pa.locator('[data-op="ready"]').click();
  await pa.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
  await pa.locator('[data-op="start"]').click();
  await pa.locator('#guess').waitFor({state:"visible"});
@@ -60,6 +68,10 @@ try{
  });
  assert.ok(options.length>=25);
  assert.ok(options.includes("Pikachu"),"Custom category selected only pokemon");
+ await pa.locator('#guess').fill("Pika");
+ await pa.locator('.guess-option').getByText("Pikachu").waitFor({state:"visible",timeout:5000});
+ await pa.locator('.guess-option').getByText("Pikachu").click();
+ assert.equal(await pa.locator('#guess').inputValue(),"Pikachu");
  assert.equal(await pa.locator("#seconds").innerText().then(Number)>0,true);
  await pa.locator('#guess').fill(options[0]);
  await pa.locator('#guess-form button[type="submit"]').click();
@@ -86,6 +98,6 @@ try{
  await pa.locator('#guess').waitFor({state:"visible",timeout:10000});
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
  assert.deepEqual(failures,[],"Erros de JavaScript no navegador");
- console.log("NAVEGADOR MULTIPLAYER 2.0 OK: presets, categoria filtrada, 20 segundos, placar, estatísticas, mobile e revanche.");
+ console.log("NAVEGADOR MULTIPLAYER 2.1 OK: tutorial, configuração rápida, opções avançadas, confirmação de pronto, autocomplete, multiplayer, mobile.");
  await a.close();await b.close();
 }finally{await browser.close()}
