@@ -28,6 +28,20 @@ jobs:
           node cloudflare/prepare.mjs
           test -s cloudflare/public/offline.html
           test -s cloudflare/public/assets/riviera-reference-beach.jpg
+      - name: Testar dois clientes reais no Worker local (Durable Object)
+        env:
+          CI: "1"
+          WRANGLER_SEND_METRICS: "false"
+        run: |
+          npx --yes wrangler@4 dev --local --config wrangler.jsonc --ip 127.0.0.1 --port 8787 > /tmp/riviera-wrangler.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8787/api/status > /dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          if ! node cloudflare/integration.mjs; then
+            cat /tmp/riviera-wrangler.log
+            exit 1
+          fi
       - name: Publicar no Cloudflare, se acesso configurado
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
