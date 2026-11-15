@@ -1,15 +1,79 @@
 (function clientApp(){
  const root=document.getElementById("app"),notice=document.getElementById("notice");
  const KEY="riviera-cloudflare-session-v1",NICK="riviera-nickname-v1",q=new URLSearchParams(location.search),invite=(q.get("room")||"").trim().toUpperCase();
- let session=null,room=null,ws=null,screen=invite?"join":"home",busy=false,draft="",lastSignature="",serverOffset=0,syncing=false,connectionState="offline",reconnectTimer=null,rankings=[];
+ let session=null,room=null,ws=null,screen=invite?"join":"home",busy=false,draft="",lastSignature="",serverOffset=0,syncing=false,connectionState="offline",reconnectTimer=null,rankings=[],soundEnabled=false,audioCtx=null,lastReactAt=0;
+ const seenReactions=new Set();
  try{session=JSON.parse(localStorage.getItem(KEY)||"null")}catch{}
  if(session?.code&&session?.token&&(!invite||session.code===invite))screen="room";
+ try{soundEnabled=localStorage.getItem("riviera-sound-v1")==="on"}catch{}
  const e=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  function setNotice(message){notice.textContent=message||"";notice.hidden=!message}
  function updateNetwork(){const n=document.getElementById("net-pill");if(n){const ok=connectionState==="connected"&&navigator.onLine;n.className="net-pill "+(ok?"connected":"disconnected");n.textContent=ok?"● AO VIVO":"○ RECONECTANDO";}}
  async function loadRankings(){try{const r=await fetch("/api/rankings",{cache:"no-store"});const v=await r.json();if(r.ok&&Array.isArray(v.rankings)){rankings=v.rankings;if(screen==="home")render()}}catch{}}
+function renderResultScene(){
+ const r=room.lastResults;
+ const isFinal=room.phase==="finished";
+ const leaderboard=[...room.players].sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
+ const ranks=[1,0,2];
+ const podium=isFinal?`<div class="podium-section"><span class="kicker">OS DONOS DA RIVIERA</span><h2 class="podium-title">PÓDIO DA PARTIDA</h2><div class="podium-places" aria-label="Classificação final">${ranks.map(index=>{const p=leaderboard[index];if(!p)return "";const medal=["🥇","🥈","🥉"][index];return `<div class="podium-place podium-${index+1}" style="--podium-delay:${index*.12}s"><span class="podium-medal" aria-hidden="true">${medal}</span><span class="podium-name">${e(p.nick)}</span><strong>${p.points} <small>PTS</small></strong><span class="podium-position">${index+1}º LUGAR</span></div>`}).join("")}</div>${leaderboard.length>3?`<p class="podium-more">E mais ${leaderboard.length-3} competidores na disputa!</p>`:""}</div>`:"";
+ const resultRows=(r?.results||[]).map((p,i)=>`<div class="result-row result-row-animated" style="--reveal-delay:${i*.11}s"><span class="result-symbol">${p.earned>0?"⭐":"•"}</span><div><b>${e(p.nick)}</b><small>${e(p.answer)} ${p.rank?"· posição "+p.rank+" · distância "+p.distance:"· não pontuou"}</small></div><strong>+${p.earned}</strong></div>`).join("");
+ return `<section class="game-page reveal-page" data-scene="${isFinal?"finished":"reveal"}"><div class="reveal-header"><span class="kicker">RODADA ${room.round} • RESULTADO</span><h1>${isFinal?"🏆 FIM DE JOGO":"HORA DA REVELAÇÃO"}</h1><p>${isFinal?"A temporada dessa mesa terminou. Veja quem levou o troféu.":"Quanto menor a distância do ranking, maior a pontuação."}</p></div>${podium}<div class="game-grid"><div class="panel reveal-panel"><span class="kicker">A RESPOSTA CERTA ERA</span><div class="answer-spotlight"><span class="spotlight-stars" aria-hidden="true">✦ ✧ ✦</span><h2 class="revealed">${e(r?.target||"")} <small>(${r?.position}º lugar)</small></h2></div><h3 class="result-subheading">PLACAR DA RODADA</h3><div class="results">${resultRows}</div><div class="actions"><button class="btn ghost" data-op="share-result">📤 COMPARTILHAR RESULTADO</button>${room.isHost?`<button class="btn lime" data-op="${isFinal?"restart":"next"}">${isFinal?"↻ JOGAR REVANCHE":"PRÓXIMA RODADA →"}</button>`:'<p class="waitmsg">Aguardando o anfitrião...</p>'}</div></div>${board()}</div></section>`;
+}
+function renderReactionDock(){
+ const emojis=["🔥","😂","👏","🤯","🏆","😎"];
+ return `<section class="reaction-dock" aria-label="Reações dos jogadores"><span class="reaction-label">REAGIR À PARTIDA</span><div class="reaction-options">${emojis.map(emoji=>`<button type="button" class="reaction-option" data-op="react" data-emoji="${emoji}" aria-label="Reagir ${emoji}" title="Reagir ${emoji}">${emoji}</button>`).join("")}</div><span class="reaction-tip">Reações visíveis a todos, sem revelar os palpites.</span></section>`;
+}
+function playSound(kind){
+ if(!soundEnabled)return;
+ try{
+  const Context=window.AudioContext||window.webkitAudioContext;
+  if(!Context)return;
+  if(!audioCtx)audioCtx=new Context();
+  if(audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});
+  const tones=kind==="reveal"?[392,523,784]:kind==="win"?[523,659,880,1046]:kind==="start"?[330,440]:kind==="send"?[660]:[440,550];
+  tones.forEach((frequency,i)=>{
+   const osc=audioCtx.createOscillator();
+   const gain=audioCtx.createGain();
+   const at=audioCtx.currentTime+i*.085, duration=kind==="win"?.15:.10;
+   osc.type="sine";osc.frequency.setValueAtTime(frequency,at);
+   gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.028,at+.015);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
+   osc.connect(gain);gain.connect(audioCtx.destination);osc.start(at);osc.stop(at+duration+.02);
+  });
+ }catch{}
+}
+function showRevealCurtain(previous,next){
+ if(!previous||previous.phase!=="playing"||!["reveal","finished"].includes(next.phase))return;
+ playSound(next.phase==="finished"?"win":"reveal");
+ if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(".reveal-curtain").forEach(node=>node.remove());
+ const layer=document.createElement("div");
+ layer.className="reveal-curtain";layer.setAttribute("aria-hidden","true");
+ layer.innerHTML='<div class="curtain-inner"><span>RIVIERA SHOWDOWN</span><strong>HORA DA<br>VERDADE</strong><span class="curtain-dots">✦ ✦ ✦</span></div>';
+ document.body.append(layer);
+ setTimeout(()=>{layer.classList.add("curtain-exit");setTimeout(()=>layer.remove(),500)},1350);
+}
+function paintReactions(events){
+ const stage=document.getElementById("reaction-stage");
+ if(!stage||!Array.isArray(events))return;
+ for(const evt of events){
+  if(!evt?.id||seenReactions.has(evt.id))continue;
+  seenReactions.add(evt.id);
+  const bubble=document.createElement("div");
+  bubble.className="reaction-bubble";bubble.setAttribute("role","status");
+  const emoji=document.createElement("span");emoji.className="bubble-emoji";emoji.textContent=evt.emoji;
+  const nick=document.createElement("span");nick.className="bubble-nick";nick.textContent=evt.nick;
+  bubble.append(emoji,nick);stage.append(bubble);
+  setTimeout(()=>bubble.remove(),4800);
+ }
+ if(seenReactions.size>250)seenReactions.clear();
+}
+function sharingSummary(){
+ const rank=[...room.players].sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
+ const ranks=rank.map((p,i)=>`${i+1}º ${p.nick}: ${p.points} pts`).join("\n");
+ return `🏝️ RIVIERA SHOWDOWN ${room.phase==="finished"?"• RESULTADO FINAL":"• RODADA "+room.round}\n${ranks}\n🎮 ${location.origin}/?room=${session.code}`;
+}
  function controls(){
-  return `<header class="nav"><div class="nav-inner"><img class="brand" src="/assets/riviera-logo-transparent.png" alt="Riviera Showdown"><span class="nav-tag">A ARENA É SUA</span><span class="net-pill" id="net-pill">○ INICIANDO</span><button class="btn small ghost" data-op="${screen==="room"?"leave":"home"}" type="button">${screen==="room"?"Sair":"Início"}</button></div></header>`;
+  return `<header class="nav"><div class="nav-inner"><img class="brand" src="/assets/riviera-logo-transparent.png" alt="Riviera Showdown"><span class="nav-tag">A ARENA É SUA</span><button type="button" class="sound-toggle" data-op="sound" aria-pressed="${soundEnabled}">${soundEnabled?"🔊 SOM LIGADO":"🔇 SOM DESLIGADO"}</button><span class="net-pill" id="net-pill">○ INICIANDO</span><button class="btn small ghost" data-op="${screen==="room"?"leave":"home"}" type="button">${screen==="room"?"Sair":"Início"}</button></div></header>`;
  }
  function board(){
   return `<div class="board"><div class="board-title"><b>PLACAR</b><span>${room.players.length} JOGADORES</span></div>${room.players.map((p,i)=>`<div class="player"><span class="ranknum">#${i+1}</span><span class="nick">${e(p.nick)} ${p.id===room.host?'<small>👑 ANFITRIÃO</small>':""} ${p.id===room.me?'<small>VOCÊ</small>':""}</span><span class="points">${p.points} <small>PTS</small></span>${room.phase==="playing"?`<span class="sent ${p.submitted?"yes":""}">${p.submitted?"✓ ENVIOU":"AGUARDANDO"}</span>`:room.phase==="lobby"?`<span class="sent ${p.online?"yes":""}">${p.online?"● ONLINE":"○ DESCONECTADO"} · ${p.ready?"✓ PRONTO":"AGUARDANDO"}</span>`:""}${room.phase==="lobby"&&room.isHost&&p.id!==room.me?`<span class="host-tools"><button class="mini-btn" data-op="handoff" data-player="${e(p.id)}" title="Passar a liderança">👑 Tornar host</button><button class="mini-btn danger" data-op="kick" data-player="${e(p.id)}" title="Remover do lobby">Remover</button></span>`:""}</div>`).join("")}</div>`;
@@ -29,11 +93,10 @@
     const qn=room.question,me=room.players.find(p=>p.id===room.me),submitted=!!me?.submitted;
     content=`<section class="game-page"><div class="round-head"><div><span class="kicker">RODADA ${room.round}${room.mode==="rounds"?" DE "+room.target:" • CORRIDA ATÉ "+room.target}</span><h1>QUAL É A POSIÇÃO?</h1></div><div class="timer" id="timer"><strong id="seconds">30</strong><small>SEGUNDOS</small></div></div><div class="game-grid"><div class="panel question"><span class="category">📊 ${e(qn.category)}</span><h2>Quem está em <strong>${qn.position}º lugar</strong>?</h2><p>Ranking TOP ${qn.limit} · ${e(qn.snapshot)}</p><div class="separator"></div>${submitted?`<div class="success-state">✓ PALPITE ENVIADO<p>Seu palpite está guardado até a revelação.</p></div>`:`<form id="guess-form" class="stack"><label>SEU PALPITE<input id="guess" name="answer" autocomplete="off" placeholder="Digite o nome ou apelido (ex.: EUA)" list="options" required maxlength="100" value="${e(draft)}"></label><datalist id="options">${qn.options.map(x=>`<option value="${e(x.name)}"></option>`).join("")}</datalist><div class="actions"><button class="btn lime" type="submit">ENVIAR PALPITE</button><button class="btn ghost" type="button" data-op="pass">NÃO SEI • PASSAR</button></div></form>`}<p class="tiny">Aceita variações de nomes, acentos e pequenos erros de digitação. Fonte: ${e(qn.source)}. Em empate de distância, ganha quem enviou antes.</p></div>${board()}</div></section>`;
    }else if(room.phase==="reveal"||room.phase==="finished"){
-    const r=room.lastResults;
-    content=`<section class="game-page"><span class="kicker">RODADA ${room.round} • RESULTADO</span><h1>${room.phase==="finished"?"🏆 FIM DE JOGO":"HORA DA REVELAÇÃO"}</h1><div class="game-grid"><div class="panel"><span class="kicker">A RESPOSTA CERTA ERA</span><h2 class="revealed">${e(r?.target||"")} <small>(${r?.position}º lugar)</small></h2><div class="results">${(r?.results||[]).map((p,i)=>`<div class="result-row"><span>${i===0?"🥇":i===1?"🥈":"•"}</span><div><b>${e(p.nick)}</b><small>${e(p.answer)} ${p.rank?"· posição "+p.rank+" · distância "+p.distance:"· não pontuou"}</small></div><strong>+${p.earned}</strong></div>`).join("")}</div>${room.phase==="finished"?'<h2>O PÓDIO ESTÁ DEFINIDO!</h2>':""}${room.isHost?`<button class="btn lime" data-op="${room.phase==="finished"?"restart":"next"}">${room.phase==="finished"?"↻ JOGAR REVANCHE":"PRÓXIMA RODADA →"}</button>`:'<p class="waitmsg">Aguardando o anfitrião...</p>'}</div>${board()}</div></section>`;
+    content=renderResultScene();
    }else content=`<section class="form-page"><h1>SALA ENCERRADA</h1><p>O anfitrião fechou a partida.</p><button data-op="leave" class="btn lime">VOLTAR AO INÍCIO</button></section>`;
   }
-  root.innerHTML=controls()+content+`<footer class="footer">RIVIERA SHOWDOWN <span>FEITO PARA JOGAR COM A TURMA</span></footer>`;
+  root.innerHTML=controls()+content+(screen==="room"&&room?renderReactionDock()+'<div id="reaction-stage" class="reaction-stage" aria-live="polite" aria-atomic="false"></div>':"")+`<footer class="footer">RIVIERA SHOWDOWN <span>FEITO PARA JOGAR COM A TURMA</span></footer>`;
   setNotice("");
   updateTimer();updateNetwork();
  }
@@ -59,9 +122,15 @@
   try{
    const next=await api("/api/room/"+session.code);
    serverOffset=next.serverNow-Date.now();
+   const previous=room;
    room=next;room.code=session.code;
    const sig=JSON.stringify({phase:next.phase,players:next.players,round:next.round,question:next.question?.position,results:next.lastResults});
-   if(sig!==lastSignature){lastSignature=sig;screen="room";render();}
+   if(sig!==lastSignature){
+    lastSignature=sig;screen="room";render();
+    if(previous&&next.phase==="playing"&&(previous.round!==next.round||previous.phase!=="playing"))playSound("start");
+    showRevealCurtain(previous,next);
+   }
+   paintReactions(next.reactions);
    updateTimer();
   }catch(err){
    if(/sessão não pertence|Sala não encontrada|sala expirou/i.test(err.message)){
@@ -114,6 +183,27 @@
   }
   if(op==="resume"&&session){screen="room";render();connect();sync()}
   if(op==="whatsapp"&&session){const link=location.origin+"/?room="+session.code;window.open("https://wa.me/?text="+encodeURIComponent("🎮 Bora jogar Riviera Showdown! Entra na minha sala: "+link),"_blank","noopener,noreferrer")}
+  if(op==="sound"){
+   soundEnabled=!soundEnabled;
+   try{localStorage.setItem("riviera-sound-v1",soundEnabled?"on":"off")}catch{}
+   if(soundEnabled)playSound("toggle");
+   render();
+  }
+  if(op==="react"&&session&&room){
+   const emoji=btn.dataset.emoji;
+   if(Date.now()-lastReactAt<1100)return;
+   lastReactAt=Date.now();
+   try{await api("/api/room/"+session.code+"/react","POST",{emoji});playSound("send");await sync()}
+   catch(err){setNotice(err.message)}
+  }
+  if(op==="share-result"&&session&&room){
+   const summary=sharingSummary();
+   try{
+    if(navigator.share){await navigator.share({title:"Riviera Showdown",text:summary})}
+    else if(navigator.clipboard){await navigator.clipboard.writeText(summary);setNotice("Resultado copiado! Cole no grupo do WhatsApp.")}
+    else setNotice("Copie o resultado pelo placar.");
+   }catch(err){if(err?.name!=="AbortError")setNotice("Não foi possível compartilhar automaticamente.")}
+  }
   if(op==="ready")await sendAction("ready");
   if(op==="handoff"||op==="kick"){
     const playerId=btn.dataset.player;
@@ -126,7 +216,7 @@
    try{await navigator.clipboard.writeText(location.origin+"/?room="+session.code);setNotice("Link copiado! Compartilhe com seus amigos.")}
    catch{setNotice("Copie o link na barra do navegador: "+location.origin+"/?room="+session.code)}
   }
-  if(op==="start"||op==="next"||op==="restart"||op==="pass")await sendAction(op);
+  if(op==="start"||op==="next"||op==="restart"||op==="pass"){if(op==="pass")playSound("send");await sendAction(op)}
  });
  root.addEventListener("submit",async event=>{
   event.preventDefault();if(busy)return;
@@ -146,7 +236,7 @@
    if(form.id==="guess-form"){
     const answer=String(new FormData(form).get("answer")||"").trim();
     if(!answer)throw Error("Digite um palpite ou escolha Passar.");
-    await api("/api/room/"+session.code+"/guess","POST",{answer});draft="";await sync();
+    await api("/api/room/"+session.code+"/guess","POST",{answer});playSound("send");draft="";await sync();
    }
   }catch(err){setNotice(err.message)}
   finally{busy=false}

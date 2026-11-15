@@ -30,7 +30,7 @@ export function chooseQuestion(room){
  }
  if(!choices.length)room.used=[];
  const selected=(choices.length?choices:[{key:"0:25:1",bi:0,limit:25,position:1}])[Math.floor(Math.random()*(choices.length||1))];
- room.used.push(selected.key); room.question=selected;room.answers={};room.lastResults=null;
+ room.used.push(selected.key); room.question=selected;room.answers={};room.lastResults=null;room.reactions=[];
  room.round+=1; room.phase="playing";room.deadline=Date.now()+30000;
 }
 
@@ -119,7 +119,7 @@ export class ArenaRoom{
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid]})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"1.1",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?{category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}:null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null}};
+    return {change:changed,state:room,data:{version:"1.2",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?{category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}:null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(!isHost&&["start","next","restart","close","kick","handoff"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
@@ -130,6 +130,19 @@ export class ArenaRoom{
        if(available.length)room.host=available.sort((a,b)=>(b[1].lastSeen||0)-(a[1].lastSeen||0))[0][0];
      }
      return {change:true,state:room,data:{ok:true,host:room.host}};
+   }
+   if(path==="/react"){
+     const emojis=["🔥","😂","👏","🤯","🏆","😎"];
+     const emoji=String(body.emoji||"");
+     if(!emojis.includes(emoji))return {error:"Reação inválida",status:400};
+     if(room.phase==="closed")return {error:"Sala encerrada",status:410};
+     const actor=room.players[id];
+     if(now-(actor.lastReactionAt||0)<1200)return {error:"Aguarde um instante para reagir novamente",status:429};
+     actor.lastReactionAt=now;
+     room.reactions=(room.reactions||[]).filter(evt=>now-evt.at<8500).slice(-11);
+     const event={id:crypto.randomUUID(),emoji,nick:actor.nick,at:now};
+     room.reactions.push(event);
+     return {change:true,state:room,data:{ok:true,eventId:event.id}};
    }
    if(path==="/ready"){
      if(room.phase!=="lobby")return {error:"Pronto só pode ser alterado no lobby",status:409};
@@ -198,7 +211,7 @@ export class ArenaRoom{
 
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"1.1",rankings:BANKS.length});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"1.2",rankings:BANKS.length});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,sourceUrl:b.sourceUrl||null}))});
  if(path==="/api/room"&&request.method==="POST"){
   let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
@@ -211,7 +224,7 @@ async function handleRequest(request,env){
   }
   return safeJson({error:"Não foi possível abrir uma sala. Tente novamente."},503);
  }
- const match=path.match(/^\/api\/room\/([A-HJ-NP-Z2-9]{6})(?:\/(ws|join|start|guess|pass|next|restart|close|heartbeat|ready|kick|handoff|leave))?$/);
+ const match=path.match(/^\/api\/room\/([A-HJ-NP-Z2-9]{6})(?:\/(ws|join|start|guess|pass|next|restart|close|heartbeat|ready|kick|handoff|leave|react))?$/);
  if(match){
   const [_,code,action]=match,stub=env.ARENA.get(env.ARENA.idFromName(code));
   const suffix=action?"/"+action:"/state",remote=new URL("https://room"+suffix);

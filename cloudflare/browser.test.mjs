@@ -30,6 +30,12 @@ try{
  assert.ok(await pa.locator('.player .sent.yes').count()>=1,"Lobby mostra jogador pronto");
  assert.ok(await pa.locator('[data-op="kick"]').count()===1,"Host pode remover no lobby");
  assert.ok(await pa.locator('[data-op="handoff"]').count()===1,"Host pode transferir liderança");
+ assert.equal(await pa.locator('[data-op="sound"]').getAttribute("aria-pressed"),"false");
+ await pa.locator('[data-op="sound"]').click();
+ assert.equal(await pa.locator('[data-op="sound"]').getAttribute("aria-pressed"),"true");
+ await pa.locator('[data-op="react"][data-emoji="🔥"]').click();
+ await pb.locator('.reaction-bubble .bubble-emoji').getByText("🔥").waitFor({state:"visible",timeout:12000});
+ assert.ok(await pb.locator('.reaction-bubble').count()>0,"Reactions are synchronized between browsers");
  await pa.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
  await pa.locator('[data-op="start"]').click();
  await pa.locator('#guess').waitFor({state:"visible"});
@@ -48,6 +54,10 @@ try{
  await pa.getByText("FIM DE JOGO").waitFor({timeout:10000});
  await pb.getByText("FIM DE JOGO").waitFor({timeout:10000});
  assert.equal(await pa.locator(".result-row").count(),2);
+ assert.equal(await pa.locator(".podium-place").count(),2,"Final podium shows two players");
+ assert.ok(await pa.locator('[data-op="share-result"]').count()===1,"Result sharing button exists");
+ assert.equal(await pb.locator(".podium-place").count(),2,"Final podium synchronized with guest");
+
  assert.equal(await pb.locator(".result-row").count(),2);
  const overflow=await pb.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  assert.ok(overflow<=2,"Site não pode ter scroll horizontal no mobile: "+overflow);
@@ -58,6 +68,6 @@ try{
  await pa.locator('#guess').waitFor({state:"visible",timeout:10000});
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
  assert.deepEqual(failures,[],"Erros de JavaScript no navegador");
- console.log("NAVEGADOR MULTIPLAYER OK: dois Chromes, convite, lobby, envios simultâneos, revelação, mobile, revanche.");
+ console.log("NAVEGADOR MULTIPLAYER 1.2 OK: som opt-in, reações entre Chromes, revelação, pódio, mobile e revanche.");
  await a.close();await b.close();
 }finally{await browser.close()}
