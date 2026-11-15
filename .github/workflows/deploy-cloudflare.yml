@@ -28,6 +28,8 @@ jobs:
           node cloudflare/prepare.mjs
           test -s cloudflare/public/offline.html
           test -s cloudflare/public/assets/riviera-reference-beach.jpg
+      - name: Instalar Playwright para testar a interface no Chrome
+        run: npm ci --no-audit --no-fund
       - name: Testar dois clientes reais no Worker local (Durable Object)
         env:
           CI: "1"
@@ -39,6 +41,10 @@ jobs:
             sleep 1
           done
           if ! node cloudflare/integration.mjs; then
+            cat /tmp/riviera-wrangler.log
+            exit 1
+          fi
+          if ! node cloudflare/browser.test.mjs; then
             cat /tmp/riviera-wrangler.log
             exit 1
           fi
