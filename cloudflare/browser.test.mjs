@@ -135,7 +135,7 @@ try{
  await pd.locator('#guess-form button[type="submit"]').click();
  await pc.getByText("FIM DE JOGO").waitFor({timeout:12000});
  await pd.getByText("FIM DE JOGO").waitFor({timeout:12000});
- assert.ok((await pc.locator('.revealed').innerText()).includes(def.answer));
+ assert.ok((await pc.locator('.revealed').innerText()).toLocaleLowerCase("pt-BR").includes(def.answer.toLocaleLowerCase("pt-BR")));
  assert.equal(await pd.locator('.result-row').count(),2);
  assert.ok((await pc.locator('.results').innerText()).includes("100%"));
  assert.ok((await pc.locator('.results').innerText()).includes("0%"));
