@@ -28,8 +28,8 @@ try{
  await pa.locator('[data-op="preset"][data-preset="classic"]').click();
  assert.equal(await pa.locator('#create-form [name="mode"]').inputValue(),"rounds");
  await pa.locator('#create-form [name="target"]').fill("1");
- await pa.locator('#create-form [name="durationSeconds"]').selectOption("20");
  await pa.locator('#advanced-options > summary').click();
+ await pa.locator('#create-form [name="durationSeconds"]').selectOption("20");
  await pa.locator('[data-op="categories-none"]').click();
  await pa.locator('details.category-group:has(input[value="pokemon"]) > summary').click();
  await pa.locator('input[name="categoryIds"][value="pokemon"]').check();
