@@ -62,7 +62,43 @@ export function calculateAwards(room){
  return items;
 }
 
+
+export const PHRASES=[{"id":"proverb-01","lead":"Água mole em pedra dura,","answer":"tanto bate até que fura","alternatives":["tanto bate que fura","até que fura"]},{"id":"proverb-02","lead":"De grão em grão,","answer":"a galinha enche o papo","alternatives":["a galinha vai enchendo o papo"]},{"id":"proverb-03","lead":"Casa de ferreiro,","answer":"espeto de pau","alternatives":[]},{"id":"proverb-04","lead":"Filho de peixe,","answer":"peixinho é","alternatives":["peixe é","peixinho sera"]},{"id":"proverb-05","lead":"A pressa é inimiga","answer":"da perfeição","alternatives":["da perfeicao"]},{"id":"proverb-06","lead":"Quem com ferro fere,","answer":"com ferro será ferido","alternatives":["com ferro e ferido"]},{"id":"proverb-07","lead":"Quem espera,","answer":"sempre alcança","alternatives":["sempre alcanca"]},{"id":"proverb-08","lead":"Em terra de cego,","answer":"quem tem um olho é rei","alternatives":["quem tem um olho so e rei"]},{"id":"proverb-09","lead":"Cavalo dado,","answer":"não se olha os dentes","alternatives":["nao se olha os dentes","não se olha os dentes de um cavalo dado"]},{"id":"proverb-10","lead":"Antes só,","answer":"do que mal acompanhado","alternatives":[]},{"id":"proverb-11","lead":"O barato,","answer":"sai caro","alternatives":[]},{"id":"proverb-12","lead":"Quem avisa,","answer":"amigo é","alternatives":["e amigo"]},{"id":"proverb-13","lead":"Uma andorinha só,","answer":"não faz verão","alternatives":["nao faz o verao"]},{"id":"proverb-14","lead":"Depois da tempestade,","answer":"vem a bonança","alternatives":["vem a bonanca","vem o sol"]},{"id":"proverb-15","lead":"Não adianta chorar,","answer":"pelo leite derramado","alternatives":["sobre o leite derramado"]},{"id":"proverb-16","lead":"A união,","answer":"faz a força","alternatives":["faz a forca"]},{"id":"proverb-17","lead":"Nem tudo que reluz,","answer":"é ouro","alternatives":["e ouro"]},{"id":"proverb-18","lead":"Quem semeia vento,","answer":"colhe tempestade","alternatives":["colhe a tempestade"]},{"id":"proverb-19","lead":"Roupa suja,","answer":"se lava em casa","alternatives":["lava se em casa"]},{"id":"proverb-20","lead":"A mentira,","answer":"tem perna curta","alternatives":["tem pernas curtas"]},{"id":"proverb-21","lead":"A esperança,","answer":"é a última que morre","alternatives":["e a ultima a morrer"]},{"id":"proverb-22","lead":"Águas passadas,","answer":"não movem moinhos","alternatives":["nao movem moinho"]},{"id":"proverb-23","lead":"Gato escaldado,","answer":"tem medo de água fria","alternatives":["tem medo da agua fria"]},{"id":"proverb-24","lead":"Não julgue um livro,","answer":"pela capa","alternatives":["por sua capa"]},{"id":"proverb-25","lead":"Quem muito fala,","answer":"pouco faz","alternatives":[]},{"id":"proverb-26","lead":"O hábito,","answer":"não faz o monge","alternatives":["nao faz monge"]},{"id":"proverb-27","lead":"Cada macaco,","answer":"no seu galho","alternatives":["fica no seu galho"]},{"id":"proverb-28","lead":"Quando um não quer,","answer":"dois não brigam","alternatives":["dois nao brigam"]},{"id":"proverb-29","lead":"Quem procura,","answer":"acha","alternatives":["encontra"]},{"id":"proverb-30","lead":"Mais vale tarde,","answer":"do que nunca","alternatives":[]},{"id":"proverb-31","lead":"Quem ri por último,","answer":"ri melhor","alternatives":["ri mais alto","ri mais"]},{"id":"proverb-32","lead":"O peixe,","answer":"morre pela boca","alternatives":["pela boca morre"]},{"id":"proverb-33","lead":"Em boca fechada,","answer":"não entra mosca","alternatives":["nao entram moscas"]},{"id":"proverb-34","lead":"Santo de casa,","answer":"não faz milagre","alternatives":["nao faz milagres"]},{"id":"proverb-35","lead":"Quem não arrisca,","answer":"não petisca","alternatives":["nao ganha"]},{"id":"proverb-36","lead":"Não deixe para amanhã,","answer":"o que pode fazer hoje","alternatives":["o que se pode fazer hoje"]},{"id":"proverb-37","lead":"Quem tudo quer,","answer":"tudo perde","alternatives":[]},{"id":"proverb-38","lead":"Onde há fumaça,","answer":"há fogo","alternatives":["existe fogo","tem fogo"]},{"id":"proverb-39","lead":"Devagar,","answer":"se vai ao longe","alternatives":["vai se longe","se chega longe"]},{"id":"proverb-40","lead":"De médico e louco,","answer":"todo mundo tem um pouco","alternatives":["todos temos um pouco"]},{"id":"proverb-41","lead":"A curiosidade,","answer":"matou o gato","alternatives":[]},{"id":"proverb-42","lead":"O que os olhos não veem,","answer":"o coração não sente","alternatives":["o coracao nao sente"]},{"id":"proverb-43","lead":"A necessidade,","answer":"é a mãe da invenção","alternatives":["e a mae da invencao"]},{"id":"proverb-44","lead":"O seguro,","answer":"morreu de velho","alternatives":[]},{"id":"proverb-45","lead":"O tempo,","answer":"é o melhor remédio","alternatives":["e o melhor remedio"]},{"id":"proverb-46","lead":"A prática,","answer":"leva à perfeição","alternatives":["leva a perfeicao"]},{"id":"proverb-47","lead":"Amor com amor,","answer":"se paga","alternatives":[]},{"id":"proverb-48","lead":"A ocasião,","answer":"faz o ladrão","alternatives":["faz o ladrao"]},{"id":"proverb-49","lead":"Quem não tem cão,","answer":"caça com gato","alternatives":["caca como gato"]},{"id":"proverb-50","lead":"Mais vale um pássaro na mão,","answer":"do que dois voando","alternatives":["que dois voando"]},{"id":"proverb-51","lead":"Quem planta,","answer":"colhe","alternatives":["vai colher"]},{"id":"proverb-52","lead":"O pior cego,","answer":"é aquele que não quer ver","alternatives":["e o que nao quer ver","é quem não quer enxergar"]},{"id":"proverb-53","lead":"O olho do dono,","answer":"engorda o gado","alternatives":[]},{"id":"proverb-54","lead":"Quem canta,","answer":"seus males espanta","alternatives":[]},{"id":"proverb-55","lead":"A palavra é prata,","answer":"o silêncio é ouro","alternatives":["o silencio e ouro"]}];
+export function evaluatePhrase(input,phrase){
+ const text=normalizeAnswer(input);
+ if(text.length<2)return 0;
+ const candidates=[phrase.answer,...(phrase.alternatives||[])].map(normalizeAnswer);
+ if(candidates.includes(text))return 100;
+ // Approximation is intentionally conservative: spelling and missing small words,
+ // not a claimed AI judgement of meaning.
+ let best=0;
+ for(const canonical of candidates){
+   const dist=levenshtein(text,canonical);
+   const chars=Math.max(text.length,canonical.length);
+   const similarity=1-dist/chars;
+   const a=new Set(text.split(" ").filter(Boolean)),b=new Set(canonical.split(" ").filter(Boolean));
+   const shared=[...a].filter(t=>b.has(t)).length;
+   const f1=2*shared/Math.max(1,a.size+b.size);
+   if(Math.min(text.length,canonical.length)<canonical.length*0.58)continue;
+   const negation=["nao","nunca","sem"];
+   if(negation.some(word=>a.has(word)!==b.has(word)))continue;
+   if(similarity>=0.88&&f1>=0.65)best=Math.max(best,90);
+   else if(similarity>=0.77&&f1>=0.70)best=Math.max(best,75);
+   else if(similarity>=0.68&&f1>=0.72)best=Math.max(best,60);
+ }
+ return best;
+}
+export function phraseQuestion(room){
+ let candidates=PHRASES.map((item,i)=>({key:"phrase:"+i,index:i})).filter(q=>!room.used.includes(q.key));
+ if(!candidates.length){room.used=[];candidates=PHRASES.map((item,i)=>({key:"phrase:"+i,index:i}));}
+ const chosen=candidates[Math.floor(Math.random()*candidates.length)];
+ room.question={type:"phrase",...chosen};room.used.push(chosen.key);
+ room.answers={};room.lastResults=null;room.reactions=[];
+ room.round++;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
+}
+
 export function chooseQuestion(room){
+ if(room.gameType==="phrases")return phraseQuestion(room);
  const allowed=room.config?.categoryIds?.length?room.config.categoryIds:BANKS.map(b=>b.id);
  let candidates=[];
  for(let bi=0;bi<BANKS.length;bi++){
@@ -87,8 +123,9 @@ export function finalizeRoom(room,now){
  if(room.phase!=="playing")return false;
  const every=Object.keys(room.players).every(pid=>Object.hasOwn(room.answers,pid));
  if(!every&&now<room.deadline)return false;
- const q=room.question,board=BANKS[q.bi].items;
- const scored=Object.entries(room.answers).filter(([,a])=>a.rank!==null).map(([pid,a])=>({pid,nick:room.players[pid]?.nick||"Jogador",answer:a.answer,rank:a.rank,distance:Math.abs(a.rank-q.position),at:a.at})).sort((a,b)=>a.distance-b.distance||a.at-b.at||a.pid.localeCompare(b.pid));
+ const q=room.question,isPhrase=q?.type==="phrase";
+ const bank=isPhrase?null:BANKS[q.bi],board=bank?.items;
+ const scored=Object.entries(room.answers).filter(([,a])=>isPhrase?(a.quality||0)>=60:a.rank!==null).map(([pid,a])=>({pid,nick:room.players[pid]?.nick||"Jogador",answer:a.answer,rank:a.rank,quality:isPhrase?(a.quality||0):null,distance:isPhrase?100-(a.quality||0):Math.abs(a.rank-q.position),at:a.at})).sort((a,b)=>a.distance-b.distance||a.at-b.at||a.pid.localeCompare(b.pid));
  const results=Object.entries(room.players).map(([pid,p])=>{
    const a=room.answers[pid],found=scored.find(t=>t.pid===pid),index=scored.findIndex(t=>t.pid===pid);
    const basePoints=found?(room.mode==="race"?(index===0?1:0):index===0?2:index===1?1:0):0;
@@ -110,10 +147,11 @@ export function finalizeRoom(room,now){
        if(room.special&&index===0)stats.turboWins++;
      }
    }
-   return {pid,nick:p.nick,answer:a?.answer||"Sem resposta",rank:a?.rank??null,distance:found?.distance??null,earned,points:p.points,missed:!a||a.rank===null};
+   return {pid,nick:p.nick,answer:a?.answer||"Sem resposta",rank:isPhrase?null:a?.rank??null,quality:isPhrase?(a?.quality||0):null,distance:found?.distance??null,earned,points:p.points,missed:!found};
  }).sort((a,b)=>b.earned-a.earned||(a.distance??999)-(b.distance??999)||a.nick.localeCompare(b.nick));
- room.lastResults={target:board[q.position-1],position:q.position,round:room.round,special:!!room.special,results};
- room.history=(room.history||[]).concat({round:room.round,category:BANKS[q.bi].title,target:board[q.position-1],position:q.position,special:!!room.special,results:results.map(t=>({pid:t.pid,nick:t.nick,distance:t.distance,earned:t.earned}))}).slice(-60);
+ const solution=isPhrase?PHRASES[q.index].answer:board[q.position-1];
+ room.lastResults={type:isPhrase?"phrase":"ranking",target:solution,prefix:isPhrase?PHRASES[q.index].lead:null,position:isPhrase?null:q.position,round:room.round,special:!!room.special,results};
+ room.history=(room.history||[]).concat({round:room.round,category:isPhrase?"Frases & Aproximações":BANKS[q.bi].title,target:solution,position:isPhrase?null:q.position,special:!!room.special,results:results.map(t=>({pid:t.pid,nick:t.nick,distance:t.distance,quality:t.quality,earned:t.earned}))}).slice(-60);
  room.phase=(room.mode==="race"?Object.values(room.players).some(p=>p.points>=room.target)||room.round>=30:room.round>=room.target)?"finished":"reveal";
  if(room.phase==="finished"){
    room.matchesPlayed=(room.matchesPlayed||0)+1;
@@ -170,8 +208,8 @@ export class ArenaRoom{
     if(nick.length<2)return {error:"Digite um nome com pelo menos 2 letras",status:400};
     const target=Math.max(1,Math.min(mode==="race"?15:20,Number.parseInt(body.target)||5));
     let config;
-    try{config=normalizeRoomConfig(body)}catch(e){return {error:e.message,status:400};}
-    const id=crypto.randomUUID(),secret=randomToken(),newRoom={host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
+    try{config=normalizeRoomConfig(body.gameType==="phrases"?{...body,categoryIds:BANKS.map(b=>b.id)}:body)}catch(e){return {error:e.message,status:400};}
+    const id=crypto.randomUUID(),secret=randomToken(),newRoom={gameType:body.gameType==="phrases"?"phrases":"ranking",host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
     return {change:true,state:newRoom,data:{id,token:secret}};
    }
    if(!room)return {error:"Sala não encontrada",status:404};
@@ -194,7 +232,7 @@ export class ArenaRoom{
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"2.1",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?{category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}:null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    return {change:changed,state:room,data:{version:"2.2",gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(!isHost&&["start","next","restart","close","kick","handoff"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
@@ -252,16 +290,23 @@ export class ArenaRoom{
    if(path==="/guess"||path==="/pass"){
     if(room.phase!=="playing"||now>=room.deadline)return {change:changed,state:room,error:"A rodada já terminou",status:409};
     if(Object.hasOwn(room.answers,id))return {error:"Você já respondeu nesta rodada",status:409};
-    let answer="Passou",rank=null;
+    let answer="Passou",rank=null,quality=0;
     if(path==="/guess"){
-      const raw=String(body.answer||"").trim().slice(0,100);
+      const raw=String(body.answer||"").trim().slice(0,160);
       if(!raw)return {error:"Digite um palpite ou use Passar",status:400};
-      const bank=BANKS[room.question.bi],options=bank.items.slice(0,room.question.limit),index=matchAnswer(raw,options);
-      if(index<0)return {error:"Item não reconhecido. Tente uma sugestão: "+suggestAnswer(raw,options).join(", "),status:422};
-      rank=index+1;answer=bank.items[index];
-      if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
+      if(room.question.type==="phrase"){
+        if(raw.length<2)return {error:"Escreva ao menos duas letras da continuação.",status:400};
+        const candidate=normalizeAnswer(raw);
+        if(Object.values(room.answers).some(a=>normalizeAnswer(a.answer)===candidate))return {error:"Essa continuação já foi enviada por outra pessoa. Tente uma diferente.",status:409};
+        quality=evaluatePhrase(raw,PHRASES[room.question.index]);answer=raw;
+      }else{
+        const bank=BANKS[room.question.bi],options=bank.items.slice(0,room.question.limit),index=matchAnswer(raw,options);
+        if(index<0)return {error:"Item não reconhecido. Tente uma sugestão: "+suggestAnswer(raw,options).join(", "),status:422};
+        rank=index+1;answer=bank.items[index];
+        if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
+      }
     }
-    room.answers[id]={answer,rank,at:now};
+    room.answers[id]={answer,rank,quality,at:now};
     finalizeRoom(room,now);
     return {change:true,state:room,data:{ok:true},alarm:room.phase==="playing"?room.deadline:undefined};
    }
@@ -319,7 +364,7 @@ export async function proxyImage(request,env){
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.1",rankings:BANKS.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.2",rankings:BANKS.length,phrases:PHRASES.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null}))});
  if(path==="/api/room"&&request.method==="POST"){
   let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}

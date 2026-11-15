@@ -234,3 +234,19 @@ body:has(.reaction-dock) #app{padding-bottom:110px}
 .rank-catalog[open]>summary:after{content:"▴"}
 .rank-catalog>.rank-grid{margin-top:17px}
 @media(max-width:760px){.rank-catalog>summary{font-size:11px;padding:14px}}
+
+/* Riviera Showdown 2.2 — Frases & Aproximações */
+.future-mode-active{border:1px solid #d8ff5985;background:linear-gradient(145deg,#d8ff5915,#843dcc20)}
+.future-mode-active b{font-family:"Barlow Condensed",sans-serif;color:#e8ff94;font-size:27px}
+.future-mode-active .btn{align-self:flex-start;margin-top:8px;font-size:11px;padding:12px 19px;min-height:42px}
+.game-description{font-size:13px;margin:-7px 0 1px;color:#cab6e0;border-left:3px solid #d8ff59;padding:0 0 0 12px}
+.category-fieldset[hidden]{display:none!important}
+.phrase-prompt{font-family:"Barlow Condensed",sans-serif!important;font-size:clamp(2.8rem,5.1vw,5rem)!important;line-height:1.05;text-transform:none;letter-spacing:0;overflow-wrap:anywhere;margin:23px 0}
+.phrase-prompt strong{color:#d8ff59;font-size:1.08em}
+.revealed .phrase-prefix{display:block;font-size:clamp(1.1rem,2.6vw,1.7rem);color:#d5bdec;letter-spacing:0;margin:0 0 12px;font-weight:700}
+.game-page:has(.phrase-prompt) .question{border-color:#deacff}
+.game-page:has(.phrase-prompt) .category{color:#d8ff59}
+.game-page:has(.phrase-prompt) input#guess{font-size:16px;min-height:57px}
+.reveal-page:has(.phrase-prefix) .answer-spotlight{padding:27px 0}
+.reveal-page:has(.phrase-prefix) .revealed{font-size:clamp(2rem,4vw,3.8rem);line-height:1.2}
+@media(max-width:760px){.phrase-prompt{font-size:clamp(2.4rem,10vw,4rem)!important}.future-mode-active .btn{width:100%}.game-page:has(.phrase-prompt) .question{padding:22px 18px}}

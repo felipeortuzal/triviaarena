@@ -1,3 +1,4 @@
+import {PHRASES} from "./worker.mjs";
 import assert from "node:assert/strict";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
@@ -13,8 +14,9 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.1");
+assert.equal(info.version,"2.2");
 assert.equal(info.rankings,41);
+assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
 assert.equal(list.data.rankings.length,41);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
@@ -87,7 +89,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.1");
+ assert.equal(state.version,"2.2");
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
@@ -122,4 +124,53 @@ assert.equal(replay.round,1);
 assert.equal(replay.players.every(p=>p.stats.match.played===0),true);
 assert.equal(replay.players.every(p=>p.stats.career.played===3),true);
 assert.equal(replay.history.length,3);
-console.log("INTEGRAÇÃO 2.1 OK: 41 fontes, confirmação de pronto, quartos personalizáveis, Turbo, estatísticas e privacidade.");
+
+const made=await call("/api/room","POST",{nick:"Ditados Host",gameType:"phrases",mode:"rounds",target:2,categoryIds:[],durationSeconds:20});
+assert.equal(made.status,200);
+const phraseHost=made.data;
+const phraseGuest=(await call("/api/room/"+phraseHost.code+"/join","POST",{nick:"Ditados Guest"})).data;
+const phPath="/api/room/"+phraseHost.code;
+assert.equal((await call(phPath+"/ready","POST",{},phraseHost.token)).status,200);
+assert.equal((await call(phPath+"/ready","POST",{},phraseGuest.token)).status,200);
+assert.equal((await call(phPath+"/start","POST",{},phraseHost.token)).status,200);
+const seenPrompts=new Set();
+for(let round=1;round<=2;round++){
+ const phState=(await call(phPath,"GET",null,phraseHost.token)).data;
+ assert.equal(phState.gameType,"phrases");
+ assert.equal(phState.question.type,"phrase");
+ assert.deepEqual(phState.question.options,[]);
+ assert.equal(Object.hasOwn(phState.question,"answer"),false);
+ assert.equal(Object.hasOwn(phState.question,"index"),false);
+ assert.equal(seenPrompts.has(phState.question.lead),false);
+ seenPrompts.add(phState.question.lead);
+ const def=PHRASES.find(x=>x.lead===phState.question.lead);
+ assert.ok(def);
+ const first=round===1?phraseHost.token:phraseGuest.token;
+ const second=round===1?phraseGuest.token:phraseHost.token;
+ assert.equal((await call(phPath+"/guess","POST",{answer:def.answer},first)).status,200);
+ assert.equal((await call(phPath+"/guess","POST",{answer:def.answer},second)).status,409);
+ const privateState=(await call(phPath,"GET",null,second)).data;
+ assert.equal(privateState.phase,"playing");
+ assert.equal(privateState.lastResults,null);
+ assert.equal(JSON.stringify(privateState).includes(JSON.stringify(def.answer)),false);
+ assert.equal((await call(phPath+"/guess","POST",{answer:"nada a ver com esse ditado"},second)).status,200);
+ const phResult=(await call(phPath,"GET",null,second)).data;
+ assert.equal(phResult.lastResults.type,"phrase");
+ assert.equal(phResult.lastResults.target,def.answer);
+ assert.equal(phResult.lastResults.prefix,def.lead);
+ const winnerId=round===1?phraseHost.id:phraseGuest.id;
+ assert.equal(phResult.lastResults.results.find(x=>x.pid===winnerId).quality,100);
+ assert.equal(phResult.lastResults.results.find(x=>x.pid===winnerId).earned,2);
+ if(round===1)assert.equal((await call(phPath+"/next","POST",{},phraseHost.token)).status,200);
+ else assert.equal(phResult.phase,"finished");
+}
+const phraseFinal=(await call(phPath,"GET",null,phraseHost.token)).data;
+assert.equal(phraseFinal.players.reduce((a,p)=>a+p.points,0),4);
+assert.equal(phraseFinal.history.length,2);
+assert.equal(phraseFinal.awards.some(a=>a.title==="Sniper"),true);
+assert.equal((await call(phPath+"/restart","POST",{},phraseHost.token)).status,200);
+const phraseReplay=(await call(phPath,"GET",null,phraseGuest.token)).data;
+assert.equal(phraseReplay.gameType,"phrases");
+assert.equal(phraseReplay.round,1);
+console.log("INTEGRAÇÃO 2.2 OK: Ranking + Frases, sigilo de respostas, reserva atômica, qualidade, pontos, revanche, 41 rankings e 55 ditados.");
+

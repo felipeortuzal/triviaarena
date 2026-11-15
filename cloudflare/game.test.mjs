@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -80,4 +80,39 @@ test("recortes regionais preservam a ordem do ranking mundial original",()=>{
 test("rankings antigos funcionam após novas perguntas",()=>{
  const r=make();r.config={durationSeconds:20,categoryIds:["pokemon"],turbo:false};
  chooseQuestion(r);assert.equal(BANKS[r.question.bi].id,"pokemon");
+});
+
+test("Frases: 55 ditados únicos com respostas e alternativas",()=>{
+ assert.equal(PHRASES.length,55);
+ assert.equal(new Set(PHRASES.map(q=>q.id)).size,55);
+ for(const q of PHRASES){assert.ok(q.lead&&q.answer);assert.ok(Array.isArray(q.alternatives));assert.ok(q.answer.length>=4)}
+});
+test("Frases: avaliação exata, sinônimos cadastrados e erros ortográficos",()=>{
+ const q=PHRASES[0];
+ assert.equal(evaluatePhrase("TANTO bate ATÉ que FURA!!!",q),100);
+ assert.equal(evaluatePhrase("tanto bate que fura",q),100);
+ assert.equal(evaluatePhrase("tanto bate ate que furra",q),90);
+ assert.equal(evaluatePhrase("fura",q),0);
+ assert.equal(evaluatePhrase("nunca bate ate que fura",q),0);
+ assert.equal(evaluatePhrase("",q),0);
+});
+test("Frases: sorteio seguro e sem perguntas repetidas na partida",()=>{
+ const r=make();r.gameType="phrases";r.config={durationSeconds:20,turbo:true,categoryIds:["pokemon"]};
+ const seen=new Set();
+ for(let n=1;n<=10;n++){chooseQuestion(r);assert.equal(r.question.type,"phrase");assert.ok(!seen.has(r.question.key));seen.add(r.question.key);assert.equal(r.round,n);assert.equal(r.special,n%3===0)}
+});
+test("Frases: pontuação por qualidade e desempate por envio no backend",()=>{
+ const r=make("rounds",1);r.gameType="phrases";r.config={durationSeconds:20,turbo:false,categoryIds:["area"]};
+ chooseQuestion(r);
+ const q=PHRASES[r.question.index];
+ r.answers={a:{answer:q.answer,rank:null,quality:100,at:100},b:{answer:"resposta sem relação",rank:null,quality:0,at:99}};
+ assert.equal(finalizeRoom(r,Date.now()),true);
+ assert.equal(r.phase,"finished");assert.equal(r.lastResults.type,"phrase");
+ assert.equal(r.lastResults.target,q.answer);assert.equal(r.lastResults.prefix,q.lead);
+ assert.equal(r.lastResults.results.find(x=>x.pid==="a").earned,2);
+ assert.equal(r.lastResults.results.find(x=>x.pid==="b").earned,0);
+ assert.equal(r.players.a.matchStats.exact,1);
+ const tie=make("rounds",1);tie.gameType="phrases";tie.config=r.config;chooseQuestion(tie);
+ tie.answers={a:{answer:"variante 1",quality:90,rank:null,at:100},b:{answer:"variante 2",quality:90,rank:null,at:200}};
+ finalizeRoom(tie,Date.now());assert.equal(tie.players.a.points,2);assert.equal(tie.players.b.points,1);
 });
