@@ -17,10 +17,23 @@ try{
  await pa.locator('[data-op="create"]').click();
  await pa.locator('#create-form [name="nick"]').fill("Afonso");
  await pa.locator('#create-form [name="target"]').fill("1");
+ await pa.locator('[data-op="preset"][data-preset="turbo"]').click();
+ assert.equal(await pa.locator('#create-form [name="durationSeconds"]').inputValue(),"20");
+ assert.equal(await pa.locator('#create-form [name="mode"]').inputValue(),"race");
+ assert.equal(await pa.locator('#create-form [name="turbo"]').isChecked(),true);
+ await pa.locator('[data-op="preset"][data-preset="classic"]').click();
+ assert.equal(await pa.locator('#create-form [name="mode"]').inputValue(),"rounds");
+ await pa.locator('#create-form [name="target"]').fill("1");
+ await pa.locator('#create-form [name="durationSeconds"]').selectOption("20");
+ await pa.locator('[data-op="categories-none"]').click();
+ await pa.locator('input[name="categoryIds"][value="pokemon"]').check();
+ assert.equal(await pa.locator('input[name="categoryIds"]:checked').count(),1);
  await pa.locator('#create-form button[type="submit"]').click();
  await pa.locator('.roomcode').waitFor({state:"visible"});
  const code=(await pa.locator('.roomcode').innerText()).trim();
  assert.match(code,/^[A-HJ-NP-Z2-9]{6}$/);
+ assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("20s por rodada")));
+ assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("1 categorias")));
  await pb.goto(base+"?room="+code,{waitUntil:"domcontentloaded"});
  await pb.locator('#join-form [name="nick"]').fill("Bianca");
  await pb.locator('#join-form button[type="submit"]').click();
@@ -46,6 +59,8 @@ try{
   return (await r.json()).question.options.map(o=>o.name);
  });
  assert.ok(options.length>=25);
+ assert.ok(options.includes("Pikachu"),"Custom category selected only pokemon");
+ assert.equal(await pa.locator("#seconds").innerText().then(Number)>0,true);
  await pa.locator('#guess').fill(options[0]);
  await pa.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("PALPITE ENVIADO").waitFor({timeout:8000});
@@ -55,6 +70,9 @@ try{
  await pb.getByText("FIM DE JOGO").waitFor({timeout:10000});
  assert.equal(await pa.locator(".result-row").count(),2);
  assert.equal(await pa.locator(".podium-place").count(),2,"Final podium shows two players");
+ assert.equal(await pa.locator(".stats-table tbody tr").count(),2,"Stats for all friends shown");
+ assert.ok(await pa.getByText("QUEM DOMINOU A MESA?").count()>0);
+ assert.ok(await pa.locator(".history").count()===1);
  assert.ok(await pa.locator('[data-op="share-result"]').count()===1,"Result sharing button exists");
  assert.equal(await pb.locator(".podium-place").count(),2,"Final podium synchronized with guest");
 
@@ -68,6 +86,6 @@ try{
  await pa.locator('#guess').waitFor({state:"visible",timeout:10000});
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
  assert.deepEqual(failures,[],"Erros de JavaScript no navegador");
- console.log("NAVEGADOR MULTIPLAYER 1.2 OK: som opt-in, reações entre Chromes, revelação, pódio, mobile e revanche.");
+ console.log("NAVEGADOR MULTIPLAYER 2.0 OK: presets, categoria filtrada, 20 segundos, placar, estatísticas, mobile e revanche.");
  await a.close();await b.close();
 }finally{await browser.close()}

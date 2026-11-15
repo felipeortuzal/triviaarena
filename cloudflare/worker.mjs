@@ -23,15 +23,43 @@ export function levenshtein(a,b){if(Math.abs(a.length-b.length)>3)return 99;let 
 export function matchAnswer(raw,options){const value=normalizeAnswer(raw);if(!value)return -1;const exact=options.findIndex(item=>normalizeAnswer(item)===value);if(exact>=0)return exact;const alias=options.findIndex(item=>(SYNONYMS[normalizeAnswer(item)]||[]).map(normalizeAnswer).includes(value));if(alias>=0)return alias;if(value.length<6)return -1;let best=99,at=-1,ties=0;options.forEach((item,i)=>{const d=levenshtein(value,normalizeAnswer(item));if(d<best){best=d;at=i;ties=1}else if(d===best)ties++});return best<=2&&ties===1?at:-1;}
 function suggestAnswer(raw,options){const q=normalizeAnswer(raw);return options.map(v=>({v,d:levenshtein(q,normalizeAnswer(v))})).sort((a,b)=>a.d-b.d).slice(0,3).map(x=>x.v)}
 
+
+export const ROUND_DURATIONS=[20,30,45];
+export function normalizeRoomConfig(input={}){
+ const duration=ROUND_DURATIONS.includes(Number(input.durationSeconds))?Number(input.durationSeconds):30;
+ const categoryIds=Array.isArray(input.categoryIds)?
+ [...new Set(input.categoryIds.filter(id=>typeof id==="string"&&BANKS.some(b=>b.id===id)))]:BANKS.map(b=>b.id);
+ if(categoryIds.length===0)throw new Error("Escolha pelo menos uma categoria válida.");
+ return {durationSeconds:duration,categoryIds,turbo:input.turbo===true};
+}
+export function emptyStats(){return {played:0,valid:0,exact:0,distanceSum:0,first:0,second:0,turboWins:0,fastestExactMs:null,matches:0,wins:0};}
+function ensureStats(p){if(!p.stats)p.stats=emptyStats();if(!p.matchStats)p.matchStats=emptyStats();}
+export function getPlayerStats(p){const s=p?.stats||emptyStats(),m=p?.matchStats||emptyStats();return {career:{...s,averageDistance:s.valid?Math.round(s.distanceSum/s.valid*10)/10:null},match:{...m,averageDistance:m.valid?Math.round(m.distanceSum/m.valid*10)/10:null}};}
+export function calculateAwards(room){
+ const players=Object.values(room.players||{}).filter(p=>(p.matchStats?.played||0)>0);
+ const items=[];
+ const award=(title,emoji,filter)=>{const eligible=players.filter(filter);if(!eligible.length)return;items.push({title,emoji,nicks:eligible.map(p=>p.nick)});};
+ let maxExact=Math.max(0,...players.map(p=>p.matchStats?.exact||0));
+ if(maxExact>0)award("Sniper","🎯",p=>p.matchStats.exact===maxExact);
+ let valid=players.filter(p=>(p.matchStats?.valid||0)>0);
+ if(valid.length){const best=Math.min(...valid.map(p=>p.matchStats.distanceSum/p.matchStats.valid));award("Professor","🧠",p=>p.matchStats.valid>0&&Math.abs(p.matchStats.distanceSum/p.matchStats.valid-best)<1e-9);}
+ const fastest=players.filter(p=>p.matchStats?.fastestExactMs!==null&&p.matchStats?.fastestExactMs!==undefined);
+ if(fastest.length){const best=Math.min(...fastest.map(p=>p.matchStats.fastestExactMs));award("Flash","⚡",p=>p.matchStats.fastestExactMs===best);}
+ const maxTurbo=Math.max(0,...players.map(p=>p.matchStats?.turboWins||0));
+ if(maxTurbo>0)award("Rei do Turbo","🚀",p=>p.matchStats.turboWins===maxTurbo);
+ return items;
+}
+
 export function chooseQuestion(room){
  const choices=[];
- for(let bi=0;bi<BANKS.length;bi++)for(const limit of [...new Set([25,50,100].map(n=>Math.min(n,BANKS[bi].items.length)))])for(let position=1;position<=Math.min(limit,30);position++){
+ const allowed=room.config?.categoryIds?.length?room.config.categoryIds:BANKS.map(b=>b.id);
+ for(let bi=0;bi<BANKS.length;bi++)if(allowed.includes(BANKS[bi].id))for(const limit of [...new Set([25,50,100].map(n=>Math.min(n,BANKS[bi].items.length)))])for(let position=1;position<=Math.min(limit,30);position++){
    const key=`${bi}:${limit}:${position}`;if(!room.used.includes(key))choices.push({key,bi,limit,position});
  }
  if(!choices.length)room.used=[];
  const selected=(choices.length?choices:[{key:"0:25:1",bi:0,limit:25,position:1}])[Math.floor(Math.random()*(choices.length||1))];
  room.used.push(selected.key); room.question=selected;room.answers={};room.lastResults=null;room.reactions=[];
- room.round+=1; room.phase="playing";room.deadline=Date.now()+30000;
+ room.round+=1;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
 }
 
 export function finalizeRoom(room,now){
@@ -42,12 +70,36 @@ export function finalizeRoom(room,now){
  const scored=Object.entries(room.answers).filter(([,a])=>a.rank!==null).map(([pid,a])=>({pid,nick:room.players[pid]?.nick||"Jogador",answer:a.answer,rank:a.rank,distance:Math.abs(a.rank-q.position),at:a.at})).sort((a,b)=>a.distance-b.distance||a.at-b.at||a.pid.localeCompare(b.pid));
  const results=Object.entries(room.players).map(([pid,p])=>{
    const a=room.answers[pid],found=scored.find(t=>t.pid===pid),index=scored.findIndex(t=>t.pid===pid);
-   const earned=found?(room.mode==="race"?(index===0?1:0):index===0?2:index===1?1:0):0;
+   const basePoints=found?(room.mode==="race"?(index===0?1:0):index===0?2:index===1?1:0):0;
+   const earned=basePoints*(room.special?2:1);
    p.points+=earned;
+   ensureStats(p);
+   for(const stats of [p.stats,p.matchStats]){
+     stats.played++;
+     if(found){
+       stats.valid++;stats.distanceSum+=found.distance;
+       if(found.distance===0){
+         stats.exact++;
+         const start=room.deadline-(room.config?.durationSeconds||30)*1000;
+         const responseMs=Math.max(0,found.at-start);
+         stats.fastestExactMs=stats.fastestExactMs===null?responseMs:Math.min(stats.fastestExactMs,responseMs);
+       }
+       if(index===0)stats.first++;
+       if(index===1)stats.second++;
+       if(room.special&&index===0)stats.turboWins++;
+     }
+   }
    return {pid,nick:p.nick,answer:a?.answer||"Sem resposta",rank:a?.rank??null,distance:found?.distance??null,earned,points:p.points,missed:!a||a.rank===null};
  }).sort((a,b)=>b.earned-a.earned||(a.distance??999)-(b.distance??999)||a.nick.localeCompare(b.nick));
- room.lastResults={target:board[q.position-1],position:q.position,round:room.round,results};
+ room.lastResults={target:board[q.position-1],position:q.position,round:room.round,special:!!room.special,results};
+ room.history=(room.history||[]).concat({round:room.round,category:BANKS[q.bi].title,target:board[q.position-1],position:q.position,special:!!room.special,results:results.map(t=>({pid:t.pid,nick:t.nick,distance:t.distance,earned:t.earned}))}).slice(-60);
  room.phase=(room.mode==="race"?Object.values(room.players).some(p=>p.points>=room.target)||room.round>=30:room.round>=room.target)?"finished":"reveal";
+ if(room.phase==="finished"){
+   room.matchesPlayed=(room.matchesPlayed||0)+1;
+   const high=Math.max(...Object.values(room.players).map(p=>p.points),0);
+   for(const p of Object.values(room.players)){ensureStats(p);p.stats.matches++;p.stats.wins+=p.points===high?1:0;}
+   room.awards=calculateAwards(room);
+ }
  return true;
 }
 
@@ -96,7 +148,9 @@ export class ArenaRoom{
     const nick=String(body.nick||"").trim().slice(0,24),mode=body.mode==="race"?"race":"rounds";
     if(nick.length<2)return {error:"Digite um nome com pelo menos 2 letras",status:400};
     const target=Math.max(1,Math.min(mode==="race"?15:20,Number.parseInt(body.target)||5));
-    const id=crypto.randomUUID(),secret=randomToken(),newRoom={host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now}},mode,target,round:0,used:[],answers:{},phase:"lobby",created:now};
+    let config;
+    try{config=normalizeRoomConfig(body)}catch(e){return {error:e.message,status:400};}
+    const id=crypto.randomUUID(),secret=randomToken(),newRoom={host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
     return {change:true,state:newRoom,data:{id,token:secret}};
    }
    if(!room)return {error:"Sala não encontrada",status:404};
@@ -109,7 +163,7 @@ export class ArenaRoom{
     if(nick.length<2)return {error:"Digite um apelido com pelo menos 2 letras",status:400};
     if(Object.values(room.players).some(p=>normalizeAnswer(p.nick)===normalizeAnswer(nick)))return {error:"Já existe um jogador com esse nome",status:409};
     const id=crypto.randomUUID(),secret=randomToken();
-    room.players[id]={nick,token:secret,points:0,ready:false,lastSeen:now};
+    room.players[id]={nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()};
     return {change:true,state:room,data:{id,token:secret}};
    }
    const member=Object.entries(room.players).find(([,p])=>p.token===token);
@@ -118,8 +172,8 @@ export class ArenaRoom{
    let changed=finalizeRoom(room,now);
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
-    const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid]})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"1.2",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?{category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}:null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
+    return {change:changed,state:room,data:{version:"2.0",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?{category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}:null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(!isHost&&["start","next","restart","close","kick","handoff"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
@@ -195,8 +249,8 @@ export class ArenaRoom{
    }
    if(path==="/restart"){
     if(room.phase!=="finished")return {error:"Termine a partida antes da revanche",status:409};
-    for(const p of Object.values(room.players))p.points=0;
-    room.round=0;room.used=[];
+    for(const p of Object.values(room.players)){p.points=0;p.matchStats=emptyStats();}
+    room.round=0;room.used=[];room.awards=[];
     chooseQuestion(room);return {change:true,state:room,data:{ok:true},alarm:room.deadline};
    }
    if(path==="/close"){
@@ -211,7 +265,7 @@ export class ArenaRoom{
 
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"1.2",rankings:BANKS.length});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.0",rankings:BANKS.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,sourceUrl:b.sourceUrl||null}))});
  if(path==="/api/room"&&request.method==="POST"){
   let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
