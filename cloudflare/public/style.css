@@ -225,3 +225,12 @@ body:has(.reaction-dock) #app{padding-bottom:110px}
  .guess-suggestions{max-height:190px}
 }
 @media(max-width:390px){.advanced-options>summary{padding:12px}.preset-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.preset-btn{font-size:11px;padding:9px 5px}.how-dialog{width:calc(100vw - 12px)}}
+
+/* Riviera 2.1 catalog polish */
+.rank-library{grid-column:1/-1;margin-top:22px}
+.rank-catalog{margin-top:18px;min-width:0}
+.rank-catalog>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d8ff5985;background:#d8ff590c;border-radius:12px;padding:16px 18px;color:#d8ff59;font-weight:900;font-size:13px;letter-spacing:.07em}
+.rank-catalog>summary:after{content:"▾";font-size:19px}
+.rank-catalog[open]>summary:after{content:"▴"}
+.rank-catalog>.rank-grid{margin-top:17px}
+@media(max-width:760px){.rank-catalog>summary{font-size:11px;padding:14px}}
