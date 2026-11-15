@@ -25,6 +25,11 @@ try{
  await pb.locator('#join-form [name="nick"]').fill("Bianca");
  await pb.locator('#join-form button[type="submit"]').click();
  await pb.locator('.roomcode').waitFor({state:"visible"});
+ await pb.locator('[data-op="ready"]').click();
+ await pa.getByText(/1 \/ 2/).waitFor({timeout:10000});
+ assert.ok(await pa.locator('.player .sent.yes').count()>=1,"Lobby mostra jogador pronto");
+ assert.ok(await pa.locator('[data-op="kick"]').count()===1,"Host pode remover no lobby");
+ assert.ok(await pa.locator('[data-op="handoff"]').count()===1,"Host pode transferir liderança");
  await pa.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
  await pa.locator('[data-op="start"]').click();
  await pa.locator('#guess').waitFor({state:"visible"});
@@ -46,6 +51,9 @@ try{
  assert.equal(await pb.locator(".result-row").count(),2);
  const overflow=await pb.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  assert.ok(overflow<=2,"Site não pode ter scroll horizontal no mobile: "+overflow);
+ await pb.setViewportSize({width:320,height:700});
+ const narrow=await pb.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ assert.ok(narrow<=2,"HUD não pode exceder a largura de 320px: "+narrow);
  await pa.locator('[data-op="restart"]').click();
  await pa.locator('#guess').waitFor({state:"visible",timeout:10000});
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
