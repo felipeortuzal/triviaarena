@@ -50,8 +50,8 @@ try{
  await pa.locator('.roomcode').waitFor({state:"visible"});
  const code=(await pa.locator('.roomcode').innerText()).trim();
  assert.match(code,/^[A-HJ-NP-Z2-9]{6}$/);
- assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("20s por rodada")));
- assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("1 categorias")));
+ assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("20 SEGUNDOS")));
+ assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("1 LISTAS")));
  await pb.goto(base+"?room="+code,{waitUntil:"domcontentloaded"});
  await pb.locator('#join-form [name="nick"]').fill("Bianca");
  await pb.locator('#join-form button[type="submit"]').click();
