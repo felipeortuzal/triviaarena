@@ -560,3 +560,353 @@ a{color:inherit}
 .rv-hero-last em{font-size:1.05em}
 @media(max-width:760px){.rv-hero-last{font-size:.69em}}
 @media(max-width:390px){.rv-hero-last{font-size:.67em}}
+
+/* ═════════════════════════════════════════════════════════════
+   RIVIERA 2.4 / HUMAN POLISH
+   A single editorial component system across navigation, wizard,
+   invite screen, lobby, match, results and mobile.
+   The cover and brand photography of 2.3 stay unchanged.
+   ═════════════════════════════════════════════════════════════ */
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid #bd6042;outline-offset:3px}
+.rv24-nav{position:relative;z-index:55}
+.rv24-nav .nav-inner{height:76px;max-width:1440px;gap:28px}
+.rv24-nav .brand{height:57px;width:118px;object-fit:contain}
+.rv24-nav-center{display:flex;align-items:center;gap:23px;flex:1;color:#d1ded6;white-space:nowrap;font-size:10px;font-weight:800;letter-spacing:.12em}
+.rv24-nav-center>span:first-child{color:#eadc93}
+.rv24-nav-center button{border:0;color:#e8efe5;background:none;cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.10em;padding:12px 2px}
+.rv24-nav-center button:hover{color:#f2db79}
+.rv24-nav-divider{opacity:.35}
+.rv24-nav .nav-actions{display:flex;align-items:center;gap:15px}
+.rv24-nav-action{background:transparent;border:0;color:#edf2e9;font-size:10px;letter-spacing:.12em;white-space:nowrap;font-weight:800;cursor:pointer;padding:12px 2px}
+.rv24-nav-action:hover{color:#e8d87a}
+.rv24-nav-primary{background:#e5d96e;color:#1e3a3b;border:1px solid #e5d96e;font-size:11px;font-weight:900;letter-spacing:.06em;height:40px;min-width:146px;padding:0 13px;cursor:pointer;white-space:nowrap}
+.rv24-nav-primary span{font-size:18px;font-weight:500;margin-left:10px}
+.rv24-nav-primary:hover{background:#f5e67b}
+.rv24-menu{position:relative}
+.rv24-menu>summary{list-style:none;display:flex;align-items:center;gap:10px;color:#f6f0e5;font-weight:900;font-size:10px;letter-spacing:.09em;min-height:40px;cursor:pointer}
+.rv24-menu>summary::-webkit-details-marker{display:none}
+.menu-lines{width:21px;height:17px;display:grid;gap:5px;align-content:center}
+.menu-lines b{display:block;height:2px;background:#d9dfd2;width:100%}
+.menu-lines b:last-child{width:67%;justify-self:end}
+.rv24-menu[open] .menu-lines b:last-child{width:100%}
+.rv24-menu-panel{position:absolute;right:-13px;top:calc(100% + 18px);width:min(345px,calc(100vw - 30px));background:#f4f0e5;color:#19383c;border:1px solid #173b40;box-shadow:0 20px 55px #152b2d36;padding:16px 21px;z-index:60}
+.rv24-menu-panel:before{content:"";position:absolute;top:-8px;right:22px;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid #f4f0e5}
+.rv24-menu-head{display:flex;justify-content:space-between;font-size:10px;font-weight:900;letter-spacing:.12em;color:#ad583e;padding-bottom:18px;border-bottom:2px solid #1d4143}
+.rv24-menu-head span{color:#67807d}
+.rv24-menu-panel>button{display:flex;align-items:center;text-align:left;gap:13px;background:transparent;border:0;border-bottom:1px solid #d0d1c5;width:100%;min-height:52px;color:#1e4045;font-weight:900;font-size:12px;cursor:pointer;padding:0 2px}
+.rv24-menu-panel>button:hover{color:#b85538;padding-left:7px}
+.rv24-menu-panel>button span{font:900 18px "Barlow Condensed";color:#b65c42}
+.rv24-menu-panel>button b{font-size:16px;margin-left:auto;font-weight:400}
+.rv24-menu-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:18px;color:#41605f;font-size:11px;font-weight:700}
+.rv24-menu-foot .sound-toggle{font-size:10px!important;color:#214b4e!important;min-width:110px;text-align:right}
+.rv24-menu-foot .sound-toggle[aria-pressed="true"]{color:#b34d33!important}
+.rv24-nav .net-pill{background:#416766!important;color:#edf2d8!important;border-radius:2px;font-size:9px;padding:6px 8px}
+.setup-page{max-width:1440px;margin:0 auto;background:#f1eee5;color:#17383c}
+.setup-container{display:grid;grid-template-columns:minmax(270px,35%) minmax(0,65%);min-height:min(820px,calc(100vh - 75px))}
+.setup-rail{background:#1a4447;color:#f5f1e5;padding:clamp(35px,4.7vw,75px) clamp(25px,3.6vw,58px) 36px;display:flex;flex-direction:column;align-items:flex-start;position:relative;overflow:hidden}
+.setup-rail:before{content:"RS / 24";position:absolute;right:-10%;bottom:9%;font:900 230px/.78 "Barlow Condensed";letter-spacing:-.055em;color:#fff1;transform:rotate(-90deg);pointer-events:none}
+.setup-back-link{padding:0;border:0;background:transparent;color:#e8e7d4;letter-spacing:.1em;font-size:10px;font-weight:900;cursor:pointer;margin-bottom:60px}
+.setup-back-link:hover{color:#e9d67b}
+.setup-rail .section-index{color:#e5d779!important;margin:0 0 28px}
+.setup-rail h1{font:900 clamp(69px,6.5vw,119px)/.78 "Barlow Condensed";margin:0 0 37px;color:#f8f3e7;letter-spacing:-.035em;position:relative}
+.setup-rail h1 em{font:italic 400 .85em "DM Serif Display",serif;color:#ead979}
+.setup-rail>p{color:#c9d8cf;max-width:280px;font-size:14px;line-height:1.6}
+.setup-steps{display:grid;width:100%;margin:55px 0 0;border-top:1px solid #b1c6bd6b;position:relative}
+.wizard-link{display:flex;align-items:center;text-align:left;gap:16px;background:transparent;border:0;border-bottom:1px solid #b1c6bd6b;color:#adc7bd;cursor:pointer;min-height:62px;padding:7px 5px}
+.wizard-link span{font:900 19px "Barlow Condensed";color:#bccac0;width:30px}
+.wizard-link strong{font-size:12px;letter-spacing:.04em}
+.wizard-link.is-active{color:#f8f3e7}
+.wizard-link.is-active span{color:#eada76}
+.wizard-link.is-done{color:#f3ecdf}
+.wizard-link.is-done span{color:#acd1b6}
+.wizard-link:disabled{cursor:default;opacity:.45}
+.setup-rail-bottom{margin-top:auto;padding-top:44px;display:flex;align-items:end;gap:15px;position:relative}
+.setup-rail-bottom strong{font:900 43px "Barlow Condensed";color:#e8d673}
+.setup-rail-bottom span{font-size:10px;letter-spacing:.08em;color:#cad9cb}
+.setup-form{padding:clamp(28px,4.6vw,70px) clamp(26px,5.2vw,85px) 36px;min-width:0;display:flex;flex-direction:column}
+.setup-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:2px solid #173d43;padding:0 0 16px;margin-bottom:43px;font-size:10px;font-weight:900;letter-spacing:.12em}
+.setup-topline span:last-child{color:#a44d35}
+.wizard-step{width:100%;min-height:495px;animation:rv24In .24s ease both}
+.wizard-eyebrow{color:#b55b3e;display:block;font-size:11px;letter-spacing:.14em;font-weight:900;margin-bottom:19px}
+.wizard-step h2{font:900 clamp(57px,5.7vw,96px)/.86 "Barlow Condensed";letter-spacing:-.026em;color:#1b3b3f;margin:0 0 19px}
+.wizard-step>p{font-size:14px;color:#637571;margin:0 0 29px}
+.setup-field{display:grid;gap:10px;color:#345856;font-size:10px;letter-spacing:.1em;font-weight:900}
+.setup-field>span{display:block;font-size:10px;font-weight:900;letter-spacing:.12em}
+.setup-field input,.setup-field select,.join-form input{width:100%;min-width:0;border:1px solid #91a59b;border-bottom:2px solid #1e5556;background:#fffdf7;color:#193e42;font-size:16px;padding:13px 16px;height:55px;border-radius:0;box-shadow:none}
+.setup-field input:focus,.setup-field select:focus,.join-form input:focus{outline:2px solid #b85a3d;outline-offset:0}
+.setup-name{margin:33px 0 25px;max-width:420px}
+.setup-mode-list{border-top:2px solid #1c4142;display:grid}
+.setup-mode{display:grid;grid-template-columns:34px minmax(0,1fr) 32px;gap:15px;text-align:left;padding:20px 14px 19px 4px;background:transparent;border:0;border-bottom:1px solid #aebbb1;color:#28474a;align-items:center;cursor:pointer}
+.setup-mode:hover{background:#e4e8d9}
+.setup-mode.is-selected{background:#e5e9d9;border-color:#4a766d}
+.mode-index{font:900 23px "Barlow Condensed";color:#b6573f}
+.mode-info{display:grid;gap:4px}
+.mode-info strong{font:900 clamp(24px,2.6vw,34px)/1 "Barlow Condensed";letter-spacing:-.015em}
+.mode-info small{font-size:11px;letter-spacing:0;color:#6d7b73}
+.mode-choice{font-size:24px;color:#54746e}
+.setup-mode.is-selected .mode-choice{color:#b45b42}
+.setup-help{font-size:12px!important;color:#71837a!important;margin-top:15px!important}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.setup-presets{margin:28px 0 26px}
+.setup-label{font-size:10px;color:#486761;letter-spacing:.1em;font-weight:900;display:block;margin-bottom:12px}
+.setup-presets .preset-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.setup-presets .preset-btn{padding:14px 8px;text-align:left;font-size:11px;min-height:66px;border:1px solid #9daea3;display:flex;flex-direction:column;gap:5px;justify-content:center;border-radius:0!important}
+.setup-presets .preset-btn small{font-size:10px;letter-spacing:0;font-weight:500}
+.setup-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 16px;margin-bottom:24px}
+.setup-toggle{display:flex;align-items:center;gap:11px;border:1px solid #a3b3a7;background:#f4f3e6;padding:12px 13px;cursor:pointer;min-height:75px}
+.setup-toggle>input{width:1px;height:1px;position:absolute;opacity:0}
+.toggle-track{height:23px;width:41px;flex:none;background:#a7b8ab;border:1px solid #819a8f;border-radius:16px;position:relative;transition:background .16s}
+.toggle-track:before{content:"";width:17px;height:17px;position:absolute;top:2px;left:3px;background:#f4f1e6;border-radius:50%;transition:transform .16s}
+.setup-toggle input:checked+.toggle-track{background:#1d605c}
+.setup-toggle input:checked+.toggle-track:before{transform:translateX(16px)}
+.setup-toggle input:focus-visible+.toggle-track{outline:2px solid #b6583e;outline-offset:3px}
+.toggle-copy{display:grid;gap:3px;color:#234744}
+.toggle-copy strong{font-size:12px}
+.toggle-copy small{font-size:10px;line-height:1.4;color:#788b7d}
+.setup-categories{border-top:1px solid #b2c1b6;border-bottom:1px solid #b2c1b6;margin:0 0 20px}
+.setup-categories>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:17px 0;font-size:10px;letter-spacing:.09em;font-weight:900;color:#244c4b;cursor:pointer}
+.setup-categories>summary::-webkit-details-marker{display:none}
+.setup-categories>summary>span{font-size:10px;font-weight:500;color:#68807a;margin-left:auto;letter-spacing:0}
+.setup-categories>summary>b{font:400 23px "DM Sans";color:#bc573b;margin-left:10px}
+.setup-categories[open]>summary>b{transform:rotate(45deg)}
+.setup-categories .category-fieldset{background:transparent!important;padding:0 0 19px;border:0!important}
+.setup-categories .category-fieldset legend{font-size:10px;padding:0 0 12px}
+.setup-categories .category-group{background:#f6f3ea!important}
+.setup-categories .category-group summary{font-size:11px}
+.setup-review{border:1px solid #254d4d;background:#faf8f0;position:relative;margin:28px 0 22px}
+.review-intro{padding:20px 23px;background:#1b4043;color:#f5edcf;display:flex;justify-content:space-between;gap:14px;align-items:center}
+.review-intro span{font-size:10px;font-weight:900;letter-spacing:.12em}
+.review-intro strong{font:900 23px "Barlow Condensed";letter-spacing:.02em}
+.setup-review dl{margin:0;padding:8px 23px 16px}
+.setup-review dl>div{border-bottom:1px solid #d4dacd;padding:16px 0;display:grid;grid-template-columns:90px 1fr;gap:15px}
+.setup-review dl>div:last-child{border:0}
+.setup-review dt{font-size:10px;font-weight:900;letter-spacing:.08em;color:#6f8078}
+.setup-review dd{margin:0;font-size:14px;font-weight:800;color:#264444;overflow-wrap:anywhere}
+.review-stamp{font:900 14px "Barlow Condensed";letter-spacing:.17em;color:#aa654c;text-align:right;padding:5px 22px 20px}
+.setup-club-note{background:#e9eadc;padding:12px 16px;color:#315e55;font-size:11px;font-weight:800;line-height:1.5}
+.setup-club-note span{font-size:18px;color:#c75b3e}
+.wizard-create{width:100%;font-size:13px!important;min-height:58px}
+.wizard-create span{font-size:23px;margin-left:10px}
+.setup-fineprint{color:#73867e;font-size:11px;margin-top:12px}
+.wizard-controls{display:flex;justify-content:space-between;gap:20px;border-top:1px solid #c7d0c4;padding-top:17px;margin-top:auto;align-items:center}
+.wizard-prev{background:none;border:0;color:#345755;font-size:11px;font-weight:900;letter-spacing:.06em;cursor:pointer;padding:13px 2px}
+.wizard-next{margin-left:auto;min-width:170px;background:#1c4649;border:1px solid #1c4649;color:#fff;padding:13px 17px;font-size:12px;font-weight:900;letter-spacing:.07em;cursor:pointer}
+.wizard-next span{margin-left:20px;font-size:17px}
+.wizard-next:hover{background:#2c686b}
+.join-page{max-width:1440px;margin:0 auto;min-height:calc(100vh - 76px);display:grid;grid-template-columns:43% 57%;background:#f2efe5}
+.join-photo{display:flex;flex-direction:column;padding:clamp(30px,4vw,60px);background:#567d76 url("/assets/riviera-coast-2026.jpg") 58% center/cover no-repeat;color:white;position:relative;overflow:hidden;min-height:660px}
+.join-photo:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#17343890,#1b3c4a25 50%,#152f3cc2);pointer-events:none}
+.join-photo>*{z-index:1;position:relative}
+.join-return{background:none;border:1px solid #fff9;color:#fff;padding:12px 15px;align-self:start;font-size:10px;letter-spacing:.1em;font-weight:900;cursor:pointer}
+.join-photo>span{margin-top:auto;font-size:12px;font-weight:900;letter-spacing:.17em}
+.join-photo>strong{font:900 clamp(85px,10vw,165px)/.78 "Barlow Condensed";margin:20px 0 43px;letter-spacing:-.03em}
+.join-photo>small{font-size:10px;letter-spacing:.13em}
+.join-main{padding:clamp(40px,7vw,112px) clamp(24px,7vw,110px);display:flex;flex-direction:column;align-items:start;justify-content:center}
+.join-main h1{font:900 clamp(65px,6vw,104px)/.87 "Barlow Condensed";margin:18px 0 25px;color:#1c4143}
+.join-main h1 em{font:italic 400 .83em "DM Serif Display";color:#ba6146}
+.join-main>p{font-size:14px;max-width:410px;margin-bottom:34px}
+.join-form{display:grid;gap:22px;width:100%;max-width:430px;border-top:2px solid #1e494b;padding-top:26px}
+.join-form .btn{margin-top:13px;width:100%;min-height:58px}
+.join-form .btn span{font-size:20px;margin-left:12px}
+#join-code{font:900 46px "Barlow Condensed";letter-spacing:.22em;text-transform:uppercase;height:83px;color:#234749}
+.join-details{border-top:1px solid #b9c9be;width:100%;max-width:430px;margin-top:29px;padding:18px 0;display:flex;flex-direction:column;gap:8px;font-size:10px;font-weight:900;color:#6d8077;letter-spacing:.07em}
+.join-back{background:none;border:0;text-decoration:underline;text-underline-offset:4px;color:#245959;font-size:12px;font-weight:700;cursor:pointer;padding:8px 0}
+/* Lobby ticket and operational roster */
+.rv24-lobby{max-width:1350px;margin:0 auto;padding:36px clamp(18px,3vw,46px) 100px}
+.rv24-screen-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #bfcabf;padding-bottom:22px;color:#44615c;font-size:10px;font-weight:900;letter-spacing:.1em}
+.rv24-back{background:none;border:0;color:#1b4645;font-size:11px;font-weight:900;cursor:pointer;padding:9px 0}
+.rv24-screen-heading>b{color:#ad5e43;font-size:10px}
+.rv24-lobby-lead{margin:39px 0 37px;max-width:900px}
+.rv24-index{color:#b55c42;font-weight:900;font-size:11px;letter-spacing:.16em}
+.rv24-lobby-lead h1{font:900 clamp(83px,9vw,141px)/.79 "Barlow Condensed";margin:15px 0 24px;color:#193b41}
+.rv24-lobby-lead h1 em{font:italic 400 .84em "DM Serif Display";color:#bd6245}
+.rv24-lobby-lead p{font-size:14px;max-width:650px}
+.rv24-lobby-layout{display:grid;grid-template-columns:minmax(0,1.14fr) minmax(290px,.86fr);gap:24px;align-items:start}
+.rv24-lobby-main{min-width:0}
+.rv24-passport{border:2px solid #1b4547;background:#f8f5eb;position:relative;padding:clamp(20px,3vw,34px)}
+.rv24-passport:after{content:"";position:absolute;width:65px;height:65px;right:0;top:0;background:linear-gradient(225deg,#e3d365 0 50%,transparent 50%);pointer-events:none}
+.rv24-passport-top{display:flex;justify-content:space-between;align-items:start;gap:15px;padding-bottom:23px;border-bottom:1px dashed #a8bdb2;color:#658078;font-size:10px;letter-spacing:.1em;font-weight:900}
+.rv24-passport-top span:first-child{color:#19494b}
+.rv24-passport-label{display:block;color:#b65c41;font-size:11px;letter-spacing:.13em;font-weight:900;margin-top:26px}
+.rv24-lobby .roomcode{display:block;font:900 clamp(81px,10vw,158px)/1 "Barlow Condensed";letter-spacing:.15em;color:#173e43!important;text-shadow:none;margin:5px 0 20px}
+.rv24-passport-actions{display:flex;flex-wrap:wrap;align-items:center;gap:15px}
+.rv24-passport-actions .btn{min-width:163px}
+.rv24-whatsapp{border:0;background:none;color:#1e5150;text-decoration:underline;text-underline-offset:5px;font-size:11px;font-weight:900;cursor:pointer;padding:11px 0}
+.rv24-passport-url{display:block;border-top:1px solid #d4dfd2;margin-top:23px;padding-top:15px;color:#667b73;font-size:11px;word-break:break-all}
+.rv24-lobby-roster{margin-top:23px;border-top:3px solid #1d494b}
+.rv24-roster-head{display:flex;justify-content:space-between;gap:12px;padding:19px 0 13px;color:#2a4b4c;font-size:10px;font-weight:900;letter-spacing:.07em}
+.rv24-roster-head span:last-child{color:#ac5b40}
+.rv24-lobby .board{border:1px solid #c6d0c4!important;background:#faf8ef!important}
+.rv24-lobby .board-title{display:none}
+.rv24-lobby .board .player{grid-template-columns:42px minmax(0,1fr) auto;padding:12px 14px!important}
+.rv24-lobby .board .player .sent{grid-column:2/4;justify-self:start;margin-top:2px}
+.rv24-lobby .board .player .host-tools{grid-column:2/4}
+.rv24-lobby .lobby-ready{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding:17px 18px!important;background:#e8ebdc!important}
+.rv24-lobby .lobby-ready>div{display:grid;gap:2px}
+.rv24-lobby .lobby-ready strong{font:900 36px "Barlow Condensed";color:#24514d!important}
+.rv24-lobby .lobby-ready span{font-size:10px;letter-spacing:.07em;font-weight:900;color:#58756c}
+.rv24-lobby .lobby-ready .btn{font-size:11px;min-width:200px}
+.rv24-lobby-side{border-top:5px solid #1b4649;background:#e9e7d8;min-height:520px;padding:clamp(24px,3vw,39px);display:flex;flex-direction:column;color:#244647}
+.rv24-rules-head{display:flex;justify-content:space-between;gap:10px;font-size:10px;font-weight:900;letter-spacing:.08em;color:#b65b41}
+.rv24-rules-head button{border:0;background:none;color:#275958;text-decoration:underline;cursor:pointer;font-size:10px;font-weight:900;letter-spacing:.06em}
+.rv24-lobby-side h2{font:900 clamp(53px,5vw,82px)/.88 "Barlow Condensed";margin:38px 0 24px;color:#1c4447}
+.rv24-lobby-side .config-summary{background:transparent!important;border:0!important;display:grid!important;gap:0!important;padding:0!important;margin:0!important}
+.rv24-lobby-side .config-summary b{border-bottom:1px solid #bac6b9;padding:13px 0;font-size:12px!important;letter-spacing:.06em}
+.rv24-lobby-side .config-summary span{border:0!important;border-bottom:1px solid #bac6b9!important;border-radius:0!important;font-size:11px!important;letter-spacing:.08em;font-weight:700;padding:12px 0!important}
+.rv24-rule-detail{font-size:13px;color:#58716c;line-height:1.55;margin:21px 0}
+.rv24-ready-footer{margin-top:auto;padding-top:45px}
+.rv24-start{min-height:60px;width:100%;font-size:12px!important;display:flex;justify-content:space-between;align-items:center}
+.rv24-start span{font-size:20px}
+.rv24-start:disabled{background:#babbb0!important;border-color:#babbb0!important;color:#6d746c!important;cursor:not-allowed}
+.rv24-ready-footer .waitmsg{font-size:11px;color:#70867c!important;margin:11px 0 0}
+.rv24-guest-wait{display:grid;gap:6px;border:1px solid #a7b8a7;padding:17px 14px;font-size:11px}
+.rv24-guest-wait strong{font-size:12px}
+.rv24-guest-wait p{margin:0}
+.rv24-pulse{display:block;border-radius:50%;height:8px;width:8px;background:#c47c3d;animation:rv24Pulse 1.6s infinite}
+.rv24-lobby .rv-room-club{background:#e7e6c9;color:#31534e}
+/* Match readability: one visual axis, clean score and progress */
+.rv24-playing-grid{grid-template-columns:minmax(0,1.35fr) minmax(275px,.65fr)!important;gap:24px!important}
+.game-page:has(.rv24-playing-grid){max-width:1320px;margin:0 auto;padding:37px clamp(16px,3vw,46px) 140px}
+.game-page:has(.rv24-playing-grid) .round-head{margin-bottom:30px;display:flex;align-items:end}
+.game-page:has(.rv24-playing-grid) .round-head h1{font-size:clamp(66px,6.5vw,117px);margin:14px 0 0}
+.game-page:has(.rv24-playing-grid) .question{border:1px solid #bbcabb!important;border-top:6px solid #1c5150!important;padding:clamp(25px,3.6vw,54px)!important}
+.game-page:has(.rv24-playing-grid) .question .category{font-size:10px;font-weight:900;letter-spacing:.12em;padding:10px 13px}
+.game-page:has(.rv24-playing-grid) .question h2{font-size:clamp(52px,5.2vw,91px);line-height:.92;letter-spacing:-.025em;margin:37px 0 18px}
+.game-page:has(.rv24-playing-grid) .question h2 strong{font-size:1.03em}
+.game-page:has(.rv24-playing-grid) .question p{max-width:640px}
+.rv24-answer-label{font-size:10px;font-weight:900;color:#a45e43;letter-spacing:.11em;margin:24px 0 15px}
+.game-page:has(.rv24-playing-grid) #guess{min-height:67px;background:#faf8f0!important;border:1px solid #a3b8ac!important;border-bottom:3px solid #1e5554!important;font-size:19px!important;padding:15px 19px!important}
+.game-page:has(.rv24-playing-grid) #guess-form .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+.game-page:has(.rv24-playing-grid) #guess-form .actions .btn.lime{flex:1.3;min-height:60px}
+.game-page:has(.rv24-playing-grid) #guess-form .actions .btn.ghost{flex:.7;min-height:60px}
+.game-page:has(.rv24-playing-grid) .board{border:1px solid #becbc0!important;position:sticky;top:20px}
+.game-page:has(.rv24-playing-grid) .board-title{padding:20px!important}
+.game-page:has(.rv24-playing-grid) .board .player{padding:18px 14px!important}
+.rv24-game-footnote{margin-top:22px;border-top:1px solid #ccd8cc;padding-top:17px;color:#6c8078!important;font-size:11px!important}
+.game-page .timer{min-width:126px;padding-bottom:14px!important;position:relative;overflow:hidden}
+.game-page .timer strong{font-size:clamp(48px,5vw,83px)}
+.rv24-timer-progress{position:absolute;bottom:0;left:0;height:7px;background:#e8d875;max-width:100%;transition:width .9s linear}
+.game-page .timer.urgent .rv24-timer-progress{background:#dd7754}
+.game-page .timer.urgent strong{color:#ffb394!important}
+.reveal-page{max-width:1320px!important;padding:35px clamp(15px,4vw,55px) 115px!important}
+.reveal-page .reveal-header{margin:25px auto 33px}
+.reveal-page .reveal-header h1{font-size:clamp(69px,7.3vw,123px)}
+.reveal-page .answer-spotlight{background:#f1eee2;padding:29px 12px 34px;margin-top:24px}
+.reveal-page .result-row{border-bottom:1px solid #d5ddd0!important}
+.reveal-page .result-row strong{font:900 28px "Barlow Condensed"}
+.reveal-page .reveal-panel>.actions{margin-top:28px}
+.reveal-page .podium-place{border-radius:0!important}
+@keyframes rv24In{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rv24Pulse{50%{opacity:.35;transform:scale(1.35)}}
+@media(max-width:1150px){
+ .rv24-nav-center>span:first-child,.rv24-nav-divider{display:none}
+ .setup-container{grid-template-columns:minmax(245px,33%) minmax(0,67%)}
+ .rv24-lobby-layout{grid-template-columns:minmax(0,1fr) minmax(270px,.88fr)}
+ .rv24-lobby .roomcode{font-size:clamp(65px,8vw,124px)}
+}
+@media(max-width:850px){
+ .rv24-nav .nav-inner{height:68px;gap:12px;padding:8px 15px}
+ .rv24-nav-center{display:none}
+ .rv24-nav .nav-actions{margin-left:auto}
+ .rv24-nav-action{display:none}
+ .rv24-nav-primary{min-width:115px;padding:0 10px;font-size:10px}
+ .rv24-menu>summary>span{display:none}
+ .setup-container{display:block}
+ .setup-rail{padding:25px 26px 20px;min-height:0}
+ .setup-back-link{margin:0 0 24px}
+ .setup-rail .section-index{margin-bottom:13px}
+ .setup-rail h1{font-size:clamp(57px,9vw,83px);margin:0 0 16px}
+ .setup-rail>p{font-size:13px;max-width:540px;margin:0}
+ .setup-steps{display:flex;margin:24px 0 0;border-top:1px solid #a4c0b2}
+ .wizard-link{flex:1;gap:8px;min-height:52px;border-bottom:0;white-space:nowrap}
+ .wizard-link span{font-size:17px}
+ .wizard-link strong{font-size:10px}
+ .setup-rail:before,.setup-rail-bottom{display:none}
+ .setup-form{padding:33px 26px 45px;min-height:560px}
+ .wizard-step{min-height:400px}
+ .wizard-step h2{font-size:clamp(58px,10vw,83px)}
+ .join-page{grid-template-columns:37% 63%}
+ .join-photo{min-height:650px;padding:23px}
+ .join-photo>strong{font-size:clamp(57px,9vw,100px)}
+ .join-main{padding:43px 25px}
+ .join-main h1{font-size:clamp(54px,8vw,76px)}
+ .rv24-lobby-layout{grid-template-columns:1fr}
+ .rv24-lobby-side{min-height:0}
+ .rv24-ready-footer{padding-top:20px}
+ .rv24-lobby-lead h1{font-size:clamp(72px,12vw,115px)}
+ .rv24-playing-grid{grid-template-columns:1fr!important}
+ .game-page:has(.rv24-playing-grid) .board{position:static}
+ .game-page:has(.rv24-playing-grid){padding-bottom:145px}
+}
+@media(max-width:580px){
+ .rv24-nav .brand{width:96px;height:44px}
+ .rv24-nav-primary{font-size:9px;min-width:107px}
+ .rv24-menu-panel{right:-8px}
+ .setup-rail{padding:21px 18px}
+ .setup-form{padding:28px 18px 39px}
+ .setup-rail h1{font-size:70px}
+ .setup-steps{gap:3px}
+ .wizard-link{min-width:0;gap:4px}
+ .wizard-link strong{font-size:9px}
+ .setup-topline{margin-bottom:27px}
+ .wizard-step h2{font-size:67px}
+ .setup-field-grid{grid-template-columns:1fr;gap:16px}
+ .setup-presets .preset-row{gap:5px}
+ .setup-presets .preset-btn{font-size:10px;padding:10px 6px}
+ .setup-presets .preset-btn small{font-size:9px}
+ .setup-mode{grid-template-columns:24px minmax(0,1fr) 24px;gap:10px;padding:18px 4px}
+ .mode-info strong{font-size:27px}
+ .mode-info small{font-size:10px}
+ .review-intro{padding:17px}
+ .review-intro strong{font-size:19px}
+ .setup-review dl{padding:7px 17px}
+ .setup-review dl>div{grid-template-columns:75px 1fr;gap:8px}
+ .wizard-next{min-width:148px}
+ .join-page{display:flex;flex-direction:column}
+ .join-photo{min-height:225px;padding:17px 20px}
+ .join-photo>span{display:none}
+ .join-photo>strong{font-size:70px;margin:55px 0 13px}
+ .join-photo>small{display:none}
+ .join-main{padding:36px 21px 58px}
+ .join-main h1{font-size:clamp(63px,13vw,83px)}
+ .join-main>p{font-size:13px}
+ #join-code{font-size:42px;letter-spacing:.17em}
+ .rv24-lobby{padding:18px 15px 105px}
+ .rv24-screen-heading{flex-wrap:wrap;padding-bottom:14px;font-size:9px}
+ .rv24-screen-heading>b{flex-basis:100%}
+ .rv24-lobby-lead{margin:27px 0 24px}
+ .rv24-lobby-lead h1{font-size:clamp(79px,16vw,110px);margin:13px 0 18px}
+ .rv24-passport{padding:20px 17px}
+ .rv24-passport-top{font-size:9px}
+ .rv24-lobby .roomcode{font-size:clamp(68px,17vw,110px);letter-spacing:.095em}
+ .rv24-passport-actions .btn{width:100%}
+ .rv24-passport-actions{gap:7px}
+ .rv24-passport-url{font-size:10px}
+ .rv24-lobby .lobby-ready{flex-direction:column;align-items:stretch!important}
+ .rv24-lobby .lobby-ready .btn{min-width:0;width:100%}
+ .rv24-lobby .board .player{grid-template-columns:33px minmax(0,1fr) 65px}
+ .rv24-lobby-side{padding:24px 21px}
+ .rv24-lobby-side h2{font-size:63px}
+ .game-page:has(.rv24-playing-grid){padding:24px 14px 145px}
+ .game-page:has(.rv24-playing-grid) .round-head{align-items:start;gap:10px}
+ .game-page:has(.rv24-playing-grid) .round-head h1{font-size:clamp(49px,12vw,75px)}
+ .game-page .timer{min-width:80px;padding:8px 6px 12px!important}
+ .game-page .timer strong{font-size:42px}
+ .game-page .timer small{font-size:8px}
+ .game-page:has(.rv24-playing-grid) .question{padding:25px 18px!important}
+ .game-page:has(.rv24-playing-grid) .question h2{font-size:clamp(45px,11vw,73px)}
+ .game-page:has(.rv24-playing-grid) #guess-form .actions{flex-direction:column}
+ .game-page:has(.rv24-playing-grid) #guess-form .actions .btn{width:100%}
+ .reveal-page .reveal-header h1{font-size:clamp(54px,12vw,85px)}
+}
+@media(max-width:360px){
+ .rv24-nav-primary{min-width:86px;padding:0 6px}
+ .rv24-nav-primary span{display:none}
+ .rv24-nav .brand{width:85px}
+ .setup-rail h1{font-size:61px}
+ .wizard-link strong{font-size:8px}
+ .rv24-lobby .roomcode{font-size:63px}
+ .rv24-lobby-lead h1{font-size:76px}
+}
+@media(prefers-reduced-motion:reduce){.wizard-step,.rv24-pulse{animation:none!important}.setup-mode,.rv24-nav *{transition:none!important}}

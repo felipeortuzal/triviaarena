@@ -25,6 +25,10 @@ try{
  assert.equal(await pa.locator('#how-dialog').evaluate(d=>d.open),false);
  await pa.locator('[data-op="create"]').first().click();
  await pa.locator('#create-form [name="nick"]').fill("Afonso");
+ assert.equal(await pa.locator(".wizard-step:not([hidden])").getAttribute("data-step"),"0");
+ assert.equal(await pa.locator(".setup-mode").count(),2);
+ await pa.locator('[data-op="wizard-next"]').click();
+ assert.equal(await pa.locator(".wizard-step:not([hidden])").getAttribute("data-step"),"1");
  await pa.locator('#create-form [name="target"]').fill("1");
  await pa.locator('[data-op="preset"][data-preset="turbo"]').click();
  assert.equal(await pa.locator('#create-form [name="durationSeconds"]').inputValue(),"20");
@@ -39,6 +43,9 @@ try{
  await pa.locator('details.category-group:has(input[value="pokemon"]) > summary').click();
  await pa.locator('input[name="categoryIds"][value="pokemon"]').check();
  assert.equal(await pa.locator('input[name="categoryIds"]:checked').count(),1);
+ await pa.locator('[data-op="wizard-next"]').click();
+ assert.equal(await pa.locator(".wizard-step:not([hidden])").getAttribute("data-step"),"2");
+ assert.ok((await pa.locator("#setup-review").innerText()).includes("Afonso"));
  await pa.locator('#create-form button[type="submit"]').click();
  await pa.locator('.roomcode').waitFor({state:"visible"});
  const code=(await pa.locator('.roomcode').innerText()).trim();
@@ -55,7 +62,8 @@ try{
  assert.ok(await pa.locator('[data-op="kick"]').count()===1,"Host pode remover no lobby");
  assert.ok(await pa.locator('[data-op="handoff"]').count()===1,"Host pode transferir liderança");
  assert.equal(await pa.locator('[data-op="sound"]').getAttribute("aria-pressed"),"false");
- await pa.locator('[data-op="sound"]').click();
+ await pa.locator('#rv24-menu > summary').click();
+ await pa.locator('#rv24-menu [data-op="sound"]').click();
  assert.equal(await pa.locator('[data-op="sound"]').getAttribute("aria-pressed"),"true");
  await pa.locator('[data-op="react"][data-emoji="🔥"]').click();
  await pb.locator('.reaction-bubble .bubble-emoji').getByText("🔥").waitFor({state:"visible",timeout:12000});
@@ -113,7 +121,10 @@ try{
  assert.equal(await pc.locator('#game-type').inputValue(),"phrases");
  assert.equal(await pc.locator('#rank-categories').isHidden(),true);
  await pc.locator('#create-form [name="nick"]').fill("Frase Host");
+ await pc.locator('[data-op="wizard-next"]').click();
  await pc.locator('#create-form [name="target"]').fill("1");
+ assert.equal(await pc.locator('#rank-categories').isHidden(),true,"Category selection hidden for Frases");
+ await pc.locator('[data-op="wizard-next"]').click();
  await pc.locator('#create-form button[type="submit"]').click();
  await pc.locator(".roomcode").waitFor({state:"visible"});
  const phraseCode=(await pc.locator(".roomcode").innerText()).trim();
@@ -164,7 +175,9 @@ try{
  assert.equal(await ep.locator(".club-leader").count(),1);
  await ep.locator('.club-panel [data-op="create"]').click();
  await ep.locator("#create-form [name=nick]").fill("Dono");
+ await ep.locator('[data-op="wizard-next"]').click();
  await ep.locator("#create-form [name=target]").fill("1");
+ await ep.locator('[data-op="wizard-next"]').click();
  await ep.locator("#create-form button[type=submit]").click();
  await ep.locator(".rv-room-club").waitFor({state:"visible",timeout:9000});
  assert.ok((await ep.locator(".rv-room-club").innerText()).includes(clubCode));
@@ -172,7 +185,28 @@ try{
 
  await c.close();await d.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in either game mode");
- console.log("NAVEGADOR MULTIPLAYER 2.3 OK: dois modos, redesign editorial, clube persistente e 5 navegadores.");
+ const ux=await browser.newContext({viewport:{width:320,height:700}});
+ const up=await ux.newPage();up.on("pageerror",err=>failures.push(err.message));
+ await up.goto(base,{waitUntil:"domcontentloaded"});
+ await up.locator('#rv24-menu > summary').click();
+ assert.ok(await up.locator('.rv24-menu-panel').isVisible(),"Compact menu must open");
+ await up.locator('#rv24-menu [data-op="join"]').click();
+ await up.locator("#join-form").waitFor({state:"visible"});
+ await up.locator('#join-code').fill("abc123");
+ assert.equal(await up.locator('#join-code').inputValue(),"ABC23","Invite code uppercased and filtered");
+ const joinOverflow=await up.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ assert.ok(joinOverflow<=2,"Join screen 320 px overflow: "+joinOverflow);
+ await up.locator('[data-op="home"]').first().click();
+ await up.locator('[data-op="create"]').first().click();
+ const creationOverflow=await up.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ assert.ok(creationOverflow<=2,"Wizard 320px overflow: "+creationOverflow);
+ await up.locator('#create-form [name=nick]').fill("Teste");
+ await up.locator('[data-op="wizard-next"]').click();
+ await up.locator('[data-op="wizard-prev"]').click();
+ assert.equal(await up.locator(".wizard-step:not([hidden])").getAttribute("data-step"),"0","Back navigation preserves wizard");
+ await ux.close();
+ assert.deepEqual(failures,[],"No JavaScript errors in redesign");
+ console.log("NAVEGADOR MULTIPLAYER 2.4 OK: wizard, menu, mobile join, lobby, Ranking, Frases, clube, revanche em seis navegadores.");
 
  await a.close();await b.close();
 }finally{await browser.close()}

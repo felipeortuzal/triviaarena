@@ -14,7 +14,7 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.3");
+assert.equal(info.version,"2.4");
 assert.equal(info.rankings,41);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
@@ -89,7 +89,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.3");
+ assert.equal(state.version,"2.4");
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
