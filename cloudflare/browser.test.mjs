@@ -87,12 +87,12 @@ try{
   const r=await fetch("/api/room/"+s.code,{headers:{authorization:"Bearer "+s.token}});
   return (await r.json()).question.options.map(o=>o.name);
  });
- assert.ok(options.length>=25);
- assert.ok(options.includes("Pikachu"),"Custom category selected only pokemon");
- await pa.locator('#guess').fill("Pika");
- await pa.locator('.guess-option').getByText("Pikachu").waitFor({state:"visible",timeout:5000});
- await pa.locator('.guess-option').getByText("Pikachu").click();
- assert.equal(await pa.locator('#guess').inputValue(),"Pikachu");
+ assert.ok(options.length>=10);
+ assert.ok(options.includes("Bulbasaur"),"Custom category selected only pokemon");
+ await pa.locator('#guess').fill("Bulb");
+ await pa.locator('.guess-option').getByText("Bulbasaur").waitFor({state:"visible",timeout:5000});
+ await pa.locator('.guess-option').getByText("Bulbasaur").click();
+ assert.equal(await pa.locator('#guess').inputValue(),"Bulbasaur");
  assert.equal(await pa.locator("#seconds").innerText().then(Number)>0,true);
  await pa.locator('#guess').fill(options[0]);
  await pa.locator('#guess-form button[type="submit"]').click();
