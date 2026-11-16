@@ -961,3 +961,23 @@ a{color:inherit}
  .rv25-round-meter{max-width:220px}
 }
 @media(prefers-reduced-motion:reduce){.rv25-auto-pulse{animation:none!important}}
+
+/* Riviera Showdown 2.6 · The Random Expansion */
+.rv26-release{margin-top:44px;border-top:2px solid #194146;border-bottom:1px solid #8fa5a0;padding:28px 0 30px;display:grid;grid-template-columns:155px minmax(0,1fr) auto;gap:25px;align-items:start;position:relative;overflow:hidden}
+.rv26-release-kicker{font-size:10px;color:#b75c40;font-weight:900;letter-spacing:.14em;max-width:140px;line-height:1.6}
+.rv26-release>div{display:flex;align-items:end;gap:27px;flex-wrap:wrap}
+.rv26-release strong{font:900 clamp(47px,6vw,86px)/.86 "Barlow Condensed",Impact,sans-serif;letter-spacing:-.03em;color:#173b41;white-space:nowrap}
+.rv26-release p{font-size:13px;line-height:1.6;color:#5b746d;max-width:310px;margin:0 0 5px}
+.rv26-release-stamp{font:900 130px/.75 "Barlow Condensed",Impact,sans-serif;letter-spacing:-.075em;color:#d4d4bf;pointer-events:none}
+.rv26-question-meta{display:flex;align-items:center;flex-wrap:wrap;gap:9px 12px}
+.rv26-question-meta .category{display:inline-flex;align-items:center;max-width:100%;white-space:normal}
+.rv26-format{display:inline-flex;align-items:center;gap:6px;background:#e5d46d;color:#234342;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;min-height:35px;padding:9px 12px;border-left:3px solid #bd6146}
+.game-page:has(.rv26-question-meta) .question h2{overflow-wrap:anywhere}
+.rv26-source{font-size:11px;color:#61756e;line-height:1.6;margin:16px 0 5px;border-top:1px solid #d8dfd5;padding-top:15px}
+.rv26-source a,.rv24-game-footnote a{color:#206262;text-decoration:underline;text-underline-offset:3px;font-weight:800}
+.rv26-category-search{display:flex;flex-direction:column;gap:9px;font-size:10px;letter-spacing:.11em;color:#355955;font-weight:900;margin:10px 0 22px}
+.rv26-category-search input{width:100%;border:1px solid #859c94;border-bottom:2px solid #24504f;background:#fffdf7;font-size:14px;color:#173c42;padding:13px 16px;border-radius:0}
+#rank-categories .category-group[hidden],#rank-categories .category-check[hidden]{display:none!important}
+#rank-categories .category-check{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:850px){.rv26-release{grid-template-columns:125px minmax(0,1fr)}.rv26-release-stamp{display:none}.rv26-release>div{display:block}.rv26-release p{margin-top:12px}}
+@media(max-width:580px){.rv26-release{grid-template-columns:1fr;gap:11px;padding-top:22px;margin-top:26px}.rv26-release-kicker{max-width:none}.rv26-release strong{font-size:clamp(47px,12vw,75px)}.rv26-release>div{display:block}.rv26-format{font-size:9px;padding:8px 10px}.rv26-question-meta{gap:8px}.game-page:has(.rv26-question-meta) .question h2{font-size:clamp(41px,10.5vw,67px)}}

@@ -261,5 +261,61 @@ try{
  assert.deepEqual(failures,[],"2.5 browser should not throw");
  console.log("NAVEGADOR MULTIPLAYER 2.5 OK: share modal, timer, auto-next, pause, Ranking, Frases, clubes, mobile e revanche.");
 
+
+ /* 2.6: giant bank, creator scale selection, catalog search and source link */
+ const hugeHost=await browser.newContext({viewport:{width:1150,height:820}});
+ const hugeGuest=await browser.newContext({viewport:{width:390,height:844}});
+ const h=await hugeHost.newPage(),g=await hugeGuest.newPage();
+ for(const p of [h,g])p.on("pageerror",err=>failures.push(err.message));
+ await h.goto(base,{waitUntil:"domcontentloaded"});
+ await h.locator(".rv26-release").waitFor({state:"visible"});
+ await h.getByText("107 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
+ await h.locator('[data-op="create"]').first().click();
+ await h.locator("#create-form [name=nick]").fill("Host Sorteio");
+ await h.locator('[data-op="wizard-next"]').click();
+ await h.locator('#rank-scale-group input[value="extreme"]').check();
+ await h.locator("#advanced-options > summary").click();
+ await h.locator('[data-op="categories-none"]').click();
+ await h.locator("#category-search").fill("1000 municípios");
+ await h.locator('#rank-categories .category-group:not([hidden])').first().waitFor({state:"visible"});
+ await h.locator('[name="categoryIds"][value="municipios-pop-2022"]').check();
+ assert.equal(await h.locator('#rank-categories input[name="categoryIds"]:checked').count(),1);
+ await h.locator("#create-form [name=target]").fill("1");
+ await h.locator('[data-op="wizard-next"]').click();
+ assert.ok((await h.locator("#setup-review").innerText()).includes("Extremo"));
+ await h.locator("#create-form button[type=submit]").click();
+ await h.locator(".roomcode").waitFor({state:"visible",timeout:12000});
+ const giantCode=(await h.locator(".roomcode").innerText()).trim();
+ assert.ok((await h.locator(".config-summary").innerText()).includes("EXTREMO"));
+ await g.goto(base+"?room="+giantCode,{waitUntil:"domcontentloaded"});
+ await g.locator("#join-form [name=nick]").fill("Guest Sorteio");
+ await g.locator("#join-form button[type=submit]").click();
+ await g.locator(".roomcode").waitFor({state:"visible",timeout:12000});
+ await h.locator('[data-op="ready"]').click();
+ await g.locator('[data-op="ready"]').click();
+ await h.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:12000});
+ await h.locator('[data-op="start"]').click();
+ await h.locator(".rv26-format").waitFor({state:"visible",timeout:12000});
+ await g.locator(".rv26-format").waitFor({state:"visible",timeout:12000});
+ assert.ok(/TOP (100|200|500|1.000)/.test(await h.locator(".rv26-format").innerText()));
+ assert.equal(await h.locator('.rv24-game-footnote a').count(),1);
+ const chosen=await h.evaluate(async()=>{
+  const sess=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
+  const resp=await fetch("/api/room/"+sess.code,{headers:{authorization:"Bearer "+sess.token}});
+  return (await resp.json()).question.options;
+ });
+ assert.ok(chosen.length>=100&&chosen.length<=1000);
+ await h.locator("#guess").fill(chosen[0].name);
+ await h.locator("#guess-form button[type=submit]").click();
+ await g.locator("#guess").fill(chosen[1].name);
+ await g.locator("#guess-form button[type=submit]").click();
+ await h.locator(".rv26-source").waitFor({state:"visible",timeout:12000});
+ assert.ok((await h.locator(".rv26-source").innerText()).includes("Geodemo Brasil"));
+ const overflowG=await g.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ assert.ok(overflowG<=2,"2.6 mobile giant challenge overflow: "+overflowG);
+ await hugeHost.close();await hugeGuest.close();
+ assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
+ console.log("NAVEGADOR MULTIPLAYER 2.6 OK: 107 rankings, 1000 posições, busca de categorias, Modo Extremo, mobile e fontes.");
+
  await a.close();await b.close();
 }finally{await browser.close()}

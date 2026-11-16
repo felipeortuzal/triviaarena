@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -17,7 +17,7 @@ test("distingue Nidoran fêmea de Nidoran macho",()=>{assert.notEqual(normalizeA
 
 test("configuração personalizada restringe duração e rankings",()=>{
  const c=normalizeRoomConfig({durationSeconds:20,categoryIds:["pokemon","pokemon"],turbo:true});
- assert.deepEqual(c,{durationSeconds:20,categoryIds:["pokemon"],turbo:true,autoNext:false});
+ assert.deepEqual(c,{durationSeconds:20,categoryIds:["pokemon"],turbo:true,autoNext:false,rankScale:"mix"});
  assert.equal(normalizeRoomConfig({durationSeconds:200}).durationSeconds,30);
  assert.throws(()=>normalizeRoomConfig({categoryIds:[]}),/categoria/);
 });
@@ -142,4 +142,91 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  r.answers={a:{answer:"um",rank:1,at:1},b:{answer:"dois",rank:2,at:2}};
  assert.equal(finalizeRoom(r,Date.now()),true);
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
+});
+
+test("2.6: catálogo expandido tem 107 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,107);
+ assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
+ assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
+ for(const bank of BANKS){
+  assert.ok(bank.items.length>=6,bank.id);
+  assert.ok(bank.items.every(x=>typeof x==="string"&&x.length>0),bank.id);
+ }
+ const big=BANKS.find(x=>x.id==="pokedex-nacional-1025");
+ assert.equal(big.items.length,1025);
+ assert.equal(big.items[0],"Bulbasaur");
+ assert.equal(big.items[24],"Pikachu");
+ assert.equal(big.items[999],"Gholdengo");
+});
+test("2.6: formatos são compatíveis com o tamanho real da lista",()=>{
+ assert.deepEqual(rankFormats(8),[8]);
+ assert.deepEqual(rankFormats(20),[10,20]);
+ assert.deepEqual(rankFormats(27),[10,20]);
+ assert.deepEqual(rankFormats(30),[10,20,30]);
+ assert.deepEqual(rankFormats(50),[10,20,30,50]);
+ assert.deepEqual(rankFormats(118),[10,20,30,50,100]);
+ assert.deepEqual(rankFormats(1000),[10,20,30,50,100,200,500,1000]);
+ assert.deepEqual(rankFormats(1025),[10,20,30,50,100,200,500,1000]);
+});
+test("2.6: faixa estendida permite as posições 100, 300, 600 e 1000",()=>{
+ assert.equal(pickTarget(1000,()=>0.999),1000);
+ assert.equal(pickTarget(500,()=>0.999),500);
+ assert.equal(pickTarget(200,()=>0.999),200);
+ assert.equal(pickTarget(30,()=>0.999),30);
+ for(const lim of [10,20,30,50,100,200,500,1000]){
+  for(let i=0;i<75;i++){const p=pickTarget(lim);assert.ok(p>=1&&p<=lim)}
+ }
+});
+test("2.6: uma sala com um único ranking gigante consegue sortear #1000",()=>{
+ const r=make();
+ r.config=normalizeRoomConfig({categoryIds:["pokedex-nacional-1025"]});
+ const original=Math.random;
+ try{Math.random=()=>0.999;
+  chooseQuestion(r);
+  assert.equal(BANKS[r.question.bi].id,"pokedex-nacional-1025");
+  assert.equal(r.question.limit,1000);
+  assert.equal(r.question.position,1000);
+  assert.equal(r.question.tier,"GIGANTE");
+  assert.equal(r.question.key,r.question.bi+":1000:1000");
+ }finally{Math.random=original}
+});
+test("2.6: alterna grupos de rankings e evita repetição de categoria consecutiva",()=>{
+ const r=make();r.config=normalizeRoomConfig({categoryIds:["f1-drivers-2014","imdb-1000-historico","municipios-pop-2022","pokedex-nacional-1025"]});
+ const picked=new Set();
+ for(let i=0;i<80;i++){
+  const last=r.question?.bi===undefined?null:BANKS[r.question.bi].group;
+  chooseQuestion(r);
+  const group=BANKS[r.question.bi].group;
+  if(last)assert.notEqual(group,last);
+  picked.add(group);
+  assert.ok(r.question.position<=r.question.limit);
+  assert.ok(r.question.limit<=BANKS[r.question.bi].items.length);
+ }
+ assert.equal(picked.size,4);
+});
+test("2.6: rankings oficiais e recortes derivados têm proveniência",()=>{
+ const ids=["municipios-pop-2022","municipios-area-2022","municipios-densidade-2022","imdb-1000-historico","pokedex-nacional-1025","f1-drivers-2017","elementos-118"];
+ for(const id of ids){
+  const b=BANKS.find(x=>x.id===id);
+  assert.ok(b&&b.source&&b.snapshot&&/^https:\/\//.test(b.sourceUrl),id);
+  assert.equal(b.items.length,new Set(b.items).size,id);
+ }
+});
+
+test("2.6: anfitrião pode escolher sorteio clássico, misto e extremo",()=>{
+ const mixed=normalizeRoomConfig({categoryIds:["pokemon"],rankScale:"mix"});
+ assert.equal(mixed.rankScale,"mix");
+ assert.equal(normalizeRoomConfig({categoryIds:["pokemon"],rankScale:"classic"}).rankScale,"classic");
+ assert.throws(()=>normalizeRoomConfig({categoryIds:["pokemon"],rankScale:"extreme"}),/TOP 100/);
+ assert.equal(normalizeRoomConfig({categoryIds:["pokedex-nacional-1025"],rankScale:"extreme"}).rankScale,"extreme");
+ assert.equal(normalizeRoomConfig({categoryIds:["pokedex-nacional-1025"],rankScale:"invalid"}).rankScale,"mix");
+});
+test("2.6: modo extremo escolhe apenas formatos TOP 100 ou maiores",()=>{
+ const r=make();r.config=normalizeRoomConfig({categoryIds:["pokedex-nacional-1025","f1-drivers-2017"],rankScale:"extreme"});
+ for(let i=0;i<45;i++){chooseQuestion(r);assert.ok(r.question.limit>=100);assert.equal(BANKS[r.question.bi].id,"pokedex-nacional-1025")}
+});
+test("2.6: modo clássico permanece limitado aos TOP 50",()=>{
+ const r=make();r.config=normalizeRoomConfig({categoryIds:["pokedex-nacional-1025","municipios-pop-2022"],rankScale:"classic"});
+ for(let i=0;i<60;i++){chooseQuestion(r);assert.ok(r.question.limit<=50)}
 });
