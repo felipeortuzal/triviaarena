@@ -404,7 +404,8 @@ export class ArenaRoom{
 
 const RIVIERA_IMAGES=new Map([
  ["/assets/riviera-logo-transparent.png","image/png"],
- ["/assets/riviera-reference-beach.jpg","image/jpeg"]
+ ["/assets/riviera-reference-beach.jpg","image/jpeg"],
+ ["/assets/riviera-coast-2026.jpg","image/jpeg"]
 ]);
 export async function proxyImage(request,env){
  const url=new URL(request.url),type=RIVIERA_IMAGES.get(url.pathname);
@@ -415,7 +416,7 @@ export async function proxyImage(request,env){
  const key=new Request(url.origin+url.pathname,{method:"GET"});
  if(cache){try{const hit=await cache.match(key);if(hit)return hit;}catch{}}
  const filename=url.pathname.split("/").pop();
- const upstreams=["https://raw.githubusercontent.com/felipeortuzal/triviaarena/main/assets/"+filename,"https://cdn.jsdelivr.net/gh/felipeortuzal/triviaarena@main/assets/"+filename];
+ const upstreams=filename==="riviera-coast-2026.jpg"?["https://images.unsplash.com/photo-1510297895683-0f27794412d5?auto=format&fit=crop&w=1600&q=78"]:["https://raw.githubusercontent.com/felipeortuzal/triviaarena/main/assets/"+filename,"https://cdn.jsdelivr.net/gh/felipeortuzal/triviaarena@main/assets/"+filename];
  for(const target of upstreams){
    try{
     const res=await fetch(target,{redirect:"follow",headers:{"User-Agent":"RivieraShowdown/2.1"}});
