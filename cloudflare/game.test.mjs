@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("41 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,41);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,41);
+test("107 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,107);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,107);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
