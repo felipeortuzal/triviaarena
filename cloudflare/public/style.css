@@ -910,3 +910,54 @@ a{color:inherit}
  .rv24-lobby-lead h1{font-size:76px}
 }
 @media(prefers-reduced-motion:reduce){.wizard-step,.rv24-pulse{animation:none!important}.setup-mode,.rv24-nav *{transition:none!important}}
+
+/* Riviera Showdown 2.5 — Game Night, native sharing and party pace */
+.rv25-share-dialog{border:2px solid #1b4547;border-radius:0;background:#f5f1e6;color:#193c3e;width:min(660px,calc(100vw - 24px));max-height:90vh;overflow-y:auto;padding:0;box-shadow:0 30px 120px #142f3477}
+.rv25-share-dialog::backdrop{background:#113236b5;backdrop-filter:blur(3px)}
+.rv25-share-body{padding:clamp(24px,4.5vw,46px);position:relative}
+.rv25-close{position:absolute;right:20px;top:18px;background:#163d40;color:#fff;border:0;width:36px;height:36px;cursor:pointer}
+.rv25-overline{color:#b65d41;font-size:10px;font-weight:900;letter-spacing:.16em}
+.rv25-share-dialog h2{font:900 clamp(62px,7vw,99px)/.84 "Barlow Condensed";margin:24px 0;color:#17383b}
+.rv25-share-dialog h2 em{font:italic 400 .84em "DM Serif Display",Georgia,serif;color:#bd6448}
+.rv25-share-dialog .rv25-share-body>p{font-size:13px;max-width:470px;margin:13px 0 21px}
+.rv25-share-ticket{background:#173f43;color:#f5f1e6;padding:25px clamp(17px,4vw,32px);display:grid;gap:8px;border-left:7px solid #e2d56b}
+.rv25-share-ticket>span{font-size:10px;color:#e5d46f;font-weight:900;letter-spacing:.15em}
+.rv25-share-ticket strong{font:900 clamp(58px,10vw,89px)/.94 "Barlow Condensed";letter-spacing:.15em;color:#f4ebce;white-space:nowrap}
+.rv25-share-ticket small{font-size:11px;overflow-wrap:anywhere;color:#bccfca}
+.rv25-share-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:20px 0 16px}
+.rv25-share-action{border:1px solid #a9bcb2;background:#fdfbf4;text-align:left;display:grid;grid-template-columns:30px 1fr;column-gap:10px;row-gap:3px;padding:15px 14px;cursor:pointer;color:#254c4c;min-height:88px}
+.rv25-share-action:hover{background:#e6e9d8;border-color:#527871}
+.rv25-share-action.primary{background:#e6d86b;border-color:#27514d}
+.rv25-share-action.primary:hover{background:#f4e47a}
+.rv25-share-action>span{font:900 23px "Barlow Condensed";grid-row:span 2;color:#b45e3d;line-height:1.3}
+.rv25-share-action strong{font-size:11px;letter-spacing:.04em;font-weight:900}
+.rv25-share-action small{font-size:10px;color:#657972}
+.rv25-share-note{font-size:10px!important;color:#7c8a7d!important;border-top:1px solid #c8d2c7;padding-top:13px}
+.rv25-flow-toggle{grid-column:1/-1}
+.rv25-auto-bar{display:flex;align-items:center;gap:18px;border-top:4px solid #d9cc63;background:#173c3f;color:#f1edda;margin:6px 0 19px;padding:17px 23px}
+.rv25-auto-bar>div{display:grid;grid-template-columns:12px 1fr;gap:3px 8px;flex:1;align-items:center}
+.rv25-auto-pulse{height:8px;width:8px;background:#dcd366;border-radius:50%;grid-row:span 2;animation:rv24Pulse 1.5s infinite}
+.rv25-auto-bar strong{font-size:11px;letter-spacing:.10em}
+.rv25-auto-bar small{font-size:11px;color:#c4d1c5}
+.rv25-auto-time{font:900 38px "Barlow Condensed";color:#e7d773;min-width:36px;text-align:right}
+.rv25-hold{border:1px solid #bdc3b6;color:#e6e7d6;background:transparent;font-size:10px;font-weight:900;letter-spacing:.08em;cursor:pointer;min-height:35px;padding:0 13px}
+.rv25-hold:hover{background:#2c5c5b}
+.rv25-round-meter{width:min(360px,100%);height:7px;background:#c7d3c5;margin:18px 0 6px;overflow:hidden}
+.rv25-round-meter span{display:block;height:100%;background:#bc6043}
+.rv24-passport-actions .rv24-whatsapp{white-space:nowrap}
+@media(max-width:580px){
+ .rv25-share-dialog{width:calc(100vw - 16px)}
+ .rv25-share-ticket strong{font-size:clamp(53px,15vw,76px);letter-spacing:.1em}
+ .rv25-share-body{padding:23px 19px}
+ .rv25-share-grid{gap:7px}
+ .rv25-share-action{padding:13px 9px;grid-template-columns:22px 1fr;min-height:82px;column-gap:6px}
+ .rv25-share-action strong{font-size:10px}
+ .rv25-share-action>span{font-size:19px}
+ .rv25-auto-bar{padding:15px 12px;gap:7px;flex-wrap:wrap}
+ .rv25-auto-bar strong{font-size:10px}
+ .rv25-auto-bar small{font-size:10px}
+ .rv25-hold{font-size:9px;padding:0 10px}
+ .rv25-auto-time{font-size:34px}
+ .rv25-round-meter{max-width:220px}
+}
+@media(prefers-reduced-motion:reduce){.rv25-auto-pulse{animation:none!important}}

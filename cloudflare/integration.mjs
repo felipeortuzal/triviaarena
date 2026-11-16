@@ -14,7 +14,7 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.4");
+assert.equal(info.version,"2.5");
 assert.equal(info.rankings,41);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
@@ -89,7 +89,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.4");
+ assert.equal(state.version,"2.5");
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
@@ -227,3 +227,48 @@ assert.equal(history.players.every(p=>!Object.hasOwn(p,"token")),true,"No creden
 console.log("INTEGRAÇÃO 2.3 OK: Ranking, Frases, clubes com token, placar cross-room, idempotência e revanche.");
 
 
+
+/* 2.5 — host controlled automatic reveal / manual override */
+const party=(await call("/api/room","POST",{nick:"Party Host",mode:"rounds",target:2,categoryIds:["pokemon"],durationSeconds:20,turbo:false,autoNext:true})).data;
+const partyGuest=(await call("/api/room/"+party.code+"/join","POST",{nick:"Party Guest"})).data;
+const partyPath="/api/room/"+party.code;
+assert.equal((await call(partyPath+"/ready","POST",{},party.token)).status,200);
+assert.equal((await call(partyPath+"/ready","POST",{},partyGuest.token)).status,200);
+assert.equal((await call(partyPath+"/start","POST",{},party.token)).status,200);
+const partyBegin=(await call(partyPath,"GET",null,party.token)).data;
+assert.equal(partyBegin.config.autoNext,true);
+assert.equal(partyBegin.round,1);
+assert.equal((await call(partyPath+"/guess","POST",{answer:partyBegin.question.options[0].name},party.token)).status,200);
+assert.equal((await call(partyPath+"/guess","POST",{answer:partyBegin.question.options[1].name},partyGuest.token)).status,200);
+const partyReveal=(await call(partyPath,"GET",null,party.token)).data;
+assert.equal(partyReveal.phase,"reveal");
+assert.ok(partyReveal.nextAt>Date.now()+7500&&partyReveal.nextAt<Date.now()+10500,"Automatic next round must have 9s server deadline");
+assert.equal((await call(partyPath+"/hold-next","POST",{},partyGuest.token)).status,403,"Only host can pause auto-next");
+await new Promise(resolve=>setTimeout(resolve,9600));
+const partyRound2=(await call(partyPath,"GET",null,partyGuest.token)).data;
+assert.equal(partyRound2.phase,"playing","Auto next must progress even without host button");
+assert.equal(partyRound2.round,2);
+assert.equal(partyRound2.nextAt,null);
+const partySecondOptions=partyRound2.question.options.map(x=>x.name);
+assert.equal((await call(partyPath+"/guess","POST",{answer:partySecondOptions[0]},party.token)).status,200);
+assert.equal((await call(partyPath+"/guess","POST",{answer:partySecondOptions[1]},partyGuest.token)).status,200);
+const partyFinal=(await call(partyPath,"GET",null,party.token)).data;
+assert.equal(partyFinal.phase,"finished");
+assert.equal(partyFinal.nextAt,null);
+assert.equal(partyFinal.history.length,2);
+
+const hold=(await call("/api/room","POST",{nick:"Host Pausa",mode:"rounds",target:3,categoryIds:["pokemon"],autoNext:true,durationSeconds:20})).data;
+const holdGuest=(await call("/api/room/"+hold.code+"/join","POST",{nick:"Convidado Pausa"})).data;
+const holdPath="/api/room/"+hold.code;
+await call(holdPath+"/ready","POST",{},hold.token);
+await call(holdPath+"/ready","POST",{},holdGuest.token);
+await call(holdPath+"/start","POST",{},hold.token);
+const holdBegin=(await call(holdPath,"GET",null,hold.token)).data;
+await call(holdPath+"/guess","POST",{answer:holdBegin.question.options[0].name},hold.token);
+await call(holdPath+"/guess","POST",{answer:holdBegin.question.options[1].name},holdGuest.token);
+assert.equal((await call(holdPath,"GET",null,hold.token)).data.phase,"reveal");
+assert.equal((await call(holdPath+"/hold-next","POST",{},hold.token)).status,200);
+const stopped=(await call(holdPath,"GET",null,hold.token)).data;
+assert.equal(stopped.nextAt,null);assert.equal(stopped.config.autoNext,false);
+assert.equal((await call(holdPath+"/next","POST",{},hold.token)).status,200,"Manual progression remains possible after pause");
+console.log("INTEGRAÇÃO 2.5 OK: avanço automático real por alarme, controle do host, jogo até o fim e compatibilidade manual.");

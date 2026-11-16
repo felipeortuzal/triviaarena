@@ -42,7 +42,7 @@ export function normalizeRoomConfig(input={}){
  const categoryIds=Array.isArray(input.categoryIds)?
  [...new Set(input.categoryIds.filter(id=>typeof id==="string"&&BANKS.some(b=>b.id===id)))]:BANKS.map(b=>b.id);
  if(categoryIds.length===0)throw new Error("Escolha pelo menos uma categoria válida.");
- return {durationSeconds:duration,categoryIds,turbo:input.turbo===true};
+ return {durationSeconds:duration,categoryIds,turbo:input.turbo===true,autoNext:input.autoNext===true};
 }
 export function emptyStats(){return {played:0,valid:0,exact:0,distanceSum:0,first:0,second:0,turboWins:0,fastestExactMs:null,matches:0,wins:0};}
 function ensureStats(p){if(!p.stats)p.stats=emptyStats();if(!p.matchStats)p.matchStats=emptyStats();}
@@ -94,7 +94,7 @@ export function phraseQuestion(room){
  const chosen=candidates[Math.floor(Math.random()*candidates.length)];
  room.question={type:"phrase",...chosen};room.used.push(chosen.key);
  room.answers={};room.lastResults=null;room.reactions=[];
- room.round++;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
+ room.round++;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.nextAt=null;room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
 }
 
 export function chooseQuestion(room){
@@ -116,7 +116,7 @@ export function chooseQuestion(room){
  const group=candidates[Math.floor(Math.random()*candidates.length)];
  const selected=group.choices[Math.floor(Math.random()*group.choices.length)];
  room.used.push(selected.key); room.question=selected;room.answers={};room.lastResults=null;room.reactions=[];
- room.round+=1;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
+ room.round+=1;room.special=!!room.config?.turbo&&room.round%3===0;room.phase="playing";room.nextAt=null;room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
 }
 
 export function finalizeRoom(room,now){
@@ -153,6 +153,7 @@ export function finalizeRoom(room,now){
  room.lastResults={type:isPhrase?"phrase":"ranking",target:solution,prefix:isPhrase?PHRASES[q.index].lead:null,position:isPhrase?null:q.position,round:room.round,special:!!room.special,results};
  room.history=(room.history||[]).concat({round:room.round,category:isPhrase?"Frases & Aproximações":BANKS[q.bi].title,target:solution,position:isPhrase?null:q.position,special:!!room.special,results:results.map(t=>({pid:t.pid,nick:t.nick,distance:t.distance,quality:t.quality,earned:t.earned}))}).slice(-60);
  room.phase=(room.mode==="race"?Object.values(room.players).some(p=>p.points>=room.target)||room.round>=30:room.round>=room.target)?"finished":"reveal";
+ room.nextAt=room.phase==="reveal"&&room.config?.autoNext?now+9000:null;
  if(room.phase==="finished"){
    room.matchesPlayed=(room.matchesPlayed||0)+1;
    const high=Math.max(...Object.values(room.players).map(p=>p.points),0);
@@ -183,6 +184,7 @@ export class ArenaRoom{
     }
   }
   if(result?.alarm)await this.ctx.storage.setAlarm(result.alarm);
+  else if(result?.state?.phase==="reveal"&&result.state.nextAt)await this.ctx.storage.setAlarm(result.state.nextAt);
   return result;
  }
  broadcast(){
@@ -193,7 +195,12 @@ export class ArenaRoom{
  async alarm(){
   await this.change(room=>{
    if(!room)return {error:"Sala não existe",status:404};
-   const changed=finalizeRoom(room,Date.now());
+   const now=Date.now();
+   if(room.phase==="reveal"&&room.config?.autoNext&&room.nextAt){
+     if(now>=room.nextAt){chooseQuestion(room);return {change:true,state:room,alarm:room.deadline};}
+     return {change:false,state:room,alarm:room.nextAt+100};
+   }
+   const changed=finalizeRoom(room,now);
    return {change:changed,state:room,alarm:!changed&&room.phase==="playing"?room.deadline+100:undefined};
   });
  }
@@ -302,9 +309,9 @@ export class ArenaRoom{
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"2.4",clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    return {change:changed,state:room,data:{version:"2.5",clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
-   if(!isHost&&["start","next","restart","close","kick","handoff"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
+   if(!isHost&&["start","next","restart","close","kick","handoff","hold-next"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
      room.players[id].lastSeen=now;
      const h=room.players[room.host];
@@ -380,6 +387,11 @@ export class ArenaRoom{
     finalizeRoom(room,now);
     return {change:true,state:room,data:{ok:true},alarm:room.phase==="playing"?room.deadline:undefined};
    }
+   if(path==="/hold-next"){
+    if(room.phase!=="reveal"||!room.nextAt)return {error:"Não há avanço automático a pausar",status:409};
+    room.nextAt=null;room.config={...room.config,autoNext:false};
+    return {change:true,state:room,data:{ok:true}};
+   }
    if(path==="/next"){
     if(room.phase!=="reveal")return {error:"Ainda não é hora da próxima rodada",status:409};
     chooseQuestion(room);
@@ -388,7 +400,7 @@ export class ArenaRoom{
    if(path==="/restart"){
     if(room.phase!=="finished")return {error:"Termine a partida antes da revanche",status:409};
     for(const p of Object.values(room.players)){p.points=0;p.matchStats=emptyStats();}
-    room.round=0;room.used=[];room.awards=[];room.matchId=crypto.randomUUID();
+    room.round=0;room.used=[];room.awards=[];room.nextAt=null;room.matchId=crypto.randomUUID();
     chooseQuestion(room);return {change:true,state:room,data:{ok:true},alarm:room.deadline};
    }
    if(path==="/close"){
@@ -435,7 +447,7 @@ export async function proxyImage(request,env){
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.4",rankings:BANKS.length,phrases:PHRASES.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.5",rankings:BANKS.length,phrases:PHRASES.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null}))});
 
  if(path==="/api/club"&&request.method==="POST"){
@@ -475,7 +487,7 @@ async function handleRequest(request,env){
   }
   return safeJson({error:"Não foi possível abrir uma sala. Tente novamente."},503);
  }
- const match=path.match(/^\/api\/room\/([A-HJ-NP-Z2-9]{6})(?:\/(ws|join|start|guess|pass|next|restart|close|heartbeat|ready|kick|handoff|leave|react))?$/);
+ const match=path.match(/^\/api\/room\/([A-HJ-NP-Z2-9]{6})(?:\/(ws|join|start|guess|pass|next|restart|close|heartbeat|ready|kick|handoff|leave|react|hold-next))?$/);
  if(match){
   const [_,code,action]=match,stub=env.ARENA.get(env.ARENA.idFromName(code));
   const suffix=action?"/"+action:"/state",remote=new URL("https://room"+suffix);

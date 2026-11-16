@@ -17,7 +17,7 @@ test("distingue Nidoran fêmea de Nidoran macho",()=>{assert.notEqual(normalizeA
 
 test("configuração personalizada restringe duração e rankings",()=>{
  const c=normalizeRoomConfig({durationSeconds:20,categoryIds:["pokemon","pokemon"],turbo:true});
- assert.deepEqual(c,{durationSeconds:20,categoryIds:["pokemon"],turbo:true});
+ assert.deepEqual(c,{durationSeconds:20,categoryIds:["pokemon"],turbo:true,autoNext:false});
  assert.equal(normalizeRoomConfig({durationSeconds:200}).durationSeconds,30);
  assert.throws(()=>normalizeRoomConfig({categoryIds:[]}),/categoria/);
 });
@@ -115,4 +115,31 @@ test("Frases: pontuação por qualidade e desempate por envio no backend",()=>{
  const tie=make("rounds",1);tie.gameType="phrases";tie.config=r.config;chooseQuestion(tie);
  tie.answers={a:{answer:"variante 1",quality:90,rank:null,at:100},b:{answer:"variante 2",quality:90,rank:null,at:200}};
  finalizeRoom(tie,Date.now());assert.equal(tie.players.a.points,2);assert.equal(tie.players.b.points,1);
+});
+
+test("2.5: modo festa é opt-in e não altera configurações antigas",()=>{
+ const legacy=normalizeRoomConfig({durationSeconds:30,categoryIds:["pokemon"],turbo:false});
+ assert.equal(legacy.autoNext,false);
+ const party=normalizeRoomConfig({durationSeconds:20,categoryIds:["pokemon"],autoNext:true,turbo:false});
+ assert.equal(party.autoNext,true);
+});
+test("2.5: próxima rodada automática agenda revelação e não antecipa gabarito",()=>{
+ const r=make("rounds",2);r.config=normalizeRoomConfig({autoNext:true,durationSeconds:20,categoryIds:["pokemon"]});
+ chooseQuestion(r);assert.equal(r.nextAt,null);
+ const started=Date.now();r.answers={a:{answer:"um",rank:1,at:started},b:{answer:"dois",rank:2,at:started+1}};
+ assert.equal(finalizeRoom(r,started),true);
+ assert.equal(r.phase,"reveal");
+ assert.ok(r.nextAt>=started+8900&&r.nextAt<=started+9100);
+ assert.equal(r.round,1);assert.equal(r.history.length,1);
+ chooseQuestion(r);
+ assert.equal(r.round,2);assert.equal(r.phase,"playing");assert.equal(r.nextAt,null);
+ r.answers={a:{answer:"um",rank:1,at:started},b:{answer:"dois",rank:2,at:started+1}};
+ finalizeRoom(r,Date.now());
+ assert.equal(r.phase,"finished");assert.equal(r.nextAt,null);
+});
+test("2.5: formato manual continua com revelação sem timer automático",()=>{
+ const r=make("rounds",3);r.config=normalizeRoomConfig({autoNext:false,categoryIds:["pokemon"]});chooseQuestion(r);
+ r.answers={a:{answer:"um",rank:1,at:1},b:{answer:"dois",rank:2,at:2}};
+ assert.equal(finalizeRoom(r,Date.now()),true);
+ assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });

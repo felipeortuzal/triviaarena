@@ -48,6 +48,12 @@ try{
  assert.ok((await pa.locator("#setup-review").innerText()).includes("Afonso"));
  await pa.locator('#create-form button[type="submit"]').click();
  await pa.locator('.roomcode').waitFor({state:"visible"});
+ await pa.locator('[data-op="share-open"]').click();
+ assert.equal(await pa.locator('#share-dialog').evaluate(x=>x.open),true,"Share dialog should open");
+ assert.equal(await pa.locator('#share-dialog [data-op="copy-code"]').count(),1);
+ assert.equal(await pa.locator('#share-dialog [data-op="share-native"]').count(),1);
+ await pa.locator('[data-op="share-close"]').click();
+ assert.equal(await pa.locator('#share-dialog').evaluate(x=>x.open),false);
  const code=(await pa.locator('.roomcode').innerText()).trim();
  assert.match(code,/^[A-HJ-NP-Z2-9]{6}$/);
  assert.ok(await pa.locator(".config-summary").innerText().then(s=>s.includes("20 SEGUNDOS")));
@@ -73,6 +79,8 @@ try{
  await pa.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
  await pa.locator('[data-op="start"]').click();
  await pa.locator('#guess').waitFor({state:"visible"});
+ assert.equal(await pa.locator(".rv25-round-meter").count(),1);
+ assert.equal(await pa.locator(".rv25-round-meter").getAttribute("aria-valuenow"),"1");
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
  const options=await pa.evaluate(async()=>{
   const s=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
@@ -206,7 +214,52 @@ try{
  assert.equal(await up.locator(".wizard-step:not([hidden])").getAttribute("data-step"),"0","Back navigation preserves wizard");
  await ux.close();
  assert.deepEqual(failures,[],"No JavaScript errors in redesign");
- console.log("NAVEGADOR MULTIPLAYER 2.4 OK: wizard, menu, mobile join, lobby, Ranking, Frases, clube, revanche em seis navegadores.");
+ /* 2.5: Modo Festa UI and pause */
+ const x=await browser.newContext({viewport:{width:1280,height:800}});
+ const y=await browser.newContext({viewport:{width:390,height:780}});
+ const px=await x.newPage(),py=await y.newPage();
+ for(const p of [px,py])p.on("pageerror",err=>failures.push(err.message));
+ await px.goto(base,{waitUntil:"domcontentloaded"});
+ await px.locator('[data-op="create"]').first().click();
+ await px.locator("#create-form [name=nick]").fill("Host Modo Festa");
+ await px.locator('[data-op="wizard-next"]').click();
+ assert.equal(await px.locator("#auto-next").isChecked(),true,"Auto mode checked for new games");
+ await px.locator("#create-form [name=target]").fill("2");
+ await px.locator('[data-op="wizard-next"]').click();
+ assert.ok((await px.locator("#setup-review").innerText()).includes("Modo Festa"));
+ await px.locator("#create-form button[type=submit]").click();
+ await px.locator(".roomcode").waitFor({state:"visible"});
+ const codeParty=(await px.locator(".roomcode").innerText()).trim();
+ await py.goto(base+"?room="+codeParty,{waitUntil:"domcontentloaded"});
+ await py.locator("#join-form [name=nick]").fill("Guest Modo Festa");
+ await py.locator("#join-form button[type=submit]").click();
+ await py.locator(".roomcode").waitFor({state:"visible"});
+ assert.ok((await px.locator(".config-summary").innerText()).includes("PRÓXIMA RODADA AUTOMÁTICA"));
+ await px.locator('[data-op="ready"]').click();
+ await py.locator('[data-op="ready"]').click();
+ await px.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
+ await px.locator('[data-op="start"]').click();
+ await px.locator("#guess").waitFor({state:"visible",timeout:10000});
+ await py.locator("#guess").waitFor({state:"visible",timeout:10000});
+ const opts=await px.evaluate(async()=>{
+  const sess=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
+  const res=await fetch("/api/room/"+sess.code,{headers:{authorization:"Bearer "+sess.token}});
+  return (await res.json()).question.options.map(x=>x.name);
+ });
+ await px.locator("#guess").fill(opts[0]);
+ await px.locator("#guess-form button[type=submit]").click();
+ await py.locator("#guess").fill(opts[1]);
+ await py.locator("#guess-form button[type=submit]").click();
+ await px.locator(".rv25-auto-bar").waitFor({state:"visible",timeout:12000});
+ await py.locator(".rv25-auto-bar").waitFor({state:"visible",timeout:12000});
+ assert.ok(Number(await px.locator("#autonext-seconds").innerText())>0);
+ await px.locator('[data-op="hold-next"]').click();
+ await px.locator(".rv25-auto-bar").waitFor({state:"detached",timeout:10000});
+ await px.locator('[data-op="next"]').click();
+ await py.locator("#guess").waitFor({state:"visible",timeout:10000});
+ await x.close();await y.close();
+ assert.deepEqual(failures,[],"2.5 browser should not throw");
+ console.log("NAVEGADOR MULTIPLAYER 2.5 OK: share modal, timer, auto-next, pause, Ranking, Frases, clubes, mobile e revanche.");
 
  await a.close();await b.close();
 }finally{await browser.close()}
