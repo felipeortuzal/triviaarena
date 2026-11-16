@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
 :root{color-scheme:dark;--bg:#110b23;--panel:#1c1632;--line:#584375;--lime:#d8ff59;--violet:#a85af8;--text:#fbf7ff;--muted:#b7aace;font-family:"DM Sans",system-ui,sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(circle at 15% 0%,#332051 0,transparent 32%),linear-gradient(140deg,#110b23,#080914);min-height:100vh;overflow-x:hidden}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}a{color:inherit}h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;letter-spacing:.01em;line-height:1.03;margin:8px 0 18px;font-weight:900;text-transform:uppercase}h1{font-size:clamp(3rem,7.1vw,6.5rem)}h2{font-size:clamp(2rem,3.4vw,3.7rem)}p{color:var(--muted);line-height:1.65}.kicker{font-size:.71rem;letter-spacing:.23em;font-weight:800;color:var(--lime)}.nav{position:relative;z-index:3;background:#0f0c1bcf;border-bottom:1px solid #ffffff17;backdrop-filter:blur(18px)}.nav-inner{max-width:1250px;margin:auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{height:55px;width:170px;object-fit:contain}.nav-tag{font-size:11px;color:var(--lime);letter-spacing:.27em;font-weight:800}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:900;letter-spacing:.045em;border-radius:10px;padding:15px 24px;color:#fff;border:1px solid #9163bb;min-height:49px;background:#302043;transition:transform .15s,filter .15s;max-width:100%;text-align:center}.btn:hover:not(:disabled){filter:brightness(1.13);transform:translateY(-1px)}.btn.lime{background:var(--lime);color:#17101d;border-color:var(--lime);box-shadow:0 7px 30px #d8ff591b}.btn.violet{background:linear-gradient(110deg,#b25afd,#743dc2);border-color:#b25afd}.btn.ghost{background:transparent}.btn.small{padding:8px 14px;font-size:.73rem;min-height:36px}.btn.textlink{margin-top:20px;font-size:12px;background:transparent;color:var(--lime);border-color:#666}.hero{min-height:550px;background:linear-gradient(90deg,#110b22ee 10%,#1a0f30a8 58%,#11102880),url("/assets/riviera-reference-beach.jpg") center/cover no-repeat;display:grid;place-items:center;position:relative;overflow:hidden}.hero:before{content:"";position:absolute;bottom:0;left:0;width:100%;height:150px;background:linear-gradient(transparent,#110b23);pointer-events:none}.hero-overlay{position:relative;width:min(1200px,100%);padding:80px 38px 105px}.hero-logo{height:135px;width:260px;max-width:65vw;object-fit:contain;object-position:left;margin:-35px 0 6px}.hero h1{font-size:clamp(3.4rem,8vw,7.6rem);max-width:810px;text-shadow:0 6px 25px #0008}.hero h1 em{font-style:normal;color:var(--lime)}.hero p{color:#e4dcea;max-width:595px;font-size:1.08rem}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.modes{max-width:1200px;margin:20px auto 80px;padding:24px 30px;display:grid;gap:30px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.modes h2{color:var(--lime)}.feature-grid{display:grid;gap:12px}.feature{padding:18px 20px;background:#ffffff0b;border:1px solid #ffffff1f;border-radius:14px;display:grid;gap:7px}.feature b{color:var(--lime);font-size:.83rem}.feature span{color:var(--muted);font-size:.89rem}.modes>a{grid-column:1/-1;width:max-content}.form-page{max-width:610px;margin:65px auto 95px;padding:0 20px}.panel{background:linear-gradient(135deg,#261a3eea,#151124f7);border:1px solid #665080;border-radius:18px;padding:clamp(19px,3vw,32px);min-width:0;box-shadow:0 20px 55px #0003}.stack{display:grid;gap:19px}.stack label,.panel label{display:grid;gap:10px;font-size:12px;letter-spacing:.09em;font-weight:900;color:#ded6ed}input,select{min-height:50px;padding:12px 14px;background:#100c21;color:#fff;border:1px solid #6a507f;border-radius:9px;width:100%;min-width:0;font-size:15px;letter-spacing:normal}input:focus,select:focus{outline:2px solid var(--lime);outline-offset:2px}input::placeholder{color:#7e7295}.game-page{width:min(1200px,100%);margin:40px auto 95px;padding:0 22px}.game-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);gap:22px;align-items:start}.game-page h1{font-size:clamp(2.7rem,5.8vw,5.4rem)}.game-page h2 strong{color:var(--lime)}.roombar{display:flex;flex-wrap:wrap;align-items:center;gap:13px;padding:12px 0 26px}.roombar .kicker{margin-right:auto}.roomcode{font:900 28px "Barlow Condensed";letter-spacing:.21em;color:var(--lime)}.invite-link{word-break:break-all;padding:12px;border-radius:9px;background:#110a23;border:1px dashed #6b5c86;color:#ddd;font-size:13px}.ruleblock{display:grid;gap:8px;padding:17px 0;margin:15px 0 8px;border-bottom:1px solid #ffffff1e}.ruleblock b{font-size:20px}.ruleblock span{color:var(--muted)}.waitmsg{padding:15px;background:#ffffff0a;border-radius:9px}.board{border:1px solid #625078;border-radius:18px;background:#130f27f1;min-width:0;overflow:hidden}.board-title{padding:19px 21px;background:#26193c;border-bottom:1px solid #ffffff20;display:flex;justify-content:space-between;align-items:center;gap:8px}.board-title b{font-family:"Barlow Condensed";font-size:24px}.board-title span{color:var(--muted);font-size:11px}.player{display:flex;align-items:center;gap:10px;min-width:0;padding:15px 18px;border-bottom:1px solid #ffffff13;flex-wrap:wrap}.ranknum{font-size:12px;color:var(--muted);width:24px;flex:none}.nick{flex:1;min-width:100px;font-weight:800;overflow-wrap:anywhere}.nick small{display:block;color:var(--lime);font-size:10px;letter-spacing:.08em}.points{font:900 25px "Barlow Condensed";white-space:nowrap}.points small{font:700 10px "DM Sans";color:var(--muted)}.sent{font-size:10px;letter-spacing:.04em;color:var(--muted);width:100%;padding-left:34px}.sent.yes{color:var(--lime)}.round-head{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-bottom:25px}.timer{border:2px solid var(--lime);border-radius:16px;padding:10px 17px;text-align:center;min-width:88px;background:#d8ff5912}.timer strong{display:block;font:900 44px "Barlow Condensed";line-height:1;color:var(--lime)}.timer small{font-size:9px;font-weight:900;letter-spacing:.12em}.timer.urgent{border-color:#ff6a79}.timer.urgent strong{color:#ff6a79}.category{display:block;color:#d09cff;font-weight:800;letter-spacing:.035em}.question h2{margin-top:18px}.question p{font-size:13px}.separator{height:1px;background:#ffffff28;margin:25px 0}.success-state{text-align:center;padding:27px 15px;border:1px solid #d8ff5952;color:var(--lime);font-weight:900;border-radius:12px;background:#d8ff590b}.success-state p{margin-bottom:0}.tiny{font-size:11px;color:#9f91b5!important}.revealed{color:var(--lime);font-size:clamp(2.2rem,4vw,4rem)}.revealed small{font-size:17px;color:#e6d6f7}.results{margin:24px 0}.result-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #ffffff1d}.result-row div{flex:1;min-width:0}.result-row b{display:block;font-size:14px}.result-row small{display:block;color:var(--muted);overflow-wrap:anywhere;margin-top:5px}.result-row strong{color:var(--lime);font-size:22px}.notice{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:50;min-width:min(90vw,420px);max-width:95vw;background:#3b224b;border:1px solid #f8caff;color:#fff;box-shadow:0 20px 40px #0008;padding:14px 20px;border-radius:12px;text-align:center;font-size:13px}.footer{max-width:1200px;margin:0 auto;padding:25px 28px;border-top:1px solid #ffffff20;color:#aa9bbd;font-size:11px;letter-spacing:.19em;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}@media(max-width:760px){.nav-inner{padding:8px 16px}.brand{width:126px;height:45px}.nav-tag{display:none}.hero{min-height:480px}.hero-overlay{padding:65px 22px 82px}.hero-logo{height:95px;width:210px;margin:-14px 0 8px}.hero h1{font-size:clamp(3rem,13vw,5rem)}.hero p{font-size:.97rem}.actions .btn{flex:1 1 180px}.modes{grid-template-columns:1fr;padding:5px 20px;gap:12px}.game-grid{grid-template-columns:1fr}.game-page{padding:0 16px}.roombar .kicker{flex-basis:100%}.game-page .round-head h1{font-size:clamp(2.4rem,10vw,4rem)}.panel{padding:19px}.player{padding:13px 16px}.footer span{display:none}}@media(max-width:360px){.btn{padding:12px}.hero h1{font-size:3rem}.game-page h1{font-size:2.8rem}.roombar{gap:7px}.roomcode{font-size:21px}.round-head{gap:5px}.timer{min-width:71px;padding:9px}.timer strong{font-size:33px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 
 /* Riviera 1.1: lobby, reconexão, biblioteca e controles touch */
@@ -250,3 +250,304 @@ body:has(.reaction-dock) #app{padding-bottom:110px}
 .reveal-page:has(.phrase-prefix) .answer-spotlight{padding:27px 0}
 .reveal-page:has(.phrase-prefix) .revealed{font-size:clamp(2rem,4vw,3.8rem);line-height:1.2}
 @media(max-width:760px){.phrase-prompt{font-size:clamp(2.4rem,10vw,4rem)!important}.future-mode-active .btn{width:100%}.game-page:has(.phrase-prompt) .question{padding:22px 18px}}
+
+/* ═══════════════════════════════════════════════════════════════
+   RIVIERA CLUB / V2.3
+   Original editorial identity: Mediterranean coast, printed
+   sporting club materials, bold typography and tactile scoreboards.
+   No neon, glassmorphism, generic dashboard gradients or glow.
+   ═══════════════════════════════════════════════════════════════ */
+:root{color-scheme:light;--bg:#f2eee4;--panel:#fffdf7;--line:#d2caba;--lime:#e0d35a;--violet:#c96043;--text:#1c3036;--muted:#59686a;--ink:#17323a;--sea:#185b60;--sun:#e6d56e;--coral:#c75c40;--paper:#f2eee4;--white:#fffdf7;font-family:"DM Sans",system-ui,sans-serif}
+html{background:var(--paper)}
+body{background:var(--paper)!important;color:var(--ink)!important;overflow-x:hidden}
+h1,h2,h3{color:inherit;text-shadow:none;font-family:"Barlow Condensed",Impact,sans-serif;letter-spacing:-.025em}
+p{color:var(--muted);line-height:1.55}
+button,input,select{font-family:"DM Sans",sans-serif}
+a{color:inherit}
+::selection{background:#e7d367;color:#183239}
+.nav{position:relative;z-index:30;background:#17343b!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:none!important;color:#faf4e9}
+.nav-inner{max-width:1440px;padding:8px clamp(16px,3.4vw,50px);min-height:79px}
+.nav-brand{border:0;background:none;padding:0;line-height:0;cursor:pointer}
+.brand{height:58px;width:136px;object-fit:contain}
+.nav-tag{font-weight:800;letter-spacing:.14em;color:#e4d878!important;font-size:10px}
+.nav-edition{color:#aec0bf;font-weight:500;margin-left:7px}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.nav .btn.small{border:1px solid #d1d8d44a!important;background:transparent!important;color:#fff!important;border-radius:4px;padding:9px 15px;font-size:10px;box-shadow:none!important}
+.sound-toggle{background:transparent!important;border:0!important;color:#dee6df!important;font-size:10px!important;min-width:74px}
+.net-pill{background:#335357!important;color:#e7f0e8!important;border-color:#335357!important;font-size:10px}
+.net-pill.connected{color:#e1e68e!important}
+.btn{border-radius:4px!important;border:1px solid #18353b!important;background:var(--ink)!important;color:#fff!important;box-shadow:none!important;transition:background .17s,color .17s,transform .17s;letter-spacing:.025em;font-size:12px;font-weight:800;padding:15px 21px;min-height:49px}
+.btn:hover:not(:disabled){background:#275058!important;filter:none!important;transform:translateY(-1px)}
+.btn.lime{background:var(--sun)!important;color:#18363c!important;border-color:#18363c!important}
+.btn.lime:hover:not(:disabled){background:#f1df72!important}
+.btn.violet{background:#185b60!important;border-color:#185b60!important}
+.btn.ghost{background:transparent!important;color:var(--ink)!important;border-color:#7d8e8d!important}
+.btn.ghost:hover:not(:disabled){background:#e7e1d3!important}
+.btn.textlink{background:transparent!important;border-color:#899693!important;color:var(--sea)!important}
+.nav .btn.ghost{color:#fff!important}
+.kicker{color:var(--coral)!important;font-size:11px;font-weight:800;letter-spacing:.16em}
+.notice{background:#f9e4c8!important;color:#573828!important;position:fixed;bottom:15px;left:50%;transform:translateX(-50%);border:1px solid #c58e54!important;z-index:70;max-width:calc(100vw - 25px);border-radius:6px;padding:12px 19px;box-shadow:0 8px 30px #0002}
+.rv-home{max-width:1440px;margin:0 auto}
+.rv-hero{min-height:650px;display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);border-bottom:1px solid #bbc5bc;background:#eee8db}
+.rv-hero-main{padding:clamp(54px,7vw,105px) clamp(24px,5vw,86px) 40px;display:flex;flex-direction:column;align-items:flex-start}
+.rv-overline{font-weight:900;color:#c3593c;font-size:11px;letter-spacing:.18em}
+.rv-hero h1{font:900 clamp(76px,8.5vw,143px)/.79 "Barlow Condensed",Impact,sans-serif;color:#19353b;letter-spacing:-.035em;margin:40px 0 30px}
+.rv-hero h1 em{font:italic 400 .87em "DM Serif Display",Georgia,serif;letter-spacing:-.05em;color:#bf5f43;text-transform:none}
+.rv-hero-main>p{font-size:clamp(15px,1.3vw,18px);line-height:1.6;max-width:530px;color:#44585b;margin:0 0 22px}
+.rv-hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+.rv-hero-actions .btn{font-size:12px;min-height:56px;padding:15px 24px}
+.rv-hero-actions .btn.lime{min-width:230px}
+.rv-hero-actions .btn span{font-size:18px;margin-left:10px}
+.rv-hero-extras{display:flex;align-items:center;flex-wrap:wrap;gap:24px;margin-top:auto;padding-top:40px}
+.rv-hero-extras>span{font-size:9px;font-weight:800;color:#738681;letter-spacing:.11em}
+.rv-text-link{border:0;background:none;padding:0;font-size:11px;font-weight:900;color:#1c5559;text-decoration:underline;text-underline-offset:5px;letter-spacing:.03em}
+.rv-text-link span{margin-left:6px}
+.rv-hero-image{position:relative;min-height:650px;background:#648282 url("/assets/riviera-reference-beach.jpg") center 56%/cover no-repeat;overflow:hidden}
+.rv-hero-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#102c3410 50%,#142f3980 100%);pointer-events:none}
+.rv-photo-label{position:absolute;z-index:1;top:28px;right:25px;border:1px solid #f8f1e7a8;color:#fff;font-size:10px;letter-spacing:.14em;font-weight:900;padding:12px 13px;background:#17343b40}
+.rv-photo-number{position:absolute;z-index:1;bottom:34px;left:35px;font:900 110px/.9 "Barlow Condensed";letter-spacing:-.04em;color:#f8f0dfa8;mix-blend-mode:screen}
+.rv-games{padding:84px clamp(22px,5vw,80px) 62px;background:#f2eee4}
+.rv-section-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:38px}
+.section-index{display:block;font:900 11px "DM Sans";color:#c35c3e;letter-spacing:.17em;margin-bottom:14px}
+.rv-section-heading h2{font-size:clamp(65px,7vw,112px);line-height:.83;margin:0;letter-spacing:-.025em;color:#17343b}
+.rv-section-heading h2 i{font:italic 400 .9em "DM Serif Display",Georgia,serif;color:#bb6147;text-transform:none}
+.rv-section-heading>p{max-width:310px;line-height:1.6;font-size:14px;margin:0 0 5px}
+.rv-game-list{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rv-game{position:relative;overflow:hidden;min-height:440px;display:flex;gap:25px;padding:clamp(22px,3vw,43px);border-radius:0;border:1px solid #233f42}
+.rv-game-ranking{background:#1a5358;color:#f8f2e6}
+.rv-game-phrases{background:#dfd16a;color:#17343b}
+.rv-game-number{font:900 24px "Barlow Condensed";opacity:.75;z-index:2}
+.rv-game-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:start}
+.rv-game-type{font-size:10px;letter-spacing:.18em;font-weight:900;margin-top:5px;opacity:.72}
+.rv-game h3{font:900 clamp(49px,5vw,86px)/.86 "Barlow Condensed";margin:30px 0 20px;letter-spacing:-.025em;color:inherit}
+.rv-game p{font-size:13px;line-height:1.55;max-width:340px;color:inherit;opacity:.85;margin:0}
+.rv-game-watermark{font:900 330px/.8 "Barlow Condensed";position:absolute;right:-45px;bottom:-30px;opacity:.09;pointer-events:none;letter-spacing:-.05em}
+.rv-game-cta{background:transparent;border:0;border-bottom:2px solid currentColor;color:inherit;padding:0 0 8px;margin-top:auto;font-size:12px;font-weight:900;letter-spacing:.08em;min-height:33px}
+.rv-game-cta span{margin-left:22px;font-size:20px;font-weight:400}
+.rv-game-cta:hover{transform:translateX(5px)}
+.rv-up-next{border-top:1px solid #9baaaa;margin-top:28px;display:flex;align-items:center;gap:19px;padding-top:23px}
+.rv-up-next>span{font-size:10px;letter-spacing:.13em;color:#ba5538;font-weight:900}
+.rv-up-next strong{font:900 31px "Barlow Condensed";color:#17343b;letter-spacing:.01em}
+.rv-up-next p{font-size:12px;margin:0}
+.club-panel{margin:10px clamp(22px,5vw,80px) 64px;border-top:4px solid #14353b;padding:50px 0 55px;background:none;display:grid;gap:20px}
+.club-panel-empty{grid-template-columns:1fr 320px;align-items:end}
+.club-panel h2{font:900 clamp(54px,6vw,94px)/.87 "Barlow Condensed";color:#17343b;margin:0 0 24px}
+.club-panel p{font-size:14px;max-width:480px}
+.club-panel-cta{display:flex;flex-direction:column;align-items:stretch;gap:11px}
+.club-big-number{font:italic 190px/.6 "DM Serif Display";text-align:right;color:#c65c3f}
+.club-panel-cta small{font-size:11px;color:#768886;text-align:right}
+.club-panel-top{display:flex;justify-content:space-between;gap:30px;align-items:start}
+.club-panel-top h2{text-transform:uppercase}
+.club-code{padding:18px;border:1px solid #1d4649;display:grid;gap:6px;min-width:205px;text-align:center}
+.club-code span{font-size:10px;font-weight:900;letter-spacing:.12em}
+.club-code strong{font:900 43px "Barlow Condensed";letter-spacing:.15em}
+.club-table{border:1px solid #213f41}
+.club-table-head{display:flex;justify-content:space-between;gap:15px;background:#19383f;color:#f2ebde;padding:14px 18px;font-size:10px;letter-spacing:.12em;font-weight:800}
+.club-leader{display:grid;grid-template-columns:70px 1fr 135px 85px;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #c8cfc5;font-size:13px}
+.club-leader:last-child{border-bottom:0}
+.club-rank{font:900 30px "Barlow Condensed";color:#b45f47}
+.club-leader>strong{font-size:15px}
+.club-leader strong small{font-size:9px;color:#b15438;margin-left:8px}
+.club-leader>span:nth-last-child(2){font-size:10px;color:#6c7977;letter-spacing:.05em}
+.club-leader>b{text-align:right;font:900 25px "Barlow Condensed"}
+.club-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.club-leave{background:none;color:#a7503b;text-decoration:underline;border:0;font-size:11px;font-weight:700;margin-left:auto}
+.club-recent{margin:0;padding:0;list-style:none;border-top:1px solid #c5cabb}
+.club-recent li{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #d1d2c5}
+.club-recent span{font-size:11px;color:#6d7a77}
+.club-recent strong{font-size:12px}
+.club-panel .club-note{font-size:11px;color:#89918a}
+.club-dialog{background:#f3efe5;border:2px solid #15343c;color:#1e3e43;max-width:calc(100vw - 20px);width:800px;padding:0;border-radius:2px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 90px #081b2399}
+.club-dialog::backdrop{background:#0c2b30bb;backdrop-filter:blur(3px)}
+.club-dialog-inner{position:relative;padding:clamp(24px,4vw,50px)}
+.club-dialog h2{font:900 clamp(56px,7vw,100px)/.87 "Barlow Condensed";margin:15px 0 22px}
+.club-dialog h2 i{font:italic 400 .85em "DM Serif Display";color:#b75d3d}
+.club-dialog p{max-width:650px;font-size:14px}
+.club-close{position:absolute;right:18px;top:17px;background:#1b3f42;color:white;border:none;padding:9px 12px}
+.club-form-columns{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:33px}
+.club-form{border-top:3px solid #183d43;padding-top:17px;display:flex;flex-direction:column;gap:12px}
+.club-form h3{font:900 25px "Barlow Condensed";letter-spacing:0;margin:0 0 8px}
+.club-form label{display:grid;gap:6px;font-size:11px;color:#4e6464;font-weight:900;letter-spacing:.1em}
+.club-form input{width:100%;background:#fffdf8;border:1px solid #849c99;border-radius:0;padding:14px;color:#17343b;font-size:15px}
+.club-form .btn{margin-top:9px}
+.rv-bottom{background:#17383d;color:#f4eedd;padding:65px clamp(22px,5vw,80px) 75px;margin:0}
+.rv-bottom .section-index{color:#e5d77e}
+.rv-bottom>div:not(.rv-rank-grid){display:flex;justify-content:space-between;align-items:end;gap:18px}
+.rv-bottom strong{font:900 clamp(46px,5vw,78px)/.92 "Barlow Condensed";letter-spacing:-.02em}
+.rv-bottom .btn.ghost{color:#f2ede0!important;border-color:#d4ded6!important}
+.rv-rank-details{border-top:1px solid #688484;margin-top:35px}
+.rv-rank-details>summary{cursor:pointer;padding:19px 0;font-size:12px;font-weight:900;letter-spacing:.06em;display:flex;justify-content:space-between;gap:12px;list-style:none}
+.rv-rank-details>summary span{font-size:26px}
+.rv-rank-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:18px 0 4px}
+.rv-rank-grid span{font-size:11px;line-height:1.4;color:#e4e2d6;padding:9px 0;border-bottom:1px solid #6a8780}
+.footer{background:#17383d!important;color:#a6c2b8!important;border-top:1px solid #5d827a!important;font-size:10px!important;letter-spacing:.13em}
+/* Other screens: athletic interface, no neon/glass */
+.form-page,.game-page{color:var(--ink)!important}
+.form-page{max-width:840px;margin:50px auto 90px}
+.form-page h1,.game-page h1{font:900 clamp(60px,7vw,115px)/.89 "Barlow Condensed";color:#19383f;letter-spacing:-.025em}
+.form-page>p,.game-page>p{color:#586b68}
+.panel,.question,.board{background:#fffdf7!important;border:1px solid #bcc6bb!important;border-radius:2px!important;color:#19363a!important;box-shadow:none!important;backdrop-filter:none!important}
+.panel{padding:clamp(20px,3vw,36px)}
+.panel p{color:#556969}
+.panel h1,.panel h2,.panel h3{color:#19383f}
+.form-page .panel{border-top:5px solid #195459!important}
+.form-page input,.form-page select,.game-page input,.game-page select{background:#fffcf7!important;color:#193b40!important;border:1px solid #829b96!important;border-radius:3px!important;box-shadow:none!important;min-height:48px}
+.form-page label,.game-page label,.panel label{color:#49615e!important}
+.preset-btn{border-radius:3px!important;background:#eceadd!important;color:#1c3a3e!important;border:1px solid #b2c0b4!important}
+.preset-btn.selected,.preset-btn:hover{background:#e0d46c!important;color:#243c3f!important;border-color:#18383f!important}
+.advanced-options,.category-fieldset,.category-group{background:#f4f0e5!important;border-color:#c3cbbf!important;border-radius:2px!important}
+.advanced-options>summary,.category-group summary{color:#214449!important}
+.advanced-options>summary small,.category-group summary small{color:#617371!important}
+.category-check{background:#fffdf8!important;color:#244143!important;border-color:#c5cdc1!important;border-radius:2px!important}
+.category-check span{color:#274346!important}
+.category-check:has(input:checked){background:#e3e6cd!important;border-color:#547a71!important}
+.turbo-switch,.config-summary,.lobby-ready{border-radius:2px!important;background:#eef0de!important;border:1px solid #b8c8af!important;color:#244a4c!important}
+.turbo-switch span,.turbo-switch small,.config-summary b,.config-summary span{color:#24444a!important}
+.config-summary span{border:1px solid #b0bfb4!important}
+.mini-btn{background:#f1f0e7!important;border:1px solid #779493!important;color:#29484b!important;border-radius:3px!important}
+.mini-btn.danger{color:#a04633!important;border-color:#cb9c91!important}
+.category-fieldset legend,.rank-card strong{color:#1e4144!important}
+.roomcode{color:#c45b3d!important;font:900 clamp(38px,5vw,73px) "Barlow Condensed";letter-spacing:.13em}
+.roombar{background:#193b42!important;color:#f5eddb!important;border:0!important;border-radius:3px!important;padding:18px 20px!important;align-items:center;gap:10px}
+.roombar .kicker{color:#f2d568!important}
+.roombar .roomcode{color:#f2d568!important}
+.roombar .btn.ghost{color:#fff!important;border-color:#7a9995!important}
+.roombar .btn.violet{background:#e0d56e!important;color:#193b42!important;border-color:#e0d56e!important}
+.invite-link{background:#e9ecdd!important;color:#284548!important;border:1px dashed #9baea4!important;border-radius:0!important;overflow-wrap:anywhere}
+.rv-room-club{background:#f3e5d1;padding:12px;margin:10px 0;font-size:11px;letter-spacing:.04em}
+.rv-room-club strong{font-size:14px;color:#9c503c;margin-left:6px}
+.game-grid{gap:16px!important;align-items:start}
+.board{padding:0!important;overflow:hidden}
+.board-title{background:#1a3c42!important;color:#fcf5e8!important;padding:17px!important}
+.board-title b,.board-title span{color:#f9f2e4!important}
+.player{border-color:#d6dcd1!important;padding:15px 12px!important}
+.player:nth-child(even){background:#f0f0e5!important}
+.player .nick{color:#1e3e42!important;font-weight:800}
+.player .ranknum{color:#b95b3c!important;font:900 25px "Barlow Condensed"}
+.player .points{color:#1e3b42!important;font:900 27px "Barlow Condensed"}
+.player small{color:#6c817c!important}
+.player .sent{border-color:#a9b5aa!important;background:#eee8da!important;color:#536c65!important}
+.player .sent.yes{border-color:#8cae9f!important;background:#dce6d2!important;color:#1b5845!important}
+.game-page .round-head{border-bottom:1px solid #b6c4b8;padding-bottom:20px;margin-bottom:24px}
+.round-head .kicker{color:#b75d3f!important}
+.timer{border-radius:0!important;background:#173b42!important;border:0!important;color:#f7e8ba!important;box-shadow:none!important}
+.timer strong,.timer small{color:#f4df7d!important}
+.question{border-top:5px solid #21595d!important}
+.question .category{background:#dbe6d4!important;color:#1a5758!important;border:none!important;border-radius:0!important}
+.question h2{color:#19383f!important;font-size:clamp(33px,4vw,65px)}
+.question h2 strong{color:#c05a3f!important}
+.question .separator{border-color:#c4cfc1}
+.question .tiny{color:#627370!important}
+.game-page .success-state{background:#e7eddc!important;color:#205447!important;border:1px solid #a6c4b2!important;border-radius:2px!important}
+.game-page .waitmsg{color:#4f6966!important}
+.guess-suggestions{background:#fffdf8!important;border-color:#65928a!important;border-radius:3px!important}
+.guess-option{color:#214347!important;border-bottom-color:#d4ddd1!important}
+.guess-option:hover{background:#e7ead8!important;color:#1c4447!important}
+.reaction-dock{background:#fbf8ed!important;border:1px solid #829b90!important;backdrop-filter:none!important;border-radius:7px!important;color:#244446!important;box-shadow:0 5px 30px #1b353426!important}
+.reaction-label{color:#1f5357!important}
+.reaction-option{background:#ebede3!important;border-radius:4px!important}
+.reaction-tip{color:#637f7a!important}
+.reaction-bubble{background:#183b42!important;border-color:#183b42!important;border-radius:6px!important}
+.reveal-header h1{color:#19393f!important;background:none!important;text-shadow:none!important;-webkit-text-fill-color:initial}
+.reveal-panel{background:#fffdf8!important;color:#1b3d42!important}
+.reveal-panel:before{display:none}
+.revealed,.answer-spotlight .revealed{color:#ad523b!important;text-shadow:none!important}
+.spotlight-stars{color:#c45e3f!important}
+.result-subheading{color:#23565b!important}
+.result-row{border-color:#d0d5c9!important;background:transparent!important}
+.result-row div b{color:#213e42}
+.result-row div small{color:#62716c!important}
+.result-row strong{color:#ad593f!important}
+.podium-section{border:0!important;border-top:4px solid #173b42!important;border-radius:0!important;background:#e9e3d1!important;box-shadow:none!important;color:#183e42!important}
+.podium-title{color:#173b42!important}
+.podium-place,.podium-place.podium-1{background:#f7f3e7!important;box-shadow:inset 0 -6px 0 var(--pedestal)!important;border-radius:2px!important;border-color:#c3cabd!important;color:#173b42!important}
+.podium-place.podium-1{background:#f6eed2!important;border-color:#b2a875!important}
+.podium-place strong,.podium-place .podium-name{color:#18383e!important}
+.podium-position{color:#9e523c!important}
+.stats-area{background:#fffdf8!important;border:1px solid #b7c6ba!important;border-radius:2px!important;color:#173b42!important}
+.stats-intro h2{color:#173b42!important}
+.stats-table th{background:#173b42!important;color:#f3e48b!important}
+.stats-table td{color:#29464a!important;border-color:#d0d5ca!important}
+.award-card{background:#f1f0df!important;border:1px solid #a4b9ad!important;border-radius:2px!important;color:#21474a!important}
+.award-card>span:last-child{color:#566c66!important}
+.history{background:#eeeadd!important;border-color:#cbd1c4!important}
+.history li{border-color:#c4d1c6!important}
+.history li span{color:#526964!important}
+.reveal-curtain{background:#173b42eb!important;backdrop-filter:none!important}
+.curtain-inner strong{color:#e3d675!important;text-shadow:none!important}
+.curtain-inner>span:first-child{color:#e9dd99!important}
+.curtain-dots{color:#e3d675!important}
+.phrase-prompt,.phrase-prompt strong{color:#1e4246!important}
+.phrase-prompt strong{color:#c45b3e!important}
+.game-description{color:#4d6a67!important;border-color:#c15f41}
+.question .turbo-banner{border-color:#c69d54!important;background:#f5e8bd!important;border-radius:2px!important;box-shadow:none!important}
+.turbo-banner strong{color:#754b2f!important}
+.turbo-banner span{color:#684b33!important}
+.how-dialog{background:#f2eee4!important;color:#173b42!important;border-color:#173b42!important;border-radius:2px!important}
+.how-panel h2{color:#173b42!important}
+.how-steps article{background:#fffdf8!important;border-color:#ced3c7!important;border-radius:2px!important}
+.how-steps p{color:#596f69!important}
+.step-num{color:#c25f41!important}
+.how-note{background:#e5ebd9!important;color:#2a4d4b!important}
+@media(max-width:1050px){.rv-hero h1{font-size:clamp(68px,8vw,105px)}.rv-game h3{font-size:clamp(42px,5vw,65px)}}
+@media(max-width:760px){
+ .nav-inner{min-height:63px;padding:8px 14px}
+ .brand{height:43px;width:96px}
+ .nav-edition,.nav-tag{display:none}
+ .nav-actions{gap:2px}
+ .nav .btn.small{padding:8px 9px}
+ .rv-hero{display:flex;flex-direction:column-reverse;min-height:0}
+ .rv-hero-image{min-height:260px;background-position:center 62%}
+ .rv-photo-number{font-size:78px;left:18px;bottom:17px}
+ .rv-photo-label{top:15px;right:12px;font-size:8px;padding:9px}
+ .rv-hero-main{padding:40px 22px 34px}
+ .rv-hero h1{font-size:clamp(67px,15vw,108px);margin:25px 0 24px;line-height:.79}
+ .rv-hero-main>p{font-size:15px}
+ .rv-hero-actions{display:grid;width:100%;grid-template-columns:1fr;gap:8px}
+ .rv-hero-actions .btn{width:100%}
+ .rv-hero-extras{margin-top:7px;gap:16px}
+ .rv-games{padding:58px 18px 35px}
+ .rv-section-heading{display:block}
+ .rv-section-heading h2{font-size:clamp(65px,12vw,90px)}
+ .rv-section-heading>p{margin:22px 0 0}
+ .rv-game-list{grid-template-columns:1fr;gap:11px}
+ .rv-game{min-height:365px;padding:24px}
+ .rv-game h3{font-size:clamp(63px,11vw,84px)}
+ .rv-up-next{flex-wrap:wrap;gap:9px}
+ .club-panel{margin:5px 18px 45px;padding:40px 0}
+ .club-panel-empty{grid-template-columns:1fr}
+ .club-big-number{font-size:100px;text-align:left}
+ .club-panel-cta{align-items:start}
+ .club-panel-top{display:block}
+ .club-code{display:inline-grid;margin:15px 0 20px}
+ .club-leader{grid-template-columns:34px 1fr 67px;gap:8px;padding:13px 8px}
+ .club-leader>span:nth-last-child(2){display:none}
+ .club-table-head span:last-child{display:none}
+ .club-leader>strong{font-size:12px;overflow-wrap:anywhere}
+ .club-actions{display:grid;grid-template-columns:1fr;gap:7px}
+ .club-actions .btn{width:100%}
+ .club-leave{margin:0;padding:10px}
+ .club-dialog-inner{padding:25px 17px}
+ .club-form-columns{grid-template-columns:1fr}
+ .rv-bottom{padding:55px 20px}
+ .rv-bottom>div:not(.rv-rank-grid){display:grid;gap:26px}
+ .rv-rank-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .form-page,.game-page{margin-top:25px;padding-inline:15px}
+ .roombar{align-items:start!important;justify-content:flex-start}
+ .roombar .roomcode{width:100%;font-size:45px}
+ .game-grid{gap:12px!important}
+ .board,.question{min-width:0}
+ .panel{padding:20px}
+ .round-head h1{font-size:clamp(57px,13vw,85px)}
+ .timer{min-width:94px}
+ .reaction-dock{bottom:7px}
+}
+@media(max-width:390px){
+ .rv-hero h1{font-size:64px}
+ .rv-game h3{font-size:58px}
+ .nav .net-pill{font-size:8px;padding:4px}
+ .nav .sound-toggle{min-width:50px;font-size:9px!important}
+ .club-leader>b{font-size:19px}
+ .rv-rank-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.rv-game-cta,.btn{transition:none!important}}

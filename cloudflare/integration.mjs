@@ -14,7 +14,7 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.2");
+assert.equal(info.version,"2.3");
 assert.equal(info.rankings,41);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
@@ -89,7 +89,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.2");
+ assert.equal(state.version,"2.3");
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
@@ -172,5 +172,58 @@ assert.equal((await call(phPath+"/restart","POST",{},phraseHost.token)).status,2
 const phraseReplay=(await call(phPath,"GET",null,phraseGuest.token)).data;
 assert.equal(phraseReplay.gameType,"phrases");
 assert.equal(phraseReplay.round,1);
-console.log("INTEGRAÇÃO 2.2 OK: Ranking + Frases, sigilo de respostas, reserva atômica, qualidade, pontos, revanche, 41 rankings e 55 ditados.");
+
+/* Riviera Club 2.3 — persistent cross-room scoreboard, authenticated membership */
+const clubCreate=await call("/api/club","POST",{name:"Turma da Riviera",nick:"Capitão"});
+assert.equal(clubCreate.status,200,"club creation");
+assert.match(clubCreate.data.code,/^[A-HJ-NP-Z2-9]{6}$/);
+const clubCode=clubCreate.data.code;
+const clubJoin=await call("/api/club/"+clubCode+"/join","POST",{nick:"Segundo"});
+assert.equal(clubJoin.status,200,"club joining");
+const clubHost=clubCreate.data,clubGuest=clubJoin.data;
+assert.equal((await call("/api/club/"+clubCode,"GET",null)).status,403,"club standings require token");
+const clubPre=(await call("/api/club/"+clubCode,"GET",null,clubHost.token)).data;
+assert.equal(clubPre.name,"Turma da Riviera");
+assert.equal(clubPre.players.length,2);
+assert.equal(clubPre.me,clubHost.id);
+const unauth=await call("/api/room","POST",{nick:"Capitão",clubCode,clubToken:"invalid",mode:"rounds",target:1});
+assert.equal(unauth.status,403,"no club attachment without membership token");
+const gameCreate=await call("/api/room","POST",{nick:"Capitão",clubCode,clubToken:clubHost.token,mode:"rounds",target:1,gameType:"ranking",categoryIds:["pokemon"]});
+assert.equal(gameCreate.status,200);
+const newRoom=gameCreate.data,clubRoomPath="/api/room/"+newRoom.code;
+const gameJoin=await call(clubRoomPath+"/join","POST",{nick:"Segundo",clubToken:clubGuest.token});
+assert.equal(gameJoin.status,200);
+const newGuest=gameJoin.data;
+assert.equal((await call(clubRoomPath,"GET",null,newRoom.token)).data.clubCode,clubCode);
+assert.equal((await call(clubRoomPath+"/ready","POST",{},newRoom.token)).status,200);
+assert.equal((await call(clubRoomPath+"/ready","POST",{},newGuest.token)).status,200);
+assert.equal((await call(clubRoomPath+"/start","POST",{},newRoom.token)).status,200);
+const startClub=(await call(clubRoomPath,"GET",null,newRoom.token)).data;
+const names=startClub.question.options.map(q=>q.name);
+assert.equal((await call(clubRoomPath+"/guess","POST",{answer:names[0]},newRoom.token)).status,200);
+assert.equal((await call(clubRoomPath+"/guess","POST",{answer:names[1]},newGuest.token)).status,200);
+const finalized=(await call(clubRoomPath,"GET",null,newRoom.token)).data;
+assert.equal(finalized.phase,"finished");
+const totals=finalized.players.reduce((sum,p)=>sum+p.points,0);
+assert.equal(totals,3);
+const clubAfter=(await call("/api/club/"+clubCode,"GET",null,clubGuest.token)).data;
+assert.equal(clubAfter.matches.length,1,"One completed match is recorded persistently");
+assert.equal(clubAfter.players.reduce((s,p)=>s+p.points,0),3);
+assert.equal(clubAfter.players.reduce((s,p)=>s+p.played,0),2);
+assert.equal(clubAfter.players.reduce((s,p)=>s+p.wins,0),1);
+await call(clubRoomPath,"GET",null,newRoom.token);
+const clubAfterDuplicate=(await call("/api/club/"+clubCode,"GET",null,clubHost.token)).data;
+assert.equal(clubAfterDuplicate.matches.length,1,"Repeated state reads must not duplicate results");
+assert.equal((await call(clubRoomPath+"/restart","POST",{},newRoom.token)).status,200);
+const replayStart=(await call(clubRoomPath,"GET",null,newRoom.token)).data;
+const replayNames=replayStart.question.options.map(x=>x.name);
+assert.equal((await call(clubRoomPath+"/guess","POST",{answer:replayNames[0]},newRoom.token)).status,200);
+assert.equal((await call(clubRoomPath+"/guess","POST",{answer:replayNames[1]},newGuest.token)).status,200);
+const history=(await call("/api/club/"+clubCode,"GET",null,clubHost.token)).data;
+assert.equal(history.matches.length,2,"Revanche records as separate match");
+assert.equal(history.players.reduce((a,p)=>a+p.points,0),6);
+assert.equal(history.players.reduce((a,p)=>a+p.played,0),4);
+assert.equal(history.players.every(p=>!Object.hasOwn(p,"token")),true,"No credential leakage in club board");
+console.log("INTEGRAÇÃO 2.3 OK: Ranking, Frases, clubes com token, placar cross-room, idempotência e revanche.");
+
 

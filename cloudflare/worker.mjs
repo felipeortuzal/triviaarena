@@ -172,6 +172,16 @@ export class ArenaRoom{
     if(result.change)await tx.put("room",result.state);
   });
   if(result?.change)this.broadcast();
+  if(result?.state?.phase==="finished"&&result?.state?.clubCode&&result?.state?.matchId){
+    const state=result.state;
+    const active=Object.values(state.players||{}).filter(p=>p.clubMemberId);
+    if(active.length){
+      try{
+       const stub=this.env.ARENA.get(this.env.ARENA.idFromName("club:"+state.clubCode));
+       await stub.fetch(new Request("https://club/club-record",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({matchId:state.matchId,gameType:state.gameType,players:active.map(p=>({clubMemberId:p.clubMemberId,points:p.points,exact:p.matchStats?.exact||0}))})}));
+      }catch{}
+    }
+  }
   if(result?.alarm)await this.ctx.storage.setAlarm(result.alarm);
   return result;
  }
@@ -187,8 +197,68 @@ export class ArenaRoom{
    return {change:changed,state:room,alarm:!changed&&room.phase==="playing"?room.deadline+100:undefined};
   });
  }
+
+ async clubAction(req){
+  const path=new URL(req.url).pathname;
+  let body={};
+  if(req.method==="POST"){try{body=await req.json()}catch{return safeJson({error:"Requisição inválida"},400)}}
+  const token=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"")||body.token||"";
+  let output={status:500,error:"Operação não suportada"};
+  await this.ctx.storage.transaction(async tx=>{
+    let club=await tx.get("club");
+    const now=Date.now();
+    if(path==="/club-create"){
+      if(club){output={status:409,error:"Código de clube em uso"};return;}
+      const name=String(body.name||"").trim().slice(0,40),nick=String(body.nick||"").trim().slice(0,24);
+      if(name.length<3||nick.length<2){output={status:400,error:"Informe nome do clube (3+ caracteres) e apelido"};return;}
+      const id=crypto.randomUUID(),secret=randomToken();
+      club={name,created:now,players:{[id]:{id,nick,token:secret,joined:now,played:0,wins:0,points:0,exact:0}},matches:[],updated:now};
+      await tx.put("club",club);output={status:200,data:{id,token:secret,name}};return;
+    }
+    if(!club){output={status:404,error:"Clube não encontrado"};return;}
+    if(path==="/club-join"){
+      if(Object.keys(club.players).length>=40){output={status:409,error:"Clube cheio (40 membros)"};return;}
+      const nick=String(body.nick||"").trim().slice(0,24);
+      if(nick.length<2){output={status:400,error:"Apelido muito curto"};return;}
+      if(Object.values(club.players).some(p=>normalizeAnswer(p.nick)===normalizeAnswer(nick))){output={status:409,error:"Esse apelido já está ocupado no clube"};return;}
+      const id=crypto.randomUUID(),secret=randomToken();
+      club.players[id]={id,nick,token:secret,joined:now,played:0,wins:0,points:0,exact:0};
+      club.updated=now;await tx.put("club",club);
+      output={status:200,data:{id,token:secret,name:club.name}};return;
+    }
+    if(path==="/club-record"){
+      const key=String(body.matchId||"");
+      if(!key){output={status:400,error:"Partida inválida"};return;}
+      if(club.matches.some(m=>m.matchId===key)){output={status:200,data:{ok:true,duplicate:true}};return;}
+      const all=Array.isArray(body.players)?body.players:[];
+      const members=all.filter(p=>club.players[p.clubMemberId]&&club.players[p.clubMemberId].id===p.clubMemberId);
+      if(!members.length){output={status:200,data:{ok:true,ignored:true}};return;}
+      const high=Math.max(...members.map(p=>Number(p.points)||0));
+      for(const entry of members){
+       const p=club.players[entry.clubMemberId];
+       p.played++;p.points+=Math.max(0,Number(entry.points)||0);
+       p.exact+=Math.max(0,Number(entry.exact)||0);
+       if(Number(entry.points)===high)p.wins++;
+      }
+      club.matches.unshift({matchId:key,date:now,gameType:body.gameType==="phrases"?"phrases":"ranking",results:members.map(p=>({id:p.clubMemberId,nick:club.players[p.clubMemberId].nick,points:p.points}))});
+      club.matches=club.matches.slice(0,100);club.updated=now;
+      await tx.put("club",club);output={status:200,data:{ok:true}};return;
+    }
+    const me=Object.values(club.players).find(p=>p.token===token);
+    if(!me){output={status:403,error:"Sua sessão não pertence a este clube"};return;}
+    if(path==="/club-check"){output={status:200,data:{id:me.id,nick:me.nick,name:club.name}};return;}
+    if(path==="/club-state"){
+      const leaderboard=Object.values(club.players).map(({id,nick,joined,played,wins,points,exact})=>({id,nick,joined,played,wins,points,exact})).sort((a,b)=>b.wins-a.wins||b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
+      output={status:200,data:{name:club.name,players:leaderboard,matches:club.matches.slice(0,12),me:me.id,updated:club.updated}};return;
+    }
+  });
+  return output.data?safeJson(output.data,output.status):safeJson({error:output.error},output.status);
+ }
+
  async fetch(req){
   const url=new URL(req.url),path=url.pathname;
+  if(path.startsWith("/club-"))return this.clubAction(req);
+  if(path==="/clubmeta"){const r=await this.ctx.storage.get("room");return safeJson({clubCode:r?.clubCode||null})}
   if(path==="/ws"){
    const room=await this.ctx.storage.get("room"),p=Object.entries(room?.players||{}).find(([,v])=>v.token===url.searchParams.get("token"));
    if(!p)return safeJson({error:"Convite inválido ou sessão expirada"},403);
@@ -209,7 +279,7 @@ export class ArenaRoom{
     const target=Math.max(1,Math.min(mode==="race"?15:20,Number.parseInt(body.target)||5));
     let config;
     try{config=normalizeRoomConfig(body.gameType==="phrases"?{...body,categoryIds:BANKS.map(b=>b.id)}:body)}catch(e){return {error:e.message,status:400};}
-    const id=crypto.randomUUID(),secret=randomToken(),newRoom={gameType:body.gameType==="phrases"?"phrases":"ranking",host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
+    const id=crypto.randomUUID(),secret=randomToken(),newRoom={clubCode:body.clubCode||null,matchId:crypto.randomUUID(),gameType:body.gameType==="phrases"?"phrases":"ranking",host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,clubMemberId:body.clubMemberId||null,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
     return {change:true,state:newRoom,data:{id,token:secret}};
    }
    if(!room)return {error:"Sala não encontrada",status:404};
@@ -222,7 +292,7 @@ export class ArenaRoom{
     if(nick.length<2)return {error:"Digite um apelido com pelo menos 2 letras",status:400};
     if(Object.values(room.players).some(p=>normalizeAnswer(p.nick)===normalizeAnswer(nick)))return {error:"Já existe um jogador com esse nome",status:409};
     const id=crypto.randomUUID(),secret=randomToken();
-    room.players[id]={nick,token:secret,points:0,ready:false,lastSeen:now,stats:emptyStats(),matchStats:emptyStats()};
+    room.players[id]={nick,token:secret,points:0,ready:false,lastSeen:now,clubMemberId:body.clubMemberId||null,stats:emptyStats(),matchStats:emptyStats()};
     return {change:true,state:room,data:{id,token:secret}};
    }
    const member=Object.entries(room.players).find(([,p])=>p.token===token);
@@ -232,7 +302,7 @@ export class ArenaRoom{
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"2.2",gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    return {change:changed,state:room,data:{version:"2.3",clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(!isHost&&["start","next","restart","close","kick","handoff"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
@@ -318,7 +388,7 @@ export class ArenaRoom{
    if(path==="/restart"){
     if(room.phase!=="finished")return {error:"Termine a partida antes da revanche",status:409};
     for(const p of Object.values(room.players)){p.points=0;p.matchStats=emptyStats();}
-    room.round=0;room.used=[];room.awards=[];
+    room.round=0;room.used=[];room.awards=[];room.matchId=crypto.randomUUID();
     chooseQuestion(room);return {change:true,state:room,data:{ok:true},alarm:room.deadline};
    }
    if(path==="/close"){
@@ -364,10 +434,37 @@ export async function proxyImage(request,env){
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.2",rankings:BANKS.length,phrases:PHRASES.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.3",rankings:BANKS.length,phrases:PHRASES.length,features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null}))});
+
+ if(path==="/api/club"&&request.method==="POST"){
+  let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+  for(let i=0;i<8;i++){
+   const code=randomCode(),stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
+   const resp=await stub.fetch(new Request("https://club/club-create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}));
+   if(resp.status===409)continue;
+   return safeJson({...await resp.json(),code},resp.status);
+  }
+  return safeJson({error:"Não foi possível criar o clube"},503);
+ }
+ const clubMatch=path.match(/^\/api\/club\/([A-HJ-NP-Z2-9]{6})(?:\/(join|state))?$/);
+ if(clubMatch){
+  const [_,code,action]=clubMatch,stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
+  const headers=new Headers(request.headers);headers.delete("host");
+  return stub.fetch(new Request("https://club/club-"+(action==="join"?"join":"state"),{method:request.method,headers,body:request.method==="POST"?request.body:undefined}));
+ }
+
  if(path==="/api/room"&&request.method==="POST"){
   let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+  delete body.clubMemberId;
+  if(body.clubCode&&body.clubToken){
+   const code=String(body.clubCode||"").toUpperCase();
+   if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code))return safeJson({error:"Clube inválido"},400);
+   const stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
+   const valid=await stub.fetch(new Request("https://club/club-check",{headers:{authorization:"Bearer "+body.clubToken}}));
+   if(!valid.ok)return safeJson({error:"Sessão do clube inválida"},403);
+   body.clubMemberId=(await valid.json()).id;body.clubCode=code;
+  }else{delete body.clubCode;delete body.clubToken;}
   for(let i=0;i<8;i++){
    const code=randomCode(),stub=env.ARENA.get(env.ARENA.idFromName(code));
    const resp=await stub.fetch(new Request("https://room/create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}));
@@ -381,6 +478,23 @@ async function handleRequest(request,env){
  if(match){
   const [_,code,action]=match,stub=env.ARENA.get(env.ARENA.idFromName(code));
   const suffix=action?"/"+action:"/state",remote=new URL("https://room"+suffix);
+  if(action==="join"&&request.method==="POST"){
+    let data;try{data=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+    delete data.clubMemberId;
+    if(data.clubToken){
+      const state=await stub.fetch(new Request("https://room/clubmeta"));
+      if(state.ok){
+       const {clubCode}=await state.json();
+       if(clubCode){
+        const club=env.ARENA.get(env.ARENA.idFromName("club:"+clubCode));
+        const valid=await club.fetch(new Request("https://club/club-check",{headers:{authorization:"Bearer "+data.clubToken}}));
+        if(valid.ok)data.clubMemberId=(await valid.json()).id;
+       }
+      }
+    }
+    delete data.clubToken;
+    return stub.fetch(new Request(remote.toString(),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(data)}));
+  }
   if(action==="ws"){remote.pathname="/ws";remote.search=url.search;}
   const headers=new Headers(request.headers);headers.delete("host");
   return stub.fetch(new Request(remote.toString(),{method:request.method,headers,body:request.method==="POST"?request.body:undefined}));

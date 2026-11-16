@@ -13,13 +13,17 @@ try{
  const failures=[];
  for(const p of [pa,pb])p.on("pageerror",err=>failures.push(err.message));
  await pa.goto(base,{waitUntil:"networkidle"});
- await pa.locator(".hero-logo").waitFor({state:"visible"});
- assert.ok(await pa.locator(".hero-logo").evaluate(img=>img.complete&&img.naturalWidth>200),"Logo aprovada deve carregar");
+ await pa.locator(".rv-hero").waitFor({state:"visible"});
+ assert.equal(await pa.locator(".rv-game").count(),2);
+ assert.equal(await pa.locator(".rv-hero-image").count(),1);
+ assert.ok(await pa.locator(".brand").evaluate(img=>img.complete&&img.naturalWidth>200),"Logo aprovada deve carregar");
+ const pageBackground=await pa.evaluate(()=>getComputedStyle(document.body).backgroundColor);
+ assert.ok(pageBackground!=="rgb(17, 11, 35)","Riviera theme must replace old violet neon background");
  await pa.locator('[data-op="how"]').first().click();
  assert.equal(await pa.locator('#how-dialog').evaluate(d=>d.open),true);
  await pa.locator('[data-op="close-how"]').click();
  assert.equal(await pa.locator('#how-dialog').evaluate(d=>d.open),false);
- await pa.locator('[data-op="create"]').click();
+ await pa.locator('[data-op="create"]').first().click();
  await pa.locator('#create-form [name="nick"]').fill("Afonso");
  await pa.locator('#create-form [name="target"]').fill("1");
  await pa.locator('[data-op="preset"][data-preset="turbo"]').click();
@@ -144,9 +148,31 @@ try{
  await pc.locator('[data-op="restart"]').click();
  await pc.locator('.phrase-prompt').waitFor({state:"visible",timeout:10000});
  await pd.locator('.phrase-prompt').waitFor({state:"visible",timeout:10000});
+ 
+ /* 2.3: editorial design and persistent friends club */
+ const ec=await browser.newContext({viewport:{width:1280,height:820}});
+ const ep=await ec.newPage();ep.on("pageerror",err=>failures.push(err.message));
+ await ep.goto(base,{waitUntil:"domcontentloaded"});
+ await ep.locator("#social-club").waitFor({state:"visible"});
+ await ep.locator('[data-op="club-open"]').click();
+ await ep.locator("#club-create-form [name=name]").fill("Clube Riviera Teste");
+ await ep.locator("#club-create-form [name=nick]").fill("Dono");
+ await ep.locator("#club-create-form button[type=submit]").click();
+ await ep.locator(".club-panel-active").waitFor({state:"visible",timeout:9000});
+ const clubCode=(await ep.locator(".club-code strong").innerText()).trim();
+ assert.match(clubCode,/^[A-HJ-NP-Z2-9]{6}$/);
+ assert.equal(await ep.locator(".club-leader").count(),1);
+ await ep.locator('.club-panel [data-op="create"]').click();
+ await ep.locator("#create-form [name=nick]").fill("Dono");
+ await ep.locator("#create-form [name=target]").fill("1");
+ await ep.locator("#create-form button[type=submit]").click();
+ await ep.locator(".rv-room-club").waitFor({state:"visible",timeout:9000});
+ assert.ok((await ep.locator(".rv-room-club").innerText()).includes(clubCode));
+ await ec.close();
+
  await c.close();await d.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in either game mode");
- console.log("NAVEGADOR MULTIPLAYER 2.2 OK: Ranking + Frases em 4 navegadores, pronta sessão, respostas privadas, correção e revanche.");
+ console.log("NAVEGADOR MULTIPLAYER 2.3 OK: dois modos, redesign editorial, clube persistente e 5 navegadores.");
 
  await a.close();await b.close();
 }finally{await browser.close()}
