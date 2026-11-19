@@ -35,8 +35,96 @@ const SYNONYMS={
  "bulbasaur":["bulbassauro"],"ivysaur":["ivissauro"],"venusaur":["venussauro"],"nidoran female":["nidoran femea","nidoran f"]
 };
 export function levenshtein(a,b){if(Math.abs(a.length-b.length)>3)return 99;let last=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){const next=[i];for(let j=1;j<=b.length;j++)next[j]=Math.min(next[j-1]+1,last[j]+1,last[j-1]+(a[i-1]===b[j-1]?0:1));last=next;}return last[b.length];}
-export function matchAnswer(raw,options){const value=normalizeAnswer(raw);if(!value)return -1;const exact=options.findIndex(item=>normalizeAnswer(item)===value);if(exact>=0)return exact;const alias=options.findIndex(item=>(SYNONYMS[normalizeAnswer(item)]||[]).map(normalizeAnswer).includes(value));if(alias>=0)return alias;if(value.length<6)return -1;let best=99,at=-1,ties=0;options.forEach((item,i)=>{const d=levenshtein(value,normalizeAnswer(item));if(d<best){best=d;at=i;ties=1}else if(d===best)ties++});return best<=2&&ties===1?at:-1;}
-function suggestAnswer(raw,options){const q=normalizeAnswer(raw);return options.map(v=>({v,d:levenshtein(q,normalizeAnswer(v))})).sort((a,b)=>a.d-b.d).slice(0,3).map(x=>x.v)}
+
+/* Riviera 2.7: high-confidence, server-authoritative typo resolution.
+   Deliberately not an LLM: no external network, latency, token charges or
+   non-deterministic guessing. Ambiguous guesses are never auto-mapped. */
+function normalizeGuess(raw){
+ return normalizeAnswer(String(raw||"").replace(/&/g," and "))
+  .replace(/\b(ur|yr)\b/g,"your")
+  .replace(/\bthru\b/g,"through")
+  .replace(/\btvshow\b/g,"tv show")
+  .replace(/\s+/g," ").trim();
+}
+function matcherCompact(value){return value.replace(/\s+/g,"");}
+function matcherCore(value){
+ // Omit only weak articles/connectors, never meaningful distinguishing words.
+ return value.split(" ").filter(w=>!["the","a","an","of","and","de","do","da","dos","das","o","os","as","e"].includes(w)).join(" ");
+}
+function matcherAcronym(value){
+ return value.split(" ").map(t=>t[0]||"").join("");
+}
+function matcherCity(value){
+ // IBGE names in this catalog include " - UF" to disambiguate duplicate cities.
+ return value.replace(/\s+(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to)$/,"");
+}
+export function typoDistance(a,b,cap=7){
+ if(Math.abs(a.length-b.length)>cap)return cap+1;
+ let last2=[],last1=Array.from({length:b.length+1},(_,j)=>j);
+ for(let i=1;i<=a.length;i++){
+  const next=[i];
+  for(let j=1;j<=b.length;j++){
+   let d=Math.min(next[j-1]+1,last1[j]+1,last1[j-1]+(a[i-1]===b[j-1]?0:1));
+   if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])d=Math.min(d,last2[j-2]+1);
+   next[j]=d;
+  }
+  last2=last1;last1=next;
+ }
+ return last1[b.length];
+}
+export function resolveAnswer(raw,options){
+ const input=normalizeGuess(raw);
+ const failed={index:-1,canonical:null,method:null,corrected:false};
+ if(!input||!Array.isArray(options)||!options.length)return failed;
+ const candidates=options.map((item,index)=>{
+  const normalized=normalizeGuess(item);
+  return {item,index,normalized};
+ });
+ const unique=matches=>{
+  if(matches.length!==1)return null;
+  const selected=matches[0];
+  return {index:selected.index,canonical:selected.item,method:selected.method,corrected:normalizeAnswer(raw)!==normalizeAnswer(selected.item)};
+ };
+ // Exact name or registered translation/alias.
+ const exact=candidates.filter(x=>x.normalized===input);
+ if(exact.length)return unique(exact.map(x=>({...x,method:"exact"})))||failed;
+ const aliases=candidates.filter(x=>(SYNONYMS[normalizeAnswer(x.item)]||[]).some(v=>normalizeGuess(v)===input));
+ if(aliases.length)return unique(aliases.map(x=>({...x,method:"alias"})))||failed;
+ // Unique compact spelling, shortened city-without-UF, official initials/acronym.
+ const compact=matcherCompact(input);
+ const inputCore=matcherCore(input);
+ const safeVariants=candidates.filter(x=>
+   (compact.length>=6&&matcherCompact(x.normalized)===compact)||
+   (inputCore.length>=8&&matcherCore(x.normalized)===inputCore)||
+   (input.length>=5&&matcherCity(x.normalized)===input&&x.normalized!==input)||
+   (input.length>=4&&input===matcherAcronym(x.normalized)&&x.normalized.split(" ").length>=3)
+ );
+ if(safeVariants.length)return unique(safeVariants.map(x=>({...x,method:"variant"})))||failed;
+ // Damerau–Levenshtein handles accidental swapped letters, missing and
+ // repeated letters. Strict edit budget + second-best margin prevent collisions.
+ const size=input.length;
+ const budget=size<=5?0:size<=8?1:size<=14?2:size<=23?3:size<=34?4:Math.min(6,Math.floor(size*0.12));
+ if(!budget)return failed;
+ const scores=candidates.map(x=>{
+  const city=matcherCity(x.normalized);
+  const complete=typoDistance(input,x.normalized,budget+2);
+  const shorter=city!==x.normalized?typoDistance(input,city,budget+2):budget+3;
+  return {...x,dist:Math.min(complete,shorter),compared:shorter<complete?city:x.normalized};
+ }).sort((a,b)=>a.dist-b.dist);
+ const winner=scores[0],runner=scores[1];
+ const overlap=winner.dist/Math.max(input.length,winner.compared.length);
+ const nearOther=runner&&(runner.dist===winner.dist||(winner.dist>=2&&runner.dist<=winner.dist+1));
+ if(winner.dist>budget||overlap>0.21||nearOther)return failed;
+ return {...unique([{...winner,method:"typo"}])};
+}
+export function matchAnswer(raw,options){return resolveAnswer(raw,options).index;}
+function suggestAnswer(raw,options){
+ const input=normalizeGuess(raw);
+ if(!input)return [];
+ return options.map(item=>({item,d:typoDistance(input,normalizeGuess(item),10)}))
+  .sort((a,b)=>a.d-b.d||a.item.localeCompare(b.item))
+  .slice(0,3).map(x=>x.item);
+}
 
 
 export const ROUND_DURATIONS=[20,30,45];
@@ -346,7 +434,7 @@ export class ArenaRoom{
    if(path==="/state"){
     const q=room.question,bank=q?BANKS[q.bi]:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:"2.6",clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,sourceUrl:bank.sourceUrl||null,rankType:bank.kind||"ranking",tier:q.tier||"CLÁSSICO",position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    return {change:changed,state:room,data:{version:"2.7",clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,sourceUrl:bank.sourceUrl||null,rankType:bank.kind||"ranking",tier:q.tier||"CLÁSSICO",position:q.position,limit:q.limit,special:!!room.special,options:bank.items.slice(0,q.limit).map(x=>({name:x})).sort((a,b)=>normalizeAnswer(a.name).localeCompare(normalizeAnswer(b.name)))}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(!isHost&&["start","next","restart","close","kick","handoff","hold-next"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    if(path==="/heartbeat"){
@@ -404,7 +492,7 @@ export class ArenaRoom{
    if(path==="/guess"||path==="/pass"){
     if(room.phase!=="playing"||now>=room.deadline)return {change:changed,state:room,error:"A rodada já terminou",status:409};
     if(Object.hasOwn(room.answers,id))return {error:"Você já respondeu nesta rodada",status:409};
-    let answer="Passou",rank=null,quality=0;
+    let answer="Passou",rank=null,quality=0,correction=null;
     if(path==="/guess"){
       const raw=String(body.answer||"").trim().slice(0,160);
       if(!raw)return {error:"Digite um palpite ou use Passar",status:400};
@@ -413,16 +501,19 @@ export class ArenaRoom{
         const candidate=normalizeAnswer(raw);
         if(Object.values(room.answers).some(a=>normalizeAnswer(a.answer)===candidate))return {error:"Essa continuação já foi enviada por outra pessoa. Tente uma diferente.",status:409};
         quality=evaluatePhrase(raw,PHRASES[room.question.index]);answer=raw;
+        if(quality>=90&&normalizeAnswer(raw)!==normalizeAnswer(PHRASES[room.question.index].answer))
+          correction={original:raw,canonical:PHRASES[room.question.index].answer,method:"phrase"};
       }else{
-        const bank=BANKS[room.question.bi],options=bank.items.slice(0,room.question.limit),index=matchAnswer(raw,options);
+        const bank=BANKS[room.question.bi],options=bank.items.slice(0,room.question.limit),matched=resolveAnswer(raw,options),index=matched.index;
         if(index<0)return {error:"Item não reconhecido. Tente uma sugestão: "+suggestAnswer(raw,options).join(", "),status:422};
         rank=index+1;answer=bank.items[index];
+        if(matched.corrected)correction={original:raw,canonical:answer,method:matched.method};
         if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
       }
     }
     room.answers[id]={answer,rank,quality,at:now};
     finalizeRoom(room,now);
-    return {change:true,state:room,data:{ok:true},alarm:room.phase==="playing"?room.deadline:undefined};
+    return {change:true,state:room,data:{ok:true,acceptedAnswer:answer,correction},alarm:room.phase==="playing"?room.deadline:undefined};
    }
    if(path==="/hold-next"){
     if(room.phase!=="reveal"||!room.nextAt)return {error:"Não há avanço automático a pausar",status:409};
@@ -484,7 +575,7 @@ export async function proxyImage(request,env){
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.6",rankings:BANKS.length,phrases:PHRASES.length,entries:BANKS.reduce((sum,bank)=>sum+bank.items.length,0),maxRanking:Math.max(...BANKS.map(bank=>bank.items.length)),rankFormats:[10,20,30,50,100,200,500,1000],features:["custom-rooms","turbo-rounds","group-stats","awards"]});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:"2.7",rankings:BANKS.length,phrases:PHRASES.length,entries:BANKS.reduce((sum,bank)=>sum+bank.items.length,0),maxRanking:Math.max(...BANKS.map(bank=>bank.items.length)),rankFormats:[10,20,30,50,100,200,500,1000],features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null,kind:b.kind||"ranking"}))});
 
  if(path==="/api/club"&&request.method==="POST"){

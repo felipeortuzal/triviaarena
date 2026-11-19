@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -229,4 +229,51 @@ test("2.6: modo extremo escolhe apenas formatos TOP 100 ou maiores",()=>{
 test("2.6: modo clássico permanece limitado aos TOP 50",()=>{
  const r=make();r.config=normalizeRoomConfig({categoryIds:["pokedex-nacional-1025","municipios-pop-2022"],rankScale:"classic"});
  for(let i=0;i<60;i++){chooseQuestion(r);assert.ok(r.question.limit<=50)}
+});
+
+
+/* 2.7 — Correção inteligente e segura, sem LLM externo */
+test("2.7: título de série com erro de digitação e abreviação informal",()=>{
+ const shows=["How I Met Your Mother","How I Met Your Father","Game of Thrones"];
+ const r=resolveAnswer("How I Meet Ur Mother",shows);
+ assert.equal(r.index,0);assert.equal(r.canonical,"How I Met Your Mother");
+ assert.equal(r.corrected,true);assert.equal(r.method,"typo");
+ assert.equal(matchAnswer("HIMYM",shows),0);
+ assert.equal(matchAnswer("gmae of trones",shows),2);
+ assert.equal(matchAnswer("How I Met Your Mother",shows),0);
+});
+test("2.7: erros reais em Pokémon e filmes corrigem sem alterar a resposta",()=>{
+ const pokemon=BANKS.find(b=>b.id==="pokemon").items;
+ assert.equal(resolveAnswer("Pikachuu",pokemon).canonical,"Pikachu");
+ assert.equal(resolveAnswer("Bulbassaur",pokemon).canonical,"Bulbasaur");
+ assert.equal(resolveAnswer("Charmandre",pokemon).canonical,"Charmander");
+ const movies=BANKS.find(b=>b.id==="imdb-1000-historico").items;
+ assert.equal(resolveAnswer("The Godfater",movies).canonical,"The Godfather");
+});
+test("2.7: nomes de cidades aceitam falta de UF ou troca de letra",()=>{
+ const cities=BANKS.find(b=>b.id==="municipios-pop-2022").items;
+ assert.equal(resolveAnswer("Sao Paulo",cities).canonical,"São Paulo - SP");
+ assert.equal(resolveAnswer("sao paolo",cities).canonical,"São Paulo - SP");
+ assert.equal(resolveAnswer("Curitba",cities).canonical,"Curitiba - PR");
+ assert.equal(resolveAnswer("Rio de Janeirro",cities).canonical,"Rio de Janeiro - RJ");
+});
+test("2.7: não corrige respostas ambíguas nem inventa itens",()=>{
+ assert.equal(matchAnswer("Nidoran",["Nidoran♀","Nidoran♂"]),-1);
+ assert.equal(matchAnswer("Bom Jesus",["Bom Jesus - PI","Bom Jesus - RN"]),-1);
+ assert.equal(matchAnswer("HIMY",["How I Met Your Mother","How I Met Your Father"]),-1);
+ assert.equal(matchAnswer("Absolutamente qualquer coisa",["Pikachu","Bulbasaur"]),-1);
+ assert.equal(matchAnswer("SP",["São Paulo - SP","São Pedro - SP"]),-1);
+});
+test("2.7: preserva equivalências, traduções e maiúsculas existentes",()=>{
+ const options=["Estados Unidos","Reino Unido","The Matrix","Hidrogênio"];
+ assert.equal(matchAnswer("EUA",options),0);
+ assert.equal(matchAnswer("Inglaterra",options),1);
+ assert.equal(matchAnswer("Matrix",options),2);
+ assert.equal(matchAnswer("Hidrognio",options),3);
+ assert.equal(resolveAnswer("HIDROGÊNIO",options).corrected,false);
+});
+test("2.7: distância com letras invertidas é menor que substituições arbitrárias",()=>{
+ assert.equal(typoDistance("thronse","thrones"),1);
+ assert.equal(typoDistance("pikachuu","pikachu"),1);
+ assert.ok(typoDistance("series","pokemons")>3);
 });

@@ -94,9 +94,12 @@ try{
  await pa.locator('.guess-option').getByText("Bulbasaur").click();
  assert.equal(await pa.locator('#guess').inputValue(),"Bulbasaur");
  assert.equal(await pa.locator("#seconds").innerText().then(Number)>0,true);
- await pa.locator('#guess').fill(options[0]);
+ await pa.locator('#guess').fill("Bulbassaur");
  await pa.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("PALPITE ENVIADO").waitFor({timeout:8000});
+ await pa.locator(".rv27-answer-confirm").waitFor({state:"visible",timeout:10000});
+ assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbasaur"),"Autocorreção deve mostrar o nome reconhecido");
+ assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbassaur"),"A resposta original deve ser exibida");
  await pb.locator('#guess').fill(options[1]);
  await pb.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("FIM DE JOGO").waitFor({timeout:10000});
@@ -315,7 +318,7 @@ try{
  assert.ok(overflowG<=2,"2.6 mobile giant challenge overflow: "+overflowG);
  await hugeHost.close();await hugeGuest.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
- console.log("NAVEGADOR MULTIPLAYER 2.6 OK: 107 rankings, 1000 posições, busca de categorias, Modo Extremo, mobile e fontes.");
+ console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 107 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
 
  await a.close();await b.close();
 }finally{await browser.close()}

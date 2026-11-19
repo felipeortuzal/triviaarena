@@ -981,3 +981,11 @@ a{color:inherit}
 #rank-categories .category-check{white-space:normal;overflow-wrap:anywhere}
 @media(max-width:850px){.rv26-release{grid-template-columns:125px minmax(0,1fr)}.rv26-release-stamp{display:none}.rv26-release>div{display:block}.rv26-release p{margin-top:12px}}
 @media(max-width:580px){.rv26-release{grid-template-columns:1fr;gap:11px;padding-top:22px;margin-top:26px}.rv26-release-kicker{max-width:none}.rv26-release strong{font-size:clamp(47px,12vw,75px)}.rv26-release>div{display:block}.rv26-format{font-size:9px;padding:8px 10px}.rv26-question-meta{gap:8px}.game-page:has(.rv26-question-meta) .question h2{font-size:clamp(41px,10.5vw,67px)}}
+
+/* Riviera Showdown 2.7 — First Night / conservative smart correction */
+.rv27-smart-hint{background:#edf0dc;color:#416661!important;border-left:3px solid #98b39b;padding:10px 13px;margin:14px 0 17px!important;line-height:1.55!important;font-size:11px!important;font-weight:700}
+.rv27-answer-confirm{margin-top:14px;padding:13px 14px;background:#fafcf0;border:1px solid #a9c5af;display:grid;gap:4px;color:#214c44}
+.rv27-answer-confirm span{font-size:10px;font-weight:900;letter-spacing:.11em;color:#49806a}
+.rv27-answer-confirm strong{font-size:18px;color:#163f3d;overflow-wrap:anywhere}
+.rv27-answer-confirm small{font-size:11px;line-height:1.5;color:#677c71;overflow-wrap:anywhere}
+@media(max-width:580px){.rv27-smart-hint{font-size:10px!important;padding:10px!important}.rv27-answer-confirm{padding:11px}.rv27-answer-confirm strong{font-size:16px}}
