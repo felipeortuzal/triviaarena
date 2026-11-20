@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("107 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,107);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,107);
+test("108 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,108);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,108);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
@@ -144,8 +144,8 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });
 
-test("2.6: catálogo expandido tem 107 fontes e TOP 1000 com posições reais",()=>{
- assert.equal(BANKS.length,107);
+test("2.6: catálogo expandido tem 108 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,108);
  assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
  assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
  assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
@@ -276,4 +276,42 @@ test("2.7: distância com letras invertidas é menor que substituições arbitr�
  assert.equal(typoDistance("thronse","thrones"),1);
  assert.equal(typoDistance("pikachuu","pikachu"),1);
  assert.ok(typoDistance("series","pokemons")>3);
+});
+
+test("a sala cheia sorteia opções distintas suficientes para todos",()=>{
+ const room=make();
+ room.config=normalizeRoomConfig({categoryIds:["movies-1970s","f1-teams-2010","pokemon"]});
+ room.players=Object.fromEntries(Array.from({length:12},(_,i)=>["p"+i,{nick:"Pessoa "+i,points:0}]));
+ for(let i=0;i<35;i++){
+  chooseQuestion(room);
+  assert.ok(room.question.limit>=12);
+ }
+});
+test("o sorteio usa a última posição disponível antes de reciclar uma lista",()=>{
+ const room=make();
+ room.config=normalizeRoomConfig({categoryIds:["movies-1970s"]});
+ const seen=new Set();
+ for(let i=0;i<6;i++){
+  chooseQuestion(room);
+  assert.ok(!seen.has(room.question.position));
+  seen.add(room.question.position);
+ }
+ chooseQuestion(room);
+ assert.ok(seen.has(room.question.position));
+});
+test("ninguém ganha vitória de carreira por uma partida zerada",()=>{
+ const room=make("rounds",1);
+ chooseQuestion(room);finalizeRoom(room,room.deadline+1);
+ assert.equal(room.phase,"finished");
+ for(const p of Object.values(room.players)){assert.equal(p.stats.matches,1);assert.equal(p.stats.wins,0)}
+});
+
+test("a categoria de sitcoms usa datas verificadas e reconhece abreviações e digitação",()=>{
+ const bank=BANKS.find(b=>b.id==="sitcoms-estreias-eua");
+ assert.equal(bank.items.length,20);
+ assert.ok(bank.items.indexOf("Friends")<bank.items.indexOf("The Office"));
+ assert.ok(bank.items.indexOf("The Office")<bank.items.indexOf("How I Met Your Mother"));
+ for(const guess of ["How I Meet Ur Mother","HIMYM","Como eu conheci sua mãe"]){
+  assert.equal(resolveAnswer(guess,bank.items).canonical,"How I Met Your Mother");
+ }
 });

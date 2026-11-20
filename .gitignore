@@ -3,3 +3,6 @@ dist/
 *-debug.log
 .firebase/
 test-results/
+.wrangler/
+cloudflare/public/assets/
+cloudflare/public/offline.html

@@ -5,7 +5,7 @@ import {chromium} from "playwright-core";
 const chrome=["/usr/bin/google-chrome","/usr/bin/chromium","/opt/google/chrome/chrome"].find(existsSync);
 assert.ok(chrome,"Chrome/Chromium não encontrado");
 const browser=await chromium.launch({headless:true,executablePath:chrome,args:["--no-sandbox"]});
-const base="http://127.0.0.1:8787/";
+const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787/";
 try{
  const a=await browser.newContext({viewport:{width:1280,height:900}});
  const b=await browser.newContext({viewport:{width:375,height:800}});
@@ -94,12 +94,19 @@ try{
  await pa.locator('.guess-option').getByText("Bulbasaur").click();
  assert.equal(await pa.locator('#guess').inputValue(),"Bulbasaur");
  assert.equal(await pa.locator("#seconds").innerText().then(Number)>0,true);
+ await pb.locator("#guess").fill("Char");
+ await pb.locator("#guess").evaluate(input=>{input.dataset.typing="active";input.setSelectionRange(2,2)});
  await pa.locator('#guess').fill("Bulbassaur");
  await pa.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("PALPITE ENVIADO").waitFor({timeout:8000});
  await pa.locator(".rv27-answer-confirm").waitFor({state:"visible",timeout:10000});
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbasaur"),"Autocorreção deve mostrar o nome reconhecido");
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbassaur"),"A resposta original deve ser exibida");
+ await pb.locator(".board .sent.yes").first().waitFor();
+ assert.deepEqual(await pb.locator("#guess").evaluate(input=>[input.dataset.typing,document.activeElement===input,input.value,input.selectionStart]),["active",true,"Char",2]);
+ await pa.reload({waitUntil:"domcontentloaded"});
+ await pa.locator(".rv27-answer-confirm").waitFor();
+ assert.match(await pa.locator(".rv27-answer-confirm").innerText(),/Bulbassaur/);
  await pb.locator('#guess').fill(options[1]);
  await pb.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("FIM DE JOGO").waitFor({timeout:10000});
@@ -272,7 +279,7 @@ try{
  for(const p of [h,g])p.on("pageerror",err=>failures.push(err.message));
  await h.goto(base,{waitUntil:"domcontentloaded"});
  await h.locator(".rv26-release").waitFor({state:"visible"});
- await h.getByText("107 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
+ await h.getByText("108 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
  await h.locator('[data-op="create"]').first().click();
  await h.locator("#create-form [name=nick]").fill("Host Sorteio");
  await h.locator('[data-op="wizard-next"]').click();
@@ -318,7 +325,7 @@ try{
  assert.ok(overflowG<=2,"2.6 mobile giant challenge overflow: "+overflowG);
  await hugeHost.close();await hugeGuest.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
- console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 107 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
+ console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 108 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
 
  /* 2.7.1: switching rooms in a single browser must retire the previous socket */
  const swapping=await browser.newContext({viewport:{width:1150,height:750}});
@@ -352,6 +359,15 @@ try{
  await swapPage.waitForTimeout(350);
  assert.ok(openedSockets.some(url=>url.includes("/"+switchRooms.b.code+"/ws")),"Trocar de sala deve abrir um novo WebSocket");
  await swapPage.locator("#net-pill.connected").waitFor({state:"visible",timeout:12000});
+ await swapPage.locator('[data-op="share-open"]').click();
+ await swapPage.evaluate(async host=>{
+  const identity=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
+  const response=await fetch("/api/room/"+identity.code+"/handoff",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+host.token},body:JSON.stringify({playerId:identity.id})});
+  if(!response.ok)throw Error("Transferência da mesa de teste falhou");
+ },switchRooms.b);
+ await swapPage.locator('[data-op="start"]').waitFor({state:"attached"});
+ assert.equal(await swapPage.locator("#share-dialog").evaluate(d=>d.open),true);
+ await swapPage.locator('[data-op="share-close"]').click();
  assert.deepEqual(failures,[],"A troca de salas não deve gerar erros JS");
  await swapping.close();
  console.log("BROWSER 2.7.1 OK: troca de sala recicla WebSocket e preserva conexão em tempo real.");

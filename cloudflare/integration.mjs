@@ -1,5 +1,6 @@
 import {PHRASES} from "./worker.mjs";
 import assert from "node:assert/strict";
+const VERSION="2.8.0";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -14,14 +15,14 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.7.1");
-assert.equal(info.rankings,107);
-assert.equal(info.entries,12262);
+assert.equal(info.version,VERSION);
+assert.equal(info.rankings,108);
+assert.equal(info.entries,12282);
 assert.equal(info.maxRanking,1025);
 assert.deepEqual(info.rankFormats,[10,20,30,50,100,200,500,1000]);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
-assert.equal(list.data.rankings.length,107);
+assert.equal(list.data.rankings.length,108);
 assert.equal(list.data.rankings.filter(b=>b.count>=1000).length,5);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
 assert.equal(list.data.rankings.some(b=>b.id==="epl-2025-26"),true);
@@ -93,7 +94,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.7.1");
+ assert.equal(state.version,VERSION);
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
@@ -288,7 +289,7 @@ await call(hugePath+"/ready","POST",{},huge.token);
 await call(hugePath+"/ready","POST",{},hugeGuest.token);
 assert.equal((await call(hugePath+"/start","POST",{},huge.token)).status,200);
 const hugeQ=(await call(hugePath,"GET",null,huge.token)).data;
-assert.equal(hugeQ.version,"2.7.1");
+assert.equal(hugeQ.version,VERSION);
 assert.equal(hugeQ.config.rankScale,"extreme");
 assert.ok([100,200,500,1000].includes(hugeQ.question.limit));
 assert.equal(hugeQ.question.options.length,hugeQ.question.limit);
@@ -306,7 +307,7 @@ const newSearch=list.data.rankings.find(x=>x.id==="imdb-1000-historico");
 assert.equal(newSearch.count,1000);
 const newNational=list.data.rankings.find(x=>x.id==="pokedex-nacional-1025");
 assert.equal(newNational.kind,"ordem");
-console.log("INTEGRAÇÃO 2.6 OK: 107 listas, 12.262 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
+console.log("INTEGRAÇÃO 2.6 OK: 108 listas, 12.282 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
 
 
 /* 2.7: Correção automática autoritativa, retorno privado e anti-duplicidade */
@@ -336,3 +337,63 @@ assert.equal(typoFinal.phase,"finished");
 assert.equal(typoFinal.players.reduce((n,p)=>n+p.points,0),3);
 assert.equal(typoFinal.question.options.some(x=>x.rank!==undefined),false,"Nunca revelar posições ordenadas nas opções");
 console.log("INTEGRAÇÃO 2.7 OK: dois jogadores, autocorreção segura, confirmação da resposta, duplicidade bloqueada e placar preservado.");
+
+// A reconnection can deliver a click made in the previous round or match.
+const duel=(await call("/api/room","POST",{nick:"Mesa QA",mode:"race",target:5,categoryIds:["pokemon"],durationSeconds:30})).data;
+const duelPath="/api/room/"+duel.code;
+const rival=(await call(duelPath+"/join","POST",{nick:"Rival QA"})).data;
+for(const player of [duel,rival]){
+ for(let attempt=0;attempt<2;attempt++)assert.equal((await call(duelPath+"/ready","POST",{ready:true},player.token)).data.ready,true);
+}
+assert.equal((await call(duelPath+"/start","POST",{},duel.token)).status,200);
+let firstRoundId,previousRoundId;
+for(let round=1;round<=5;round++){
+ const state=(await call(duelPath,"GET",null,duel.token)).data;
+ const roundId=state.roundId;
+ if(round===1)firstRoundId=roundId;
+ assert.equal(state.round,round);
+ if(previousRoundId){
+  for(const op of ["guess","pass"]){
+   assert.equal((await call(duelPath+"/"+op,"POST",{roundId:previousRoundId,answer:"Bulbassaur"},duel.token)).status,409);
+  }
+ }
+ assert.equal((await call(duelPath+"/guess","POST",{roundId,answer:"Bulbassaur"},duel.token)).status,200);
+ const own=(await call(duelPath,"GET",null,duel.token)).data;
+ const other=(await call(duelPath,"GET",null,rival.token)).data;
+ assert.deepEqual(own.mySubmission,{answer:"Bulbasaur",original:"Bulbassaur"});
+ assert.equal(other.mySubmission,null);
+ assert.ok(!JSON.stringify(other).includes("Bulbassaur"));
+ assert.equal((await call(duelPath+"/pass","POST",{roundId},rival.token)).status,200);
+ const revealed=(await call(duelPath,"GET",null,duel.token)).data;
+ assert.equal(revealed.players.find(p=>p.id===duel.id).points,round);
+ assert.equal(revealed.phase,round===5?"finished":"reveal");
+ if(round<5)assert.equal((await call(duelPath+"/next","POST",{roundId},duel.token)).status,200);
+ previousRoundId=roundId;
+}
+assert.equal((await call(duelPath+"/restart","POST",{roundId:previousRoundId},duel.token)).status,200);
+assert.equal((await call(duelPath+"/guess","POST",{roundId:firstRoundId,answer:"Bulbasaur"},duel.token)).status,409);
+const restarted=(await call(duelPath,"GET",null,duel.token)).data;
+assert.equal(restarted.round,1);
+assert.notEqual(restarted.roundId,firstRoundId);
+assert.ok(restarted.players.every(p=>p.points===0&&!p.submitted));
+await call(duelPath+"/close","POST",{},duel.token);
+
+const large=(await call("/api/room","POST",{nick:"Pessoa 1",mode:"rounds",target:1,categoryIds:["movies-1970s","f1-teams-2010"],durationSeconds:45})).data;
+const fullPath="/api/room/"+large.code;
+const friends=[large,...await Promise.all(Array.from({length:11},async(_,index)=>{
+ const result=await call(fullPath+"/join","POST",{nick:"Pessoa "+(index+2)});
+ assert.equal(result.status,200);return result.data;
+}))];
+assert.equal((await call(fullPath+"/join","POST",{nick:"Pessoa 13"})).status,409);
+await Promise.all(friends.map(p=>call(fullPath+"/ready","POST",{ready:true},p.token)));
+assert.equal((await call(fullPath+"/start","POST",{},large.token)).status,200);
+const crowded=(await call(fullPath,"GET",null,large.token)).data;
+assert.equal(crowded.question.limit,12);
+const guesses=await Promise.all(friends.map((p,i)=>call(fullPath+"/guess","POST",{answer:crowded.question.options[i].name,roundId:crowded.roundId},p.token)));
+assert.ok(guesses.every(g=>g.status===200));
+const fullFinal=(await call(fullPath,"GET",null,large.token)).data;
+assert.equal(fullFinal.phase,"finished");
+assert.equal(fullFinal.lastResults.results.length,12);
+assert.equal(fullFinal.players.reduce((sum,p)=>sum+p.points,0),3);
+await call(fullPath+"/close","POST",{},large.token);
+console.log("INTEGRAÇÃO 2.8 OK: corrida real até cinco, confirmação privada recuperada, reenvios atrasados, revanche e 12 palpites simultâneos.");

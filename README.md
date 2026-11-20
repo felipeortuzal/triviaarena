@@ -1,4 +1,32 @@
-# Riviera Showdown — plataforma de jogos com amigos
+# Riviera Showdown
+
+[Abrir o jogo online](https://riviera.thegoatgame.com.br/) · [Baixar o Ranking para um aparelho](https://riviera.thegoatgame.com.br/offline.html)
+
+No celular, crie uma mesa, envie o convite e espere todos confirmarem presença. Em **Por rodadas**, a menor distância ganha 2 pontos e a segunda ganha 1. Em **Corrida até X**, só o primeiro pontua. A opção Turbo dobra os pontos a cada terceira rodada. O Modo Festa dá nove segundos para conferir o resultado e avançar automaticamente.
+
+## Versão online 2.8.0
+
+A versão oficial roda no Cloudflare Worker `riviera-showdown`. Cada sala usa um Durable Object. O site oferece Ranking e Frases, além de clubes e revanche. Há 108 listas de Ranking e 55 ditados. O catálogo inclui uma seleção de 20 sitcoms por data de estreia, com fontes individuais em [sitcoms.json](cloudflare/data/sitcoms.json).
+
+- O jogador pode voltar à aba e recuperar o próprio palpite confirmado. A rodada segue no servidor enquanto o celular está bloqueado.
+- A capacidade da mesa chega a 12 pessoas. Uma seleção composta apenas por listas menores limita as vagas para que todos possam enviar respostas diferentes.
+- O modo offline reúne de 2 a 8 pessoas no mesmo aparelho, com cinco rodadas de Ranking e passagem privada de vez.
+
+## Executar e validar
+
+```sh
+npm ci
+npm test
+node --test cloudflare/game.test.mjs
+node cloudflare/prepare.mjs
+npx wrangler@4 dev --local --config wrangler.jsonc --port 8787
+```
+
+Com o Worker local em execução, rode `node cloudflare/integration.mjs`, `node cloudflare/browser.test.mjs` e `node cloudflare/playtest.mjs`. O último abre quatro perfis de navegador e joga cinco rodadas até a revanche. O workflow do Cloudflare repete a partida no domínio oficial quando encontra o JavaScript da revisão publicada.
+
+O histórico técnico do protótipo Firebase e do GitHub Pages segue abaixo. O Pages é opcional. Uma execução manual, ou a variável de Actions `RIVIERA_PAGES_ENABLED=true`, habilita a tentativa de publicação nesse destino.
+
+<details><summary>Histórico do protótipo Firebase e da prévia local</summary>
 
 **Roadmap de desenvolvimento do Riviera Showdown:** [prompts numerados, comandos e progresso](docs/etapas/README.md).
 
@@ -94,3 +122,5 @@ O anfitrião revela as respostas e confirma cada rodada. A quinta confirmação 
 ## Testes rápidos
 
 Servir os arquivos via HTTP (não `file://`): `python -m http.server 8000`. Testar em `http://localhost:8000` após configurar Firebase. Para testar multiplayer, abrir dois navegadores/perfis distintos e usar o convite. Verificar criação, entrada, palpites, revelação, pontuação e próxima rodada.
+
+</details>

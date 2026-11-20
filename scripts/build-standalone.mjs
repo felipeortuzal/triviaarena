@@ -16,30 +16,33 @@ function bundle(name){
 const code=bundle('app.js');
 const data=JSON.parse(read('data.json'));
 const logo='data:image/svg+xml,'+encodeURIComponent(read('logo.svg'));
-const brand='data:image/jpeg;base64,'+fs.readFileSync(path.join(root,'assets/riviera-logo.jpg')).toString('base64');
-const cutout='data:image/png;base64,'+fs.readFileSync(path.join(root,'assets/riviera-logo-transparent.png')).toString('base64');
-const reference='data:image/jpeg;base64,'+fs.readFileSync(path.join(root,'assets/riviera-reference-beach.jpg')).toString('base64');
+const imageFiles={beach:'assets/riviera-reference-beach.jpg',logo:'assets/riviera-logo-transparent.png'};
+const images={};
+let offlineCode=code;
+for(const [key,file] of Object.entries(imageFiles)){
+  const mime=file.endsWith('.png')?'image/png':'image/jpeg';
+  images[key]='data:'+mime+';base64,'+fs.readFileSync(path.join(root,file)).toString('base64');
+  html=html.replaceAll('src="'+file+'"','data-riviera-image="'+key+'"');
+  html=html.replaceAll("url('"+file+"')","var(--offline-"+key+")");
+  // The home screen renders these image URLs in an HTML template literal.
+  offlineCode=offlineCode.replaceAll(file,()=>'${window.RIVIERA_OFFLINE_IMAGES.'+key+'}');
+}
 const escapedData=JSON.stringify(data).replace(/</g,'\\u003c');
-const boot='<script>window.RIVIERA_STANDALONE=true;window.RIVIERA_EMBEDDED_DATA='+escapedData+';<\/script>';
-const inline='<script type="module">\n'+code.replace(/<\/script/gi,'<\\/script')+'\n<\/script>';
-const external='<script type="module" src="app.js"><\/script>';
+const boot=`<script>
+window.RIVIERA_STANDALONE=true;
+window.RIVIERA_EMBEDDED_DATA=${escapedData};
+window.RIVIERA_OFFLINE_IMAGES=${JSON.stringify(images)};
+for(const node of document.querySelectorAll('[data-riviera-image]'))node.src=window.RIVIERA_OFFLINE_IMAGES[node.dataset.rivieraImage];
+for(const [key,uri] of Object.entries(window.RIVIERA_OFFLINE_IMAGES))document.documentElement.style.setProperty('--offline-'+key,'url("'+uri+'")');
+</script>`;
+const inline='<script type="module">\n'+offlineCode.replace(/<\/script/gi,'<\\/script')+'\n</script>';
+const external='<script type="module" src="app.js"></script>';
 if(!html.includes(external))throw new Error('Tag app.js não encontrada');
-html=html.replace(/href="logo\.svg"/g,()=>`href="${logo}"`);
-html=html.replace(/src="logo\.svg"/g,()=>`src="${logo}"`);
-html=html.replace(/src="assets\/riviera-logo\.jpg"/g,()=>`src="${brand}"`);
-html=html.replace(/src="assets\/riviera-logo-transparent\.png"/g,()=>`src="${cutout}"`);
-html=html.replace(/src="assets\/riviera-reference-beach\.jpg"/g,()=>`src="${reference}"`);
-html=html.replace(/url\(\x27assets\/riviera-reference-beach\.jpg\x27\)/g,()=>`url(\x27${reference}\x27)`);
-html=html.replace(external,boot+'\n'+inline);
-// Os caminhos dentro do template do app.js só aparecem DEPOIS do script ser
-// embutido. Substitua os assets também no JS inline, não apenas no HTML/CSS.
-for(const [asset,uri] of [
-  ['assets/riviera-logo.jpg',brand],
-  ['assets/riviera-logo-transparent.png',cutout],
-  ['assets/riviera-reference-beach.jpg',reference],
-]){
-  html=html.replaceAll(asset,uri);
-  if(html.includes(asset))throw new Error('Asset offline não embutido: '+asset);
+html=html.replaceAll('href="logo.svg"',()=>`href="${logo}"`);
+html=html.replaceAll('src="logo.svg"',()=>`src="${logo}"`);
+html=html.replace(external,()=>boot+'\n'+inline);
+for(const file of Object.values(imageFiles)){
+  if(html.includes(file))throw new Error('Asset offline não embutido: '+file);
 }
 const out=path.join(root,'riviera-showdown.html');
 fs.writeFileSync(out,html);

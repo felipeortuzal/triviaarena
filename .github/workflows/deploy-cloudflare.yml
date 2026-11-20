@@ -6,6 +6,8 @@ on:
     paths:
       - "cloudflare/**"
       - "wrangler.jsonc"
+      - "assets/**"
+      - "riviera-showdown.html"
       - ".github/workflows/deploy-cloudflare.yml"
 permissions:
   contents: read
@@ -27,6 +29,7 @@ jobs:
         run: |
           node cloudflare/prepare.mjs
           test -s cloudflare/public/offline.html
+          test -s cloudflare/public/assets/riviera-coast-2026.jpg
           test -s cloudflare/public/assets/riviera-reference-beach.jpg
       - name: Instalar Playwright para testar a interface no Chrome
         run: npm ci --no-audit --no-fund
@@ -48,6 +51,7 @@ jobs:
             cat /tmp/riviera-wrangler.log
             exit 1
           fi
+          node cloudflare/playtest.mjs
       - name: Publicar no Cloudflare, se acesso configurado
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -58,3 +62,13 @@ jobs:
             exit 0
           fi
           npx --yes wrangler@4 deploy --config wrangler.jsonc
+      - name: Testar quatro jogadores no domínio oficial quando esta revisão estiver no ar
+        env:
+          RIVIERA_URL: https://riviera.thegoatgame.com.br/
+        run: |
+          curl --fail --silent --show-error --retry 2 --max-time 20 "${RIVIERA_URL}game.js" -o "$RUNNER_TEMP/riviera-live.js"
+          if cmp -s cloudflare/public/game.js "$RUNNER_TEMP/riviera-live.js"; then
+            node cloudflare/playtest.mjs
+          else
+            echo "::notice::O domínio ainda serve outra revisão. Execute o workflow após a publicação para validar a partida pública."
+          fi

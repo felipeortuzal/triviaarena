@@ -53,7 +53,7 @@ jobs:
   deploy:
     name: Publicação GitHub Pages
     needs: verificar
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.RIVIERA_PAGES_ENABLED == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

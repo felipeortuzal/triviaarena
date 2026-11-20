@@ -1,0 +1,107 @@
+{
+  "source": "TVmaze",
+  "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "selection": "Seleção editorial de 20 sitcoms dos EUA. Ordem pela data da estreia original de cada programa.",
+  "shows": [
+    {
+      "title": "Cheers",
+      "premiere": "1982-09-30",
+      "source": "https://www.tvmaze.com/shows/553/cheers"
+    },
+    {
+      "title": "The Golden Girls",
+      "premiere": "1985-09-14",
+      "source": "https://www.tvmaze.com/shows/722/the-golden-girls"
+    },
+    {
+      "title": "Full House",
+      "premiere": "1987-09-18",
+      "source": "https://www.tvmaze.com/shows/1251/full-house"
+    },
+    {
+      "title": "Seinfeld",
+      "premiere": "1989-07-05",
+      "source": "https://www.tvmaze.com/shows/530/seinfeld"
+    },
+    {
+      "title": "The Fresh Prince of Bel-Air",
+      "premiere": "1990-09-10",
+      "source": "https://www.tvmaze.com/shows/582/the-fresh-prince-of-bel-air"
+    },
+    {
+      "title": "Frasier",
+      "premiere": "1993-09-16",
+      "source": "https://www.tvmaze.com/shows/540/frasier"
+    },
+    {
+      "title": "Friends",
+      "premiere": "1994-09-22",
+      "source": "https://www.tvmaze.com/shows/431/friends"
+    },
+    {
+      "title": "Everybody Loves Raymond",
+      "premiere": "1996-09-13",
+      "source": "https://www.tvmaze.com/shows/573/everybody-loves-raymond"
+    },
+    {
+      "title": "The King of Queens",
+      "premiere": "1998-09-21",
+      "source": "https://www.tvmaze.com/shows/552/the-king-of-queens"
+    },
+    {
+      "title": "Malcolm in the Middle",
+      "premiere": "2000-01-09",
+      "source": "https://www.tvmaze.com/shows/568/malcolm-in-the-middle"
+    },
+    {
+      "title": "Scrubs",
+      "premiere": "2001-10-02",
+      "source": "https://www.tvmaze.com/shows/532/scrubs"
+    },
+    {
+      "title": "The Office",
+      "premiere": "2005-03-24",
+      "source": "https://www.tvmaze.com/shows/526/the-office"
+    },
+    {
+      "title": "How I Met Your Mother",
+      "premiere": "2005-09-19",
+      "source": "https://www.tvmaze.com/shows/171/how-i-met-your-mother"
+    },
+    {
+      "title": "30 Rock",
+      "premiere": "2006-10-11",
+      "source": "https://www.tvmaze.com/shows/537/30-rock"
+    },
+    {
+      "title": "The Big Bang Theory",
+      "premiere": "2007-09-24",
+      "source": "https://www.tvmaze.com/shows/66/the-big-bang-theory"
+    },
+    {
+      "title": "Parks and Recreation",
+      "premiere": "2009-04-09",
+      "source": "https://www.tvmaze.com/shows/174/parks-and-recreation"
+    },
+    {
+      "title": "Modern Family",
+      "premiere": "2009-09-23",
+      "source": "https://www.tvmaze.com/shows/80/modern-family"
+    },
+    {
+      "title": "Brooklyn Nine-Nine",
+      "premiere": "2013-09-17",
+      "source": "https://www.tvmaze.com/shows/49/brooklyn-nine-nine"
+    },
+    {
+      "title": "Superstore",
+      "premiere": "2015-11-30",
+      "source": "https://www.tvmaze.com/shows/1864/superstore"
+    },
+    {
+      "title": "The Good Place",
+      "premiere": "2016-09-19",
+      "source": "https://www.tvmaze.com/shows/2790/the-good-place"
+    }
+  ]
+}

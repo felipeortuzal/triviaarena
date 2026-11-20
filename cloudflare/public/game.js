@@ -1,15 +1,21 @@
 (function clientApp(){
  const root=document.getElementById("app"),notice=document.getElementById("notice");
  const CLUB_KEY="riviera-club-session-v1",KEY="riviera-cloudflare-session-v1",NICK="riviera-nickname-v1",q=new URLSearchParams(location.search),invite=(q.get("room")||"").trim().toUpperCase();
- let session=null,room=null,ws=null,screen=invite?"join":"home",busy=false,draft="",lastSignature="",serverOffset=0,syncing=false,connectionState="offline",reconnectTimer=null,rankings=[],soundEnabled=false,audioCtx=null,lastReactAt=0;
+ let session=null,room=null,ws=null,screen=invite?"join":"home",busy=false,draft="",lastSignature="",serverOffset=0,connectionState="offline",reconnectTimer=null,rankings=[],soundEnabled=false,audioCtx=null,lastReactAt=0;
  const seenReactions=new Set();
- let lastSubmitted=null;
+ const memory=new Map();
+ const storage={
+  getItem(key){try{return localStorage.getItem(key)??memory.get(key)??null}catch{return memory.get(key)??null}},
+  setItem(key,value){memory.set(key,value);try{localStorage.setItem(key,value);return true}catch{return false}},
+  removeItem(key){memory.delete(key);try{localStorage.removeItem(key)}catch{}}
+ };
+ let syncFlight=null,lastReadAt=0;
  let clubSession=null,club=null,createStep=0;
- try{clubSession=JSON.parse(localStorage.getItem(CLUB_KEY)||"null")}catch{}
+ try{clubSession=JSON.parse(storage.getItem(CLUB_KEY)||"null")}catch{}
  const defaultRankings=[{"id":"area","title":"Maiores países e territórios"},{"id":"population","title":"Mais populosos do planeta"},{"id":"gdp","title":"Maiores economias do mundo"},{"id":"movies","title":"Filmes mais bem avaliados"},{"id":"br-area","title":"Estados por área"},{"id":"br-pop","title":"Estados por população"},{"id":"pokemon","title":"Pokédex Nacional"},{"id":"elementos","title":"Tabela periódica"}];
- try{session=JSON.parse(localStorage.getItem(KEY)||"null")}catch{}
+ try{session=JSON.parse(storage.getItem(KEY)||"null")}catch{}
  if(session?.code&&session?.token&&(!invite||session.code===invite))screen="room";
- try{soundEnabled=localStorage.getItem("riviera-sound-v1")==="on"}catch{}
+ try{soundEnabled=storage.getItem("riviera-sound-v1")==="on"}catch{}
  const e=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  function setNotice(message){notice.textContent=message||"";notice.hidden=!message}
  function updateNetwork(){const n=document.getElementById("net-pill");if(n){const ok=connectionState==="connected"&&navigator.onLine;n.className="net-pill "+(ok?"connected":"disconnected");n.textContent=ok?"● AO VIVO":"○ RECONECTANDO";}}
@@ -25,10 +31,10 @@ async function clubApi(path,method="GET",data){
 async function loadClub(){
  if(!clubSession?.code)return;
  try{club=await clubApi("/api/club/"+clubSession.code);if(screen==="home")render();}
- catch(e){club=null;if(e.message.includes("sessão")||e.message.includes("encontrado")){clubSession=null;localStorage.removeItem(CLUB_KEY)}}
+ catch(e){club=null;if(e.message.includes("sessão")||e.message.includes("encontrado")){clubSession=null;storage.removeItem(CLUB_KEY)}}
 }
 function clubDialog(){
- return `<dialog class="club-dialog" id="club-dialog" aria-labelledby="club-title"><div class="club-dialog-inner"><button type="button" class="club-close" data-op="club-close" aria-label="Fechar">✕</button><div class="eyebrow">RIVIERA SOCIAL CLUB</div><h2 id="club-title">Sua turma,<br><i>seu campeonato.</i></h2><p>O código de clube é diferente do código de sala. Crie um clube uma vez e acumule pontos em todas as partidas vinculadas.</p><div class="club-form-columns"><form id="club-create-form" class="club-form"><h3>01 / FUNDAR UM CLUBE</h3><label>NOME DA TURMA<input name="name" maxlength="40" minlength="3" required placeholder="Ex.: Riviera de Quinta"></label><label>SEU APELIDO<input name="nick" maxlength="24" minlength="2" required placeholder="Nome no placar" value="${e(localStorage.getItem(NICK)||"")}"></label><button class="btn lime" type="submit">CRIAR CLUBE →</button></form><form id="club-join-form" class="club-form"><h3>02 / ENTRAR EM UM CLUBE</h3><label>CÓDIGO DO CLUBE<input name="code" maxlength="6" minlength="6" required placeholder="ABC123" autocapitalize="characters"></label><label>SEU APELIDO<input name="nick" maxlength="24" minlength="2" required placeholder="Nome no placar" value="${e(localStorage.getItem(NICK)||"")}"></label><button class="btn ghost" type="submit">ENTRAR NO CLUBE →</button></form></div></div></dialog>`;
+ return `<dialog class="club-dialog" id="club-dialog" aria-labelledby="club-title"><div class="club-dialog-inner"><button type="button" class="club-close" data-op="club-close" aria-label="Fechar">✕</button><div class="eyebrow">RIVIERA SOCIAL CLUB</div><h2 id="club-title">Sua turma,<br><i>seu campeonato.</i></h2><p>O código de clube é diferente do código de sala. Crie um clube uma vez e acumule pontos em todas as partidas vinculadas.</p><div class="club-form-columns"><form id="club-create-form" class="club-form"><h3>01 / FUNDAR UM CLUBE</h3><label>NOME DA TURMA<input name="name" maxlength="40" minlength="3" required placeholder="Ex.: Riviera de Quinta"></label><label>SEU APELIDO<input name="nick" maxlength="24" minlength="2" required placeholder="Nome no placar" value="${e(storage.getItem(NICK)||"")}"></label><button class="btn lime" type="submit">CRIAR CLUBE →</button></form><form id="club-join-form" class="club-form"><h3>02 / ENTRAR EM UM CLUBE</h3><label>CÓDIGO DO CLUBE<input name="code" maxlength="6" minlength="6" required placeholder="ABC123" autocapitalize="characters"></label><label>SEU APELIDO<input name="nick" maxlength="24" minlength="2" required placeholder="Nome no placar" value="${e(storage.getItem(NICK)||"")}"></label><button class="btn ghost" type="submit">ENTRAR NO CLUBE →</button></form></div></div></dialog>`;
 }
 function renderClubPanel(){
  const c=club;
@@ -44,17 +50,22 @@ function renderStatsAndAwards(){
  const awards=(room.awards||[]).map(a=>`<div class="award-card"><span class="award-emoji">${e(a.emoji)}</span><strong>${e(a.title)}</strong><span>${e((a.nicks||[]).join(", "))}</span></div>`).join("");
  const rows=players.map(p=>{const m=p.stats?.match||{},c=p.stats?.career||{};return `<tr><td>${e(p.nick)}</td><td>${p.points}</td><td>${m.exact||0}</td><td>${m.averageDistance??"—"}</td><td>${c.wins||0}</td></tr>`}).join("");
  const recent=(room.history||[]).slice(-10).reverse().map(h=>`<li><span>R${h.round} · ${e(h.category)}${h.special?" 🚀":""}</span><strong>${e(h.target)}</strong></li>`).join("");
- return `<section class="stats-area"><div class="stats-intro"><span class="kicker">RIVIERA AWARDS</span><h2>QUEM DOMINOU A MESA?</h2><p>Estatísticas válidas apenas nesta sala, preservadas entre revanches.</p></div>${awards?`<div class="awards-grid">${awards}</div>`:""}<div class="stats-table-wrap"><table class="stats-table"><thead><tr><th>JOGADOR</th><th>PTS</th><th>EXATAS</th><th>${room.gameType==="phrases"?"ERRO MÉDIO":"DESVIO MÉDIO"}</th><th>VITÓRIAS NA SALA</th></tr></thead><tbody>${rows}</tbody></table></div><p class="stats-footnote">Exatas e ${room.gameType==="phrases"?"erro (100 - similaridade)":"desvio"}: partida atual. Vitórias: histórico de partidas concluídas nesta sala. Empates na liderança contam como vitória para ambos.</p><details class="history"><summary>Histórico recente das rodadas</summary><ol>${recent}</ol></details></section>`;
+ return `<section class="stats-area"><div class="stats-intro"><span class="kicker">RIVIERA AWARDS</span><h2>QUEM DOMINOU A MESA?</h2><p>Estatísticas válidas apenas nesta sala, preservadas entre revanches.</p></div>${awards?`<div class="awards-grid">${awards}</div>`:""}<div class="stats-table-wrap"><table class="stats-table"><thead><tr><th>JOGADOR</th><th>PTS</th><th>EXATAS</th><th>${room.gameType==="phrases"?"ERRO MÉDIO":"DESVIO MÉDIO"}</th><th>VITÓRIAS NA SALA</th></tr></thead><tbody>${rows}</tbody></table></div><p class="stats-footnote">Exatas e ${room.gameType==="phrases"?"erro (100 - similaridade)":"desvio"}: partida atual. Vitórias: histórico de partidas concluídas nesta sala. Quem empata na liderança com pontos compartilha a vitória.</p><details class="history"><summary>Histórico recente das rodadas</summary><ol>${recent}</ol></details></section>`;
 }
 
+function placeOf(players,player){
+ return players.findIndex(p=>p.points===player.points)+1;
+}
 function renderResultScene(){
  const r=room.lastResults;
  const isFinal=room.phase==="finished";
  const leaderboard=[...room.players].sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
  const ranks=[1,0,2];
- const podium=isFinal?`<div class="podium-section"><span class="kicker">OS DONOS DA RIVIERA</span><h2 class="podium-title">PÓDIO DA PARTIDA</h2><div class="podium-places" aria-label="Classificação final">${ranks.map(index=>{const p=leaderboard[index];if(!p)return "";const medal=["🥇","🥈","🥉"][index];return `<div class="podium-place podium-${index+1}" style="--podium-delay:${index*.12}s"><span class="podium-medal" aria-hidden="true">${medal}</span><span class="podium-name">${e(p.nick)}</span><strong>${p.points} <small>PTS</small></strong><span class="podium-position">${index+1}º LUGAR</span></div>`}).join("")}</div>${leaderboard.length>3?`<p class="podium-more">E mais ${leaderboard.length-3} competidores na disputa!</p>`:""}</div>`:"";
+ const winners=leaderboard.filter(p=>p.points>0&&p.points===leaderboard[0].points);
+ const outcome=!winners.length?"Ninguém pontuou nesta partida.":winners.length>1?"Empate em primeiro lugar: "+winners.map(p=>p.nick).join(", "):winners[0].nick+" venceu com "+winners[0].points+" "+(winners[0].points===1?"ponto.":"pontos.");
+ const podium=isFinal?`<div class="podium-section"><span class="kicker">OS DONOS DA RIVIERA</span><h2 class="podium-title">PÓDIO DA PARTIDA</h2><p class="podium-outcome">${e(outcome)}</p><div class="podium-places" aria-label="Classificação final">${ranks.map(index=>{const p=leaderboard[index];if(!p)return "";const place=placeOf(leaderboard,p),medal=p.points>0?["🥇","🥈","🥉"][place-1]:"—";return `<div class="podium-place podium-${index+1}" style="--podium-delay:${index*.12}s"><span class="podium-medal" aria-hidden="true">${medal}</span><span class="podium-name">${e(p.nick)}</span><strong>${p.points} <small>PTS</small></strong><span class="podium-position">${p.points>0?place+"º LUGAR":"SEM PONTOS"}</span></div>`}).join("")}</div>${leaderboard.length>3?`<p class="podium-more">E mais ${leaderboard.length-3} competidores na disputa!</p>`:""}</div>`:"";
  const resultRows=(r?.results||[]).map((p,i)=>`<div class="result-row result-row-animated" style="--reveal-delay:${i*.11}s"><span class="result-symbol">${p.earned>0?"⭐":"•"}</span><div><b>${e(p.nick)}</b><small>${e(p.answer)} ${r.type==="phrase"?"· similaridade "+(p.quality||0)+"%"+(p.quality>=60?" · válida":" · insuficiente"):p.rank?"· posição "+p.rank+" · distância "+p.distance:"· não pontuou"}</small></div><strong>+${p.earned}</strong></div>`).join("");
- return `<section class="game-page reveal-page" data-scene="${isFinal?"finished":"reveal"}"><div class="reveal-header"><span class="kicker">A DISPUTA / RODADA ${room.round} • RESULTADO ${r?.special?"🚀 TURBO":""}</span><h1>${isFinal?"🏆 FIM DE JOGO":"HORA DA REVELAÇÃO"}</h1><p>${isFinal?"A temporada dessa mesa terminou. Veja quem levou o troféu.":(r?.type==="phrase"?"Quem completou o ditado com mais precisão?":"Quanto menor a distância do ranking, maior a pontuação.")}</p></div>${podium}${!isFinal&&room.nextAt?`<div class="rv25-auto-bar" aria-live="polite"><div><span class="rv25-auto-pulse"></span><strong>MODO FESTA / PRÓXIMA RODADA</strong><small>O jogo continua automaticamente</small></div><span class="rv25-auto-time" id="autonext-seconds">09</span>${room.isHost?'<button class="rv25-hold" data-op="hold-next">PAUSAR</button>':""}</div>`:""}<div class="game-grid"><div class="panel reveal-panel"><span class="kicker">O GABARITO / ROUND ${room.round}</span><div class="answer-spotlight"><span class="spotlight-stars" aria-hidden="true">✦ ✧ ✦</span><h2 class="revealed">${r?.type==="phrase"?`<span class="phrase-prefix">${e(r.prefix||"")}</span> ${e(r.target||"")}`:`${e(r?.target||"")} <small>(${r?.position}º lugar)</small>`}</h2></div><h3 class="result-subheading">PLACAR DA RODADA ${r?.special?"• PONTOS EM DOBRO":""}</h3><div class="results">${resultRows}</div>${r?.sourceUrl?`<p class="rv26-source">Fonte: ${e(r.source)} · ${e(r.snapshot)} · <a href="${e(r.sourceUrl)}" target="_blank" rel="noopener noreferrer">Consultar base ↗</a></p>`:""}<div class="actions"><button class="btn ghost" data-op="share-result">COMPARTILHAR RESULTADO ↗</button>${room.isHost?`<button class="btn lime" data-op="${isFinal?"restart":"next"}">${isFinal?"JOGAR REVANCHE ↻":"AVANÇAR AGORA →"}</button>`:!room.nextAt?'<p class="waitmsg">Aguardando o anfitrião...</p>':""}</div></div>${board()}</div>${isFinal?renderStatsAndAwards():""}</section>`;
+ return `<section class="game-page reveal-page" data-scene="${isFinal?"finished":"reveal"}"><div class="reveal-header"><span class="kicker">A DISPUTA / RODADA ${room.round} • RESULTADO ${r?.special?"🚀 TURBO":""}</span><h1>${isFinal?"🏆 FIM DE JOGO":"HORA DA REVELAÇÃO"}</h1><p>${isFinal?"Confira o placar final da mesa.":(r?.type==="phrase"?"Quem completou o ditado com mais precisão?":"Quanto menor a distância do ranking, maior a pontuação.")}</p></div>${podium}${!isFinal&&room.nextAt?`<div class="rv25-auto-bar" aria-live="polite"><div><span class="rv25-auto-pulse"></span><strong>MODO FESTA / PRÓXIMA RODADA</strong><small>O jogo continua automaticamente</small></div><span class="rv25-auto-time" id="autonext-seconds">09</span>${room.isHost?'<button class="rv25-hold" data-op="hold-next">PAUSAR</button>':""}</div>`:""}<div class="game-grid"><div class="panel reveal-panel"><span class="kicker">O GABARITO / ROUND ${room.round}</span><div class="answer-spotlight"><span class="spotlight-stars" aria-hidden="true">✦ ✧ ✦</span><h2 class="revealed">${r?.type==="phrase"?`<span class="phrase-prefix">${e(r.prefix||"")}</span> ${e(r.target||"")}`:`${e(r?.target||"")} <small>(${r?.position}º lugar)</small>`}</h2></div><h3 class="result-subheading">PLACAR DA RODADA ${r?.special?"• PONTOS EM DOBRO":""}</h3><div class="results">${resultRows}</div>${r?.sourceUrl?`<p class="rv26-source">Fonte: ${e(r.source)} · ${e(r.snapshot)} · <a href="${e(r.sourceUrl)}" target="_blank" rel="noopener noreferrer">Consultar base ↗</a></p>`:""}<div class="actions"><button class="btn ghost" data-op="share-result">COMPARTILHAR RESULTADO ↗</button>${room.isHost?`<button class="btn lime" data-op="${isFinal?"restart":"next"}">${isFinal?"JOGAR REVANCHE ↻":"AVANÇAR AGORA →"}</button>`:!room.nextAt?'<p class="waitmsg">Aguardando o anfitrião...</p>':""}</div></div>${board()}</div>${isFinal?renderStatsAndAwards():""}</section>`;
 }
 function renderReactionDock(){
  const emojis=["🔥","😂","👏","🤯","🏆","😎"];
@@ -106,7 +117,7 @@ function paintReactions(events){
 }
 function sharingSummary(){
  const rank=[...room.players].sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
- const ranks=rank.map((p,i)=>`${i+1}º ${p.nick}: ${p.points} pts`).join("\n");
+ const ranks=rank.map(p=>`${placeOf(rank,p)}º ${p.nick}: ${p.points} pts`).join("\n");
  return `🏝️ RIVIERA SHOWDOWN ${room.phase==="finished"?"• RESULTADO FINAL":"• RODADA "+room.round}\n${ranks}\n🎮 ${location.origin}/?room=${session.code}`;
 }
 
@@ -191,7 +202,7 @@ function renderCreateWizard(){
       <span class="wizard-eyebrow">01 / QUAL É O JOGO?</span>
       <h2>Escolha o desafio.</h2>
       <p>Dois jogos, uma regra: todo mundo participa ao mesmo tempo. Agora com ${all.length} rankings, do TOP 10 ao TOP 1000.</p>
-      <label class="setup-field setup-name"><span>COMO VÃO TE CHAMAR?</span><input name="nick" required minlength="2" maxlength="24" value="${e(localStorage.getItem(NICK)||"")}" placeholder="Seu apelido" autocomplete="nickname" aria-label="Seu apelido"></label>
+      <label class="setup-field setup-name"><span>COMO VÃO TE CHAMAR?</span><input name="nick" required minlength="2" maxlength="24" value="${e(storage.getItem(NICK)||"")}" placeholder="Seu apelido" autocomplete="nickname" aria-label="Seu apelido"></label>
       <div class="setup-mode-list" role="group" aria-label="Modo de jogo">
        <button type="button" class="setup-mode is-selected" data-op="mode-pick" data-value="ranking" aria-pressed="true"><span class="mode-index">01</span><span class="mode-info"><strong>Estimativa de Ranking</strong><small>${all.length} rankings · TOP 20, 30, 50, 100, 500 e 1000</small></span><span class="mode-choice" aria-hidden="true">↗</span></button>
        <button type="button" class="setup-mode" data-op="mode-pick" data-value="phrases" aria-pressed="false"><span class="mode-index">02</span><span class="mode-info"><strong>Frases & Aproximações</strong><small>55 ditados · respostas simultâneas</small></span><span class="mode-choice" aria-hidden="true">↗</span></button>
@@ -218,7 +229,7 @@ function renderCreateWizard(){
       </div></div>
       <div class="setup-field-grid">
        <label class="setup-field"><span>FORMATO DA PARTIDA</span><select name="mode" id="mode"><option value="rounds">Por rodadas · 2 / 1 pontos</option><option value="race">Corrida até X · 1 ponto</option></select></label>
-       <label class="setup-field" id="target-label"><span>QUANTAS RODADAS?</span><input type="number" name="target" min="1" max="20" value="5"></label>
+       <label class="setup-field" id="target-label"><span>QUANTAS RODADAS?</span><input type="number" name="target" required min="1" max="20" value="5"></label>
        <label class="setup-field"><span>TEMPO PARA RESPONDER</span><select name="durationSeconds" id="duration"><option value="20">20 segundos</option><option value="30" selected>30 segundos</option><option value="45">45 segundos</option></select></label>
        <label class="setup-toggle"><input type="checkbox" name="turbo" id="turbo"><span class="toggle-track"></span><span class="toggle-copy"><strong>Rodadas Turbo</strong><small>Pontos dobrados a cada 3 rodadas</small></span></label><label class="setup-toggle rv25-flow-toggle"><input type="checkbox" name="autoNext" id="auto-next" checked><span class="toggle-track"></span><span class="toggle-copy"><strong>Modo Festa · automático</strong><small>Nova rodada após 9 segundos de revelação. O host pode pausar.</small></span></label>
       </div>
@@ -273,8 +284,8 @@ function renderJoinPage(){
    <div class="join-photo"><button type="button" data-op="home" class="join-return">← VOLTAR</button><span>RIVIERA / GUEST PASS</span><strong>YOUR<br>TABLE<br>AWAITS.</strong><small>RS / THE SOCIAL GAME CLUB</small></div>
    <div class="join-main"><span class="wizard-eyebrow">ENTRAR NA DISPUTA</span><h1>Já tem uma<br><em>mesa aberta?</em></h1><p>O anfitrião mandou um convite? Insira o código e entre na partida.</p>
     <form id="join-form" class="join-form">
-      <label class="setup-field"><span>CÓDIGO DE SEIS CARACTERES</span><input name="code" id="join-code" required maxlength="6" minlength="6" pattern="[A-HJ-NP-Z2-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123" value="${e(invite)}"></label>
-      <label class="setup-field"><span>SEU APELIDO</span><input name="nick" required minlength="2" maxlength="24" placeholder="Como vamos te chamar?" autocomplete="nickname" value="${e(localStorage.getItem(NICK)||"")}"></label>
+      <label class="setup-field"><span>CÓDIGO DE SEIS CARACTERES</span><input name="code" id="join-code" required maxlength="6" minlength="6" pattern="[A-HJ-NP-Z2-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123" value="${e((new URLSearchParams(location.search).get("room")||"").toUpperCase())}"></label>
+      <label class="setup-field"><span>SEU APELIDO</span><input name="nick" required minlength="2" maxlength="24" placeholder="Como vamos te chamar?" autocomplete="nickname" value="${e(storage.getItem(NICK)||"")}"></label>
       <button type="submit" class="btn lime join-submit">ENTRAR NA MESA <span aria-hidden="true">→</span></button>
     </form>
     <div class="join-details"><span>01 / DIGITE O CÓDIGO</span><span>02 / ENTRE COM A TURMA</span><span>03 / CONFIRME QUE ESTÁ PRONTO</span></div>
@@ -321,12 +332,12 @@ function setWizardStep(next){
  </div></header>`;
  }
  function board(){
-  return `<div class="board"><div class="board-title"><b>PLACAR</b><span>${room.players.length} JOGADORES</span></div>${room.players.map((p,i)=>`<div class="player"><span class="ranknum">#${i+1}</span><span class="nick">${e(p.nick)} ${p.id===room.host?'<small>HOST</small>':""} ${p.id===room.me?'<small>VOCÊ</small>':""}</span><span class="points">${p.points} <small>PTS</small></span>${room.phase==="playing"?`<span class="sent ${p.submitted?"yes":""}">${p.submitted?"✓ ENVIOU":"AGUARDANDO"}</span>`:room.phase==="lobby"?`<span class="sent ${p.online?"yes":""}">${p.online?"● ONLINE":"○ DESCONECTADO"} · ${p.ready?"✓ PRONTO":"AGUARDANDO"}</span>`:""}${room.phase==="lobby"&&room.isHost&&p.id!==room.me?`<span class="host-tools"><button class="mini-btn" data-op="handoff" data-player="${e(p.id)}" title="Passar a liderança">👑 Tornar host</button><button class="mini-btn danger" data-op="kick" data-player="${e(p.id)}" title="Remover do lobby">Remover</button></span>`:""}</div>`).join("")}</div>`;
+  return `<div class="board"><div class="board-title"><b>PLACAR</b><span>${room.players.length} JOGADORES</span></div>${room.players.map((p,i)=>`<div class="player"><span class="ranknum">#${placeOf(room.players,p)}</span><span class="nick">${e(p.nick)} ${p.id===room.host?'<small>HOST</small>':""} ${p.id===room.me?'<small>VOCÊ</small>':""}</span><span class="points">${p.points} <small>PTS</small></span>${room.phase==="playing"?`<span class="sent ${p.submitted?"yes":""}">${p.submitted?"✓ ENVIOU":"AGUARDANDO"}</span>`:room.phase==="lobby"?`<span class="sent ${p.online?"yes":""}">${p.online?"● ONLINE":"○ DESCONECTADO"} · ${p.ready?"✓ PRONTO":"AGUARDANDO"}</span>`:""}${room.phase==="lobby"&&room.isHost&&p.id!==room.me?`<span class="host-tools"><button class="mini-btn" data-op="handoff" data-player="${e(p.id)}" title="Passar a liderança">👑 Tornar host</button><button class="mini-btn danger" data-op="kick" data-player="${e(p.id)}" title="Remover do lobby">Remover</button></span>`:""}</div>`).join("")}</div>`;
  }
  function render(){
-  if(room){const input=root.querySelector("#guess");if(input)draft=input.value;}
+
   let content="";
-  if(screen==="home")content=`<div class="rv-home"><section class="rv-hero"><div class="rv-hero-main"><span class="rv-overline">RIVIERA SHOWDOWN — THE SOCIAL GAME CLUB</span><h1>JOGO BOM<br>É JOGO<br><span class="rv-hero-last"><em>COM</em> A TURMA.</span></h1><p>Um sofá, vários celulares e uma disputa que ninguém vai esquecer. Escolha o desafio e veja quem manda na Riviera.</p><div class="rv-hero-actions"><button class="btn lime" data-op="create">CRIAR UMA PARTIDA <span aria-hidden="true">↗</span></button><button class="btn ghost" data-op="join">ENTRAR COM CÓDIGO</button></div><div class="rv-hero-extras"><button class="rv-text-link" data-op="how">COMO FUNCIONA <span>↗</span></button>${session?.token?'<button class="rv-text-link" data-op="resume">RETOMAR MINHA PARTIDA ↗</button>':""}<span>SEM DOWNLOAD · MULTIPLAYER AO VIVO</span></div></div><div class="rv-hero-image"><span class="rv-photo-label">A TEMPORADA É DE VOCÊS.</span><span class="rv-photo-number">RS / 26</span><span class="rv-photo-credit">FOTO: LAURENZ KLEINHEIDER / UNSPLASH</span></div></section><section class="rv-games" id="games"><div class="rv-section-heading"><div><span class="section-index">01 / ESCOLHA SEU JOGO</span><h2>HOJE TEM<br><i>REVANCHE.</i></h2></div><p>Duas formas de provar que você conhece mais que os seus amigos. Sem enrolação: criou, convidou, começou.</p></div><div class="rv-game-list"><article class="rv-game rv-game-ranking"><div class="rv-game-number">01</div><div class="rv-game-content"><span class="rv-game-type">ESTRATÉGIA / CONHECIMENTO</span><h3>ESTIMATIVA<br>DE RANKING</h3><p>Quem está na posição certa? Futebol, F1, cinema, geografia e mais ${rankings.length||107} rankings e formatos TOP 20, 50, 100 ou 1000.</p><button class="rv-game-cta" data-op="create">JOGAR RANKING <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">#01</span></article><article class="rv-game rv-game-phrases"><div class="rv-game-number">02</div><div class="rv-game-content"><span class="rv-game-type">RACIOCÍNIO / CRIATIVIDADE</span><h3>FRASES &<br>APROXIMAÇÕES</h3><p>Complete ditados populares e ganhe pela resposta mais próxima. Cada palavra conta.</p><button class="rv-game-cta" data-op="create-phrases">JOGAR FRASES <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">“ ”</span></article></div><div class="rv-up-next"><span>EM PRODUÇÃO</span><strong>SEVEN</strong><p>7 suspeitos. 1 verdade. Em breve.</p></div><div class="rv26-release"><span class="rv26-release-kicker">EDIÇÃO 2.6 / THE RANDOM EXPANSION</span><div><strong>DO TOP 10<br>AO TOP 1.000.</strong><p>${rankings.length||107} rankings · 41 clássicos + 66 novos · sorteio equilibrado por tema. Cada rodada pode ser completamente diferente.</p></div><span class="rv26-release-stamp" aria-hidden="true">1000</span></div></section>${renderClubPanel()}<section class="rv-bottom"><span class="section-index">02 / UMA NOITE. MUITAS HISTÓRIAS.</span><div><strong>VOCÊ TRAZ A TURMA.<br>NÓS TRAZEMOS A DISPUTA.</strong><button class="btn ghost" data-op="create">ABRIR UMA SALA ↗</button></div><details class="rv-rank-details"><summary>CONHEÇA AS ${rankings.length||107} LISTAS DE RANKING <span>+</span></summary><div class="rv-rank-grid">${rankings.map(x=>`<span>${e(x.title)}</span>`).join("")}</div></details></section></div>`;
+  if(screen==="home")content=`<div class="rv-home"><section class="rv-hero"><div class="rv-hero-main"><span class="rv-overline">RIVIERA SHOWDOWN — THE SOCIAL GAME CLUB</span><h1>JOGO BOM<br>É JOGO<br><span class="rv-hero-last"><em>COM</em> A TURMA.</span></h1><p>Um sofá, vários celulares e uma disputa que ninguém vai esquecer. Escolha o desafio e veja quem manda na Riviera.</p><div class="rv-hero-actions"><button class="btn lime" data-op="create">CRIAR UMA PARTIDA <span aria-hidden="true">↗</span></button><button class="btn ghost" data-op="join">ENTRAR COM CÓDIGO</button></div><div class="rv-hero-extras"><button class="rv-text-link" data-op="how">COMO FUNCIONA <span>↗</span></button>${session?.token?'<button class="rv-text-link" data-op="resume">RETOMAR MINHA PARTIDA ↗</button>':""}<a class="rv-text-link" href="/offline.html" download="Riviera-Showdown-Offline.html">JOGAR NO MESMO APARELHO ↓</a></div></div><div class="rv-hero-image"><span class="rv-photo-label">A TEMPORADA É DE VOCÊS.</span><span class="rv-photo-number">RS / 26</span><span class="rv-photo-credit">FOTO: LAURENZ KLEINHEIDER / UNSPLASH</span></div></section><section class="rv-games" id="games"><div class="rv-section-heading"><div><span class="section-index">01 / ESCOLHA SEU JOGO</span><h2>HOJE TEM<br><i>REVANCHE.</i></h2></div><p>Duas formas de provar que você conhece mais que os seus amigos. Sem enrolação: criou, convidou, começou.</p></div><div class="rv-game-list"><article class="rv-game rv-game-ranking"><div class="rv-game-number">01</div><div class="rv-game-content"><span class="rv-game-type">ESTRATÉGIA / CONHECIMENTO</span><h3>ESTIMATIVA<br>DE RANKING</h3><p>Quem está na posição certa? Futebol, F1, cinema, geografia entre ${rankings.length||108} rankings e formatos TOP 20, 50, 100 ou 1000.</p><button class="rv-game-cta" data-op="create">JOGAR RANKING <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">#01</span></article><article class="rv-game rv-game-phrases"><div class="rv-game-number">02</div><div class="rv-game-content"><span class="rv-game-type">RACIOCÍNIO / CRIATIVIDADE</span><h3>FRASES &<br>APROXIMAÇÕES</h3><p>Complete ditados populares e ganhe pela resposta mais próxima. Cada palavra conta.</p><button class="rv-game-cta" data-op="create-phrases">JOGAR FRASES <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">“ ”</span></article></div><div class="rv-up-next"><span>EM PRODUÇÃO</span><strong>SEVEN</strong><p>7 suspeitos. 1 verdade. Em breve.</p></div><div class="rv26-release"><span class="rv26-release-kicker">RIVIERA SHOWDOWN / EDIÇÃO 2.8</span><div><strong>DO TOP 10<br>AO TOP 1.000.</strong><p>${rankings.length||108} rankings · Inclui sitcoms por data de estreia, futebol, F1 e cinema. Cada rodada pode ser completamente diferente.</p></div><span class="rv26-release-stamp" aria-hidden="true">1000</span></div></section>${renderClubPanel()}<section class="rv-bottom"><span class="section-index">02 / UMA NOITE. MUITAS HISTÓRIAS.</span><div><strong>VOCÊ TRAZ A TURMA.<br>NÓS TRAZEMOS A DISPUTA.</strong><button class="btn ghost" data-op="create">ABRIR UMA SALA ↗</button></div><details class="rv-rank-details"><summary>CONHEÇA AS ${rankings.length||108} LISTAS DE RANKING <span>+</span></summary><div class="rv-rank-grid">${rankings.map(x=>`<span>${e(x.title)}</span>`).join("")}</div></details></section></div>`;
   if(screen==="create")content=renderCreateWizard();
   if(screen==="join")content=renderJoinPage();
   if(screen==="room"&&!room)content=`<section class="form-page"><h1>CONECTANDO À SALA...</h1><p>Recuperando sua partida.</p></section>`;
@@ -338,7 +349,7 @@ function setWizardStep(next){
     const ready=room.players.filter(p=>p.ready).length;
     const allReady=room.players.length>=2&&ready===room.players.length;
     content=`<section class="game-page rv24-lobby">
-      <div class="rv24-screen-heading"><button class="rv24-back" data-op="home">← VOLTAR</button><span>RIVIERA / SALA PRIVADA</span><b>${room.players.length} JOGADORES NA MESA</b></div>
+      <div class="rv24-screen-heading"><button class="rv24-back" data-op="home">← VOLTAR</button><span>RIVIERA / SALA PRIVADA</span><b>${room.players.length} / ${room.capacity||12} JOGADORES NA MESA</b></div>
       <div class="rv24-lobby-lead"><span class="rv24-index">01 / A MESA ESTÁ ABERTA</span><h1>CHAMA<br><em>A TURMA.</em></h1><p>Envie o código, espere os amigos entrarem e comece quando todo mundo confirmar.</p></div>
       <div class="rv24-lobby-layout">
        <div class="rv24-lobby-main">
@@ -366,12 +377,15 @@ function setWizardStep(next){
      </section>`;
    }else if(room.phase==="playing"){
     const qn=room.question,me=room.players.find(p=>p.id===room.me),submitted=!!me?.submitted;
-    content=`<section class="game-page"><div class="round-head"><div><span class="kicker">PARTIDA AO VIVO / RODADA ${room.round}${room.mode==="rounds"?" DE "+room.target:" • CORRIDA ATÉ "+room.target}${room.special?" • 🚀 TURBO":""}</span><h1>${qn.type==="phrase"?"COMPLETE A FRASE":"QUAL É A POSIÇÃO?"}</h1>${room.mode==="rounds"?`<div class="rv25-round-meter" role="progressbar" aria-label="Progresso da partida" aria-valuemin="0" aria-valuemax="${room.target}" aria-valuenow="${room.round}"><span style="width:${Math.min(100,room.round/room.target*100)}%"></span></div>`:""}</div><div class="timer" id="timer"><strong id="seconds">${room.config?.durationSeconds||30}</strong><small>SEGUNDOS</small><span id="timer-progress" class="rv24-timer-progress"></span></div></div><div class="game-grid rv24-playing-grid"><div class="panel question"><div class="rv26-question-meta"><span class="category">${qn.type==="phrase"?"💬":"🎲"} ${e(qn.category)}</span>${qn.type==="phrase"?"":`<span class="rv26-format">${e(qn.tier||"CLÁSSICO")} · ${qn.rankType==="ordem"?"ORDEM":"TOP"} ${Number(qn.limit).toLocaleString("pt-BR")}</span>`}</div>${qn.type==="phrase"?`<h2 class="phrase-prompt">${e(qn.lead)} <strong>...</strong></h2><p>Complete o ditado. Acertos exatos e aproximações reconhecidas valem pontos.</p>`:`<h2>${qn.rankType==="ordem"?"Quem ocupa a":"Quem está na"} <strong>${Number(qn.position).toLocaleString("pt-BR")}ª posição</strong>?</h2><p>${qn.rankType==="ordem"?"Ordem oficial dos itens":"Ranking"} · ${Number(qn.limit).toLocaleString("pt-BR")} opções · ${e(qn.snapshot)}</p>`}${room.special?'<div class="turbo-banner"><strong>🚀 RODADA TURBO</strong><span>Todos os pontos desta rodada valem o DOBRO!</span></div>':""}<div class="separator"></div><div class="rv24-answer-label">SEU PALPITE FICA SECRETO ATÉ A REVELAÇÃO</div><p class="rv27-smart-hint">✳ CORREÇÃO INTELIGENTE ATIVA · Pequenos erros e abreviações são reconhecidos automaticamente, quando não há dúvida.</p>${submitted?`<div class="success-state">✓ PALPITE ENVIADO<p>Seu palpite está guardado até a revelação.</p>${lastSubmitted?.code===session?.code&&lastSubmitted?.round===room.round?`<div class="rv27-answer-confirm"><span>${lastSubmitted.corrected?"CORREÇÃO AUTOMÁTICA":"RESPOSTA REGISTRADA"}</span><strong>${e(lastSubmitted.accepted)}</strong>${lastSubmitted.corrected?`<small>Você digitou: ${e(lastSubmitted.original)}</small>`:""}</div>`:""}</div>`:`<form id="guess-form" class="stack"><label>${qn.type==="phrase"?"SUA CONTINUAÇÃO":"SEU PALPITE"}<input id="guess" name="answer" autocomplete="off" placeholder="${qn.type==="phrase"?"Escreva como o ditado termina":/munic|cidad/i.test(qn.category)?"Município e UF (ex.: São Paulo - SP)":/pok/i.test(qn.category)?"Digite um Pokémon (ex.: Pikachu)":"Digite o nome do item do ranking"}" aria-controls="live-options" required maxlength="${qn.type==="phrase"?160:100}" value="${e(draft)}"></label>${qn.type==="phrase"?"":`<div id="live-options" class="guess-suggestions" role="listbox" hidden></div><datalist id="options">${qn.options.map(x=>`<option value="${e(x.name)}"></option>`).join("")}</datalist>`}<div class="actions"><button class="btn lime" type="submit">ENVIAR PALPITE</button><button class="btn ghost" type="button" data-op="pass">NÃO SEI • PASSAR</button></div></form>`}<p class="tiny rv24-game-footnote">${qn.type==="phrase"?"Correção: exato (100%), variação muito próxima (90%), aproximada (75% ou 60%), incorreta (0%). Só respostas com 60% ou mais disputam pontos. Empates são resolvidos pela ordem de envio.":"Aceita variações de nomes, acentos e pequenos erros de digitação. Fonte: "+e(qn.source)+(qn.sourceUrl?` <a href="${e(qn.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver dados ↗</a>`:"")+". A menor distância pontua; no empate, ganha quem enviou antes."}</p></div>${board()}</div></section>`;
+    content=`<section class="game-page"><div class="round-head"><div><span class="kicker">PARTIDA AO VIVO / RODADA ${room.round}${room.mode==="rounds"?" DE "+room.target:" • CORRIDA ATÉ "+room.target}${room.special?" • 🚀 TURBO":""}</span><h1>${qn.type==="phrase"?"COMPLETE A FRASE":"QUAL É A POSIÇÃO?"}</h1>${room.mode==="rounds"?`<div class="rv25-round-meter" role="progressbar" aria-label="Progresso da partida" aria-valuemin="0" aria-valuemax="${room.target}" aria-valuenow="${room.round}"><span style="width:${Math.min(100,room.round/room.target*100)}%"></span></div>`:""}</div><div class="timer" id="timer"><strong id="seconds">${room.config?.durationSeconds||30}</strong><small>SEGUNDOS</small><span id="timer-progress" class="rv24-timer-progress"></span></div></div><div class="game-grid rv24-playing-grid"><div class="panel question"><div class="rv26-question-meta"><span class="category">${qn.type==="phrase"?"💬":"🎲"} ${e(qn.category)}</span>${qn.type==="phrase"?"":`<span class="rv26-format">${e(qn.tier||"CLÁSSICO")} · ${qn.rankType==="ordem"?"ORDEM":"TOP"} ${Number(qn.limit).toLocaleString("pt-BR")}</span>`}</div>${qn.type==="phrase"?`<h2 class="phrase-prompt">${e(qn.lead)} <strong>...</strong></h2><p>Complete o ditado. Acertos exatos e aproximações reconhecidas valem pontos.</p>`:`<h2>${qn.rankType==="ordem"?"Quem ocupa a":"Quem está na"} <strong>${Number(qn.position).toLocaleString("pt-BR")}ª posição</strong>?</h2><p>${qn.rankType==="ordem"?"Ordem oficial dos itens":"Ranking"} · ${Number(qn.limit).toLocaleString("pt-BR")} opções · ${e(qn.snapshot)}</p>`}${room.special?'<div class="turbo-banner"><strong>🚀 RODADA TURBO</strong><span>Todos os pontos desta rodada valem o DOBRO!</span></div>':""}<div class="separator"></div><div class="rv24-answer-label">SEU PALPITE FICA SECRETO ATÉ A REVELAÇÃO</div><p class="rv27-smart-hint">✳ CORREÇÃO INTELIGENTE ATIVA · Pequenos erros e abreviações são reconhecidos automaticamente, quando não há dúvida.</p>${submitted?`<div class="success-state">✓ PALPITE ENVIADO<p>Seu palpite está guardado até a revelação.</p>${room.mySubmission?`<div class="rv27-answer-confirm"><span>${room.mySubmission.original?"CORREÇÃO AUTOMÁTICA":"RESPOSTA REGISTRADA"}</span><strong>${e(room.mySubmission.answer)}</strong>${room.mySubmission.original?`<small>Você digitou: ${e(room.mySubmission.original)}</small>`:""}</div>`:""}</div>`:`<form id="guess-form" class="stack"><label>${qn.type==="phrase"?"SUA CONTINUAÇÃO":"SEU PALPITE"}<input id="guess" name="answer" autocomplete="off" placeholder="${qn.type==="phrase"?"Escreva como o ditado termina":/munic|cidad/i.test(qn.category)?"Município e UF (ex.: São Paulo - SP)":/pok/i.test(qn.category)?"Digite um Pokémon (ex.: Pikachu)":"Digite o nome do item do ranking"}" aria-controls="live-options" required maxlength="${qn.type==="phrase"?160:100}" value="${e(draft)}"></label>${qn.type==="phrase"?"":`<div id="live-options" class="guess-suggestions" role="listbox" hidden></div>`}<div class="actions"><button class="btn lime" type="submit">ENVIAR PALPITE</button><button class="btn ghost" type="button" data-op="pass">NÃO SEI • PASSAR</button></div></form>`}<p class="tiny rv24-game-footnote">${qn.type==="phrase"?"Correção: exato (100%), variação muito próxima (90%), aproximada (75% ou 60%), incorreta (0%). Só respostas com 60% ou mais disputam pontos. Empates são resolvidos pela ordem de envio.":"Aceita variações de nomes, acentos e pequenos erros de digitação. Fonte: "+e(qn.source)+(qn.sourceUrl?` <a href="${e(qn.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver dados ↗</a>`:"")+". A menor distância pontua; no empate, ganha quem enviou antes."}</p></div>${board()}</div></section>`;
    }else if(room.phase==="reveal"||room.phase==="finished"){
     content=renderResultScene();
    }else content=`<section class="form-page"><h1>SALA ENCERRADA</h1><p>O anfitrião fechou a partida.</p><button data-op="leave" class="btn lime">VOLTAR AO INÍCIO</button></section>`;
   }
-  root.innerHTML=controls()+content+clubDialog()+renderShareDialog()+howToPlayDialog()+(screen==="room"&&room?renderReactionDock()+'<div id="reaction-stage" class="reaction-stage" aria-live="polite" aria-atomic="false"></div>':"")+`<footer class="footer">RIVIERA SHOWDOWN <span>FEITO PARA JOGAR COM A TURMA</span></footer>`;
+  if(!root.querySelector("#game-view"))root.innerHTML='<div id="game-view"></div><div id="game-dialogs"></div>';
+  const dialogs=root.querySelector("#game-dialogs");
+  if(!dialogs.querySelector("dialog[open]"))dialogs.innerHTML=clubDialog()+renderShareDialog()+howToPlayDialog();
+  root.querySelector("#game-view").innerHTML=controls()+content+(screen==="room"&&room?renderReactionDock()+'<div id="reaction-stage" class="reaction-stage" aria-live="polite" aria-atomic="false"></div>':"")+`<footer class="footer">RIVIERA SHOWDOWN <span>FEITO PARA JOGAR COM A TURMA</span></footer>`;
   setNotice("");
   updateTimer();updateNetwork();updateGameType();updateWizard();
  }
@@ -393,33 +407,57 @@ function setWizardStep(next){
   if(session?.token)headers.Authorization="Bearer "+session.token;
   const response=await fetch(path,{method,headers,body:body?JSON.stringify(body):undefined,cache:"no-store"});
   const data=await response.json().catch(()=>({error:"Resposta inválida do servidor"}));
-  if(!response.ok)throw Error(data.error||"Falha de conexão");
+  if(!response.ok){
+   const error=new Error(data.error||"Falha de conexão");
+   error.status=response.status;
+   throw error;
+  }
   return data;
  }
- async function sync(){
-  if(!session||syncing||screen!=="room")return;
-  syncing=true;
+ function sync(){
+  if(!session||screen!=="room")return Promise.resolve();
+  if(syncFlight?.owner===session){syncFlight.again=true;return syncFlight.promise}
+  const flight={owner:session,again:false};
+  syncFlight=flight;
+  flight.promise=(async()=>{
+   do{flight.again=false;await readRoom(flight.owner)}
+   while(flight.again&&flight.owner===session&&screen==="room");
+  })().finally(()=>{if(syncFlight===flight)syncFlight=null});
+  return flight.promise;
+ }
+ async function readRoom(owner){
+  const started=Date.now();
   try{
-   const next=await api("/api/room/"+session.code);
-   serverOffset=next.serverNow-Date.now();
+   const next=await api("/api/room/"+owner.code);
+   if(session!==owner||screen!=="room")return;
+   lastReadAt=Date.now();
+   if(ws?.readyState===1&&connectionState!=="connected"){connectionState="connected";updateNetwork()}
+   serverOffset=next.serverNow-(started+lastReadAt)/2;
    const previous=room;
-   if(previous&&(next.round!==previous.round||next.phase==="lobby"||next.phase==="closed"))lastSubmitted=null;
-   room=next;room.code=session.code;
-   const sig=JSON.stringify({phase:next.phase,players:next.players,round:next.round,gameType:next.gameType,question:next.question?.position,phrase:next.question?.lead,special:next.special,config:next.config,results:next.lastResults,nextAt:next.nextAt,history:next.history,awards:next.awards});
+   const sameRound=previous?.phase==="playing"&&next.phase==="playing"&&next.roundId===previous.roundId;
+   if(!sameRound)draft="";
+   room=next;room.code=owner.code;
+   const sig=JSON.stringify([next.roundId,next.phase,next.host,next.players,next.mySubmission,next.config,next.lastResults,next.nextAt,next.awards]);
    if(sig!==lastSignature){
-    lastSignature=sig;screen="room";render();
-    if(previous&&next.phase==="playing"&&(previous.round!==next.round||previous.phase!=="playing"))playSound("start");
-    showRevealCurtain(previous,next);
+    lastSignature=sig;
+    const boardNode=root.querySelector(".board");
+    if(sameRound&&boardNode&&Boolean(previous.mySubmission)===Boolean(next.mySubmission)){
+     // Preserve the actual input node, mobile keyboard, selection and suggestions.
+     boardNode.outerHTML=board();
+    }else{
+     render();
+     if(previous&&next.phase==="playing"&&!sameRound)playSound("start");
+     showRevealCurtain(previous,next);
+    }
    }
-   paintReactions(next.reactions);
-   updateTimer();
+   paintReactions(next.reactions);updateTimer();
   }catch(err){
-   if(/sessão não pertence|Sala não encontrada|sala expirou/i.test(err.message)){
-    const msg="Sua sessão não está mais ativa. Entre novamente com o convite.";
-    session=null;room=null;lastSignature="";localStorage.removeItem(KEY);ws?.close();screen="join";render();setNotice(msg);
-   }else{connectionState="offline";updateNetwork();setNotice("Conexão instável: "+err.message)}
+   if(session!==owner||screen!=="room")return;
+   if([403,404,410].includes(err.status)){
+    detachRoomSocket();session=null;room=null;lastSignature="";draft="";storage.removeItem(KEY);
+    screen="join";render();setNotice("Sua sessão não está mais ativa. Entre novamente com o convite.");
+   }else{connectionState="offline";updateNetwork();setNotice("Conexão instável. Tentando recuperar sua partida.")}
   }
-  finally{syncing=false}
  }
  function connect(){
   if(!session||screen!=="room")return;
@@ -430,7 +468,7 @@ function setWizardStep(next){
    const socket=new WebSocket((location.protocol==="https:"?"wss:":"ws:")+"//"+location.host+"/api/room/"+code+"/ws?token="+encodeURIComponent(session.token));
    ws=socket;connectionState="connecting";updateNetwork();
    socket.onopen=()=>{if(ws!==socket)return;connectionState="connected";updateNetwork();heartbeat();sync()};
-   socket.onmessage=()=>sync();
+   socket.onmessage=()=>{if(ws===socket)sync()};
    socket.onclose=()=>{if(ws!==socket)return;ws=null;connectionState="offline";updateNetwork();if(session?.code===code&&screen==="room")reconnectTimer=setTimeout(connect,2500)};
    socket.onerror=()=>{if(ws===socket){connectionState="offline";updateNetwork()}};
   }catch{connectionState="offline";updateNetwork();reconnectTimer=setTimeout(connect,4000)}
@@ -441,11 +479,22 @@ function setWizardStep(next){
   if(ws){const previous=ws;ws=null;previous.close()}
   connectionState="offline";
  }
- function resetSession(){detachRoomSocket();session=null;room=null;lastSignature="";lastSubmitted=null;localStorage.removeItem(KEY);history.replaceState({},"",location.pathname);}
+ function resetSession(){detachRoomSocket();session=null;room=null;lastSignature="";draft="";storage.removeItem(KEY);history.replaceState({},"",location.pathname);}
+ async function enterRoom(identity,nick){
+  detachRoomSocket();session=identity;room=null;draft="";lastSignature="";seenReactions.clear();
+  storage.setItem(NICK,nick);
+  const saved=storage.setItem(KEY,JSON.stringify(identity));
+  history.replaceState({},"","/?room="+identity.code);
+  screen="room";render();connect();await sync();
+  if(!saved)setNotice("Mantenha esta aba aberta. Seu navegador não conseguiu salvar a sessão para depois.");
+ }
  async function sendAction(action,body){
   if(busy)return;
   busy=true;
-  try{await api("/api/room/"+session.code+"/"+action,"POST",body||{});draft="";await sync()}
+  const owner=session;
+  const payload={...body};
+  if(["pass","next","hold-next","restart"].includes(action))payload.roundId=room?.roundId;
+  try{await api("/api/room/"+owner.code+"/"+action,"POST",payload);if(session===owner)await sync()}
   catch(err){setNotice(err.message)}
   finally{busy=false}
  }
@@ -460,7 +509,11 @@ function setWizardStep(next){
   if(event.target?.id==="game-type"){updateGameType()}
   if(event.target?.id==="mode"){
    const label=document.getElementById("target-label");
-   if(label)label.querySelector("span").textContent=event.target.value==="race"?"META DE PONTOS":"QUANTAS RODADAS?";
+   if(label){
+    const race=event.target.value==="race";
+    label.querySelector("span").textContent=race?"META DE PONTOS":"QUANTAS RODADAS?";
+    label.querySelector("input").max=race?"15":"20";
+   }
   }
  });
  root.addEventListener("click",async event=>{
@@ -469,7 +522,8 @@ function setWizardStep(next){
   if(op==="home"||op==="leave"){
     if(op==="leave"&&session){
       if(room?.phase==="playing"||room?.phase==="reveal"){setNotice("Uma partida está em andamento. Você pode voltar a esta aba depois ou continuar jogando.");return}
-      try{await api("/api/room/"+session.code+"/leave","POST",{})}catch{}
+      try{await api("/api/room/"+session.code+"/leave","POST",{})}
+      catch(err){if(![403,404,410].includes(err.status)){setNotice("Não foi possível sair agora. Sua sessão continua salva.");return}}
       resetSession();
     }
     screen="home";render();
@@ -478,7 +532,7 @@ function setWizardStep(next){
   if(op==="whatsapp"&&session){const link=location.origin+"/?room="+session.code;window.open("https://wa.me/?text="+encodeURIComponent("🎮 Bora jogar Riviera Showdown! Entra na minha sala: "+link),"_blank","noopener,noreferrer")}
   if(op==="sound"){
    soundEnabled=!soundEnabled;
-   try{localStorage.setItem("riviera-sound-v1",soundEnabled?"on":"off")}catch{}
+   try{storage.setItem("riviera-sound-v1",soundEnabled?"on":"off")}catch{}
    if(soundEnabled)playSound("toggle");
    render();
   }
@@ -497,7 +551,7 @@ function setWizardStep(next){
     else setNotice("Copie o resultado pelo placar.");
    }catch(err){if(err?.name!=="AbortError")setNotice("Não foi possível compartilhar automaticamente.")}
   }
-  if(op==="ready")await sendAction("ready");
+  if(op==="ready")await sendAction("ready",{ready:!room.players.find(p=>p.id===room.me)?.ready});
   if(op==="handoff"||op==="kick"){
     const playerId=btn.dataset.player;
     if(op==="kick"&&!window.confirm("Remover este jogador da sala?"))return;
@@ -525,7 +579,7 @@ function setWizardStep(next){
   if(op==="club-close"){document.getElementById("club-dialog")?.close()}
   if(op==="club-refresh"){await loadClub();setNotice("Placar atualizado.")}
   if(op==="club-copy"&&clubSession){try{await navigator.clipboard.writeText(clubSession.code);setNotice("Código do clube copiado.")}catch{setNotice("Código do clube: "+clubSession.code)}}
-  if(op==="club-leave"){if(!confirm("Sair deste clube neste aparelho? As estatísticas continuarão salvas no servidor."))return;clubSession=null;club=null;localStorage.removeItem(CLUB_KEY);render()}
+  if(op==="club-leave"){if(!confirm("Sair deste clube neste aparelho? As estatísticas continuarão salvas no servidor."))return;clubSession=null;club=null;storage.removeItem(CLUB_KEY);render()}
   if(op==="create"||op==="join"||op==="create-phrases"){if(op!=="join")await loadRankings();createStep=0;screen=op==="join"?"join":"create";render();if(op==="create-phrases"){const input=document.getElementById("game-type");if(input){input.value="phrases";updateGameType()}}}
   if(op==="mode-pick"){
    const form=document.getElementById("create-form");if(form){form.elements.gameType.value=btn.dataset.value;updateGameType()}
@@ -533,6 +587,7 @@ function setWizardStep(next){
   if(op==="wizard-next"){
    const form=document.getElementById("create-form");
    if(form&&createStep===0){const nick=form.elements.nick;if(!nick.reportValidity())return;}
+   if(form&&createStep===1&&!form.elements.target.reportValidity())return;
    if(form&&createStep===1&&form.elements.gameType.value==="ranking"&&!form.querySelector('[name="categoryIds"]:checked')){setNotice("Escolha pelo menos uma categoria.");return;}
    setWizardStep(createStep+1);
   }
@@ -571,32 +626,36 @@ function setWizardStep(next){
      const payload=created?{name:String(fd.get("name")||"").trim(),nick}:{nick};
      const result=await clubApi(created?"/api/club":"/api/club/"+code+"/join","POST",payload);
      clubSession={code:created?result.code:code,token:result.token,id:result.id,nick};
-     localStorage.setItem(CLUB_KEY,JSON.stringify(clubSession));localStorage.setItem(NICK,nick);
+     storage.setItem(CLUB_KEY,JSON.stringify(clubSession));storage.setItem(NICK,nick);
      club=await clubApi("/api/club/"+clubSession.code);
      render();document.getElementById("club-dialog")?.close();setNotice("Agora você faz parte do clube "+club.name+"!");return;
    }
    if(form.id==="create-form"){
+    if(createStep<2){form.querySelector('[data-op="wizard-next"]').click();return}
     const fd=new FormData(form),nick=String(fd.get("nick")).trim(),mode=String(fd.get("mode")),target=Number(fd.get("target"));
     const categoryIds=fd.getAll("categoryIds").map(String);
     const gameType=String(fd.get("gameType")||"ranking");if(gameType==="ranking"&&!categoryIds.length)throw Error("Selecione pelo menos uma categoria.");
     const durationSeconds=Number(fd.get("durationSeconds"))||30,turbo=fd.get("turbo")==="on",autoNext=fd.get("autoNext")==="on",rankScale=String(fd.get("rankScale")||"mix");
     const data=await api("/api/room","POST",{nick,mode,target,categoryIds,durationSeconds,turbo,autoNext,rankScale,gameType,...(clubSession?.token?{clubCode:clubSession.code,clubToken:clubSession.token}:{})});
-    localStorage.setItem(NICK,nick);detachRoomSocket();session=data;lastSubmitted=null;localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+data.code);screen="room";lastSignature="";room=null;connect();await sync();
+    await enterRoom(data,nick);
    }
    if(form.id==="join-form"){
     const fd=new FormData(form),code=String(fd.get("code")).trim().toUpperCase(),nick=String(fd.get("nick")).trim();
     if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code))throw Error("Código inválido, confira os seis caracteres");
+    if(session?.code===code&&session.token){screen="room";render();connect();await sync();return}
     const data=await api("/api/room/"+code+"/join","POST",{nick,...(clubSession?.token?{clubToken:clubSession.token}:{})});
-    localStorage.setItem(NICK,nick);detachRoomSocket();session={...data,code};lastSubmitted=null;localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+code);screen="room";lastSignature="";room=null;connect();await sync();
+    await enterRoom({...data,code},nick);
    }
    if(form.id==="guess-form"){
     const answer=String(new FormData(form).get("answer")||"").trim();
     if(!answer)throw Error("Digite um palpite ou escolha Passar.");
-    const confirmation=await api("/api/room/"+session.code+"/guess","POST",{answer});
-    lastSubmitted={code:session.code,round:room?.round,original:answer,accepted:confirmation.correction?.canonical||confirmation.acceptedAnswer||answer,corrected:!!confirmation.correction};
-    playSound("send");draft="";await sync();
-    if(room?.phase==="playing"&&room.players.some(p=>p.id===room.me&&p.submitted))render();
-    if(confirmation.correction)setNotice("Autocorreção: "+answer+" → "+confirmation.correction.canonical);
+    const owner=session,roundId=room.roundId;
+    const confirmation=await api("/api/room/"+owner.code+"/guess","POST",{answer,roundId});
+    if(session!==owner||screen!=="room")return;
+    playSound("send");await sync();
+    if(room?.roundId===roundId&&room.phase==="playing"&&confirmation.correction){
+     setNotice("Autocorreção: "+answer+" → "+confirmation.correction.canonical);
+    }
    }
   }catch(err){setNotice(err.message)}
   finally{busy=false}
@@ -604,7 +663,13 @@ function setWizardStep(next){
  render();
  if(screen==="room"&&session){connect();sync()}
  loadRankings();loadClub();
- setInterval(()=>{updateTimer();if(session&&screen==="room"){sync();if(!ws||ws.readyState>1)connect()}},3000);
+ setInterval(()=>{if(screen==="room"&&!document.hidden)updateTimer()},250);
+ setInterval(()=>{
+  if(!session||screen!=="room"||document.hidden)return;
+  const transitionAt=room?.phase==="playing"?room.deadline:room?.nextAt;
+  if(connectionState!=="connected"||Date.now()-lastReadAt>=12000||(transitionAt&&Date.now()+serverOffset>=transitionAt))sync();
+  if(!ws||ws.readyState>1)connect();
+ },3000);
  setInterval(()=>{if(session&&screen==="room")heartbeat()},12000);
  window.addEventListener("online",()=>{if(session&&screen==="room"){connect();heartbeat();sync()}});
  window.addEventListener("offline",()=>{connectionState="offline";updateNetwork()});

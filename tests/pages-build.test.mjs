@@ -44,7 +44,8 @@ test("recusa URLs estranhas e nunca incorpora configuração insegura",()=>{
 test("HTML offline incorpora a praia e a logo geradas pelo template JS",()=>{
   const html=readFileSync(file("riviera-showdown.html"),"utf8");
   assert.ok(html.includes('class="reference-art"'));
-  assert.ok(html.includes('src="data:image/jpeg;base64,'));
+  assert.equal(html.split('data:image/jpeg;base64,').length-1,1);
+  assert.equal(html.split('data:image/png;base64,').length-1,1);
   assert.ok(!html.includes('assets/riviera-reference-beach.jpg'));
   assert.ok(!html.includes('assets/riviera-logo-transparent.png'));
 });
