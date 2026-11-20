@@ -59,8 +59,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::notice::Deploy não executado. Configure os secrets CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID em Settings > Secrets and variables > Actions."
-            exit 0
+            echo "::error::Deploy não executado. Configure os secrets CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID em Settings > Secrets and variables > Actions."
+            exit 1
           fi
           npx --yes wrangler@4 deploy --config wrangler.jsonc
       - name: Testar quatro jogadores no domínio oficial quando esta revisão estiver no ar
@@ -71,5 +71,6 @@ jobs:
           if cmp -s cloudflare/public/game.js "$RUNNER_TEMP/riviera-live.js"; then
             node cloudflare/playtest.mjs
           else
-            echo "::error::O domínio oficial não está servindo a revisão publicada; teste de produção não validado."\n            exit 1
+            echo "::error::O domínio oficial não está servindo a revisão publicada; teste de produção não validado."
+            exit 1
           fi
