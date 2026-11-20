@@ -989,3 +989,43 @@ a{color:inherit}
 .rv27-answer-confirm strong{font-size:18px;color:#163f3d;overflow-wrap:anywhere}
 .rv27-answer-confirm small{font-size:11px;line-height:1.5;color:#677c71;overflow-wrap:anywhere}
 @media(max-width:580px){.rv27-smart-hint{font-size:10px!important;padding:10px!important}.rv27-answer-confirm{padding:11px}.rv27-answer-confirm strong{font-size:16px}}
+
+/* Riviera 2.8.1 — iPhone gameplay: one-screen arena, no giant notification */
+.notice[hidden],#notice[hidden]{display:none!important}
+#notice:not([hidden]){position:fixed!important;top:max(12px,env(safe-area-inset-top))!important;bottom:auto!important;left:50%!important;right:auto!important;width:max-content!important;min-width:0!important;max-width:min(440px,calc(100vw - 32px))!important;height:auto!important;max-height:120px!important;overflow:auto!important;padding:12px 16px!important;font-size:13px!important;line-height:1.4!important;z-index:9999!important;box-sizing:border-box!important}
+@media(max-width:760px){
+ body:has(.rv24-playing-grid){overflow:hidden!important}
+ body:has(.rv24-playing-grid) .nav,body:has(.rv24-playing-grid) .footer{display:none!important}
+ body:has(.rv24-playing-grid) #app{height:100dvh;overflow:hidden}
+ .game-page:has(.rv24-playing-grid){position:fixed!important;inset:0!important;margin:0!important;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 12px)!important;width:100%!important;max-width:none!important;height:100dvh!important;display:flex!important;flex-direction:column!important;gap:10px!important;overflow:hidden!important;box-sizing:border-box!important;background:#f1efe6!important;z-index:10}
+ .game-page:has(.rv24-playing-grid) .round-head{flex:0 0 auto!important;margin:0!important;gap:8px!important;align-items:center!important}
+ .game-page:has(.rv24-playing-grid) .round-head h1{font-size:clamp(29px,8vw,44px)!important;line-height:.95!important;margin:5px 0!important}
+ .game-page:has(.rv24-playing-grid) .kicker{font-size:9px!important}
+ .game-page:has(.rv24-playing-grid) .timer{min-width:73px!important;padding:8px!important}
+ .game-page:has(.rv24-playing-grid) .timer strong{font-size:32px!important}
+ .game-page:has(.rv24-playing-grid) .rv24-playing-grid{display:flex!important;flex:1 1 auto!important;min-height:0!important;margin:0!important;gap:0!important}
+ .game-page:has(.rv24-playing-grid) .rv24-playing-grid>.board{display:none!important}
+ .game-page:has(.rv24-playing-grid) .question{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;padding:clamp(12px,3.5vw,19px)!important;border-radius:12px!important;border-top:5px solid #16494b!important}
+ .game-page:has(.rv24-playing-grid) .rv26-question-meta{gap:6px!important}
+ .game-page:has(.rv24-playing-grid) .category,.game-page:has(.rv24-playing-grid) .rv26-format{font-size:9px!important;min-height:0!important;padding:7px 9px!important;line-height:1.25!important}
+ .game-page:has(.rv24-playing-grid) .question h2{font-size:clamp(37px,10vw,58px)!important;line-height:.93!important;margin:clamp(10px,2vh,20px) 0 8px!important}
+ .game-page:has(.rv24-playing-grid) .question>p:not(.rv27-smart-hint):not(.tiny){font-size:11px!important;line-height:1.4!important;margin:4px 0!important}
+ .game-page:has(.rv24-playing-grid) .separator,.game-page:has(.rv24-playing-grid) .rv24-answer-label,.game-page:has(.rv24-playing-grid) .rv27-smart-hint,.game-page:has(.rv24-playing-grid) .rv24-game-footnote{display:none!important}
+ .game-page:has(.rv24-playing-grid) #guess-form{margin-top:auto!important;display:flex!important;flex-direction:column!important;gap:9px!important;min-height:0!important}
+ .game-page:has(.rv24-playing-grid) #guess-form label{font-size:11px!important}
+ .game-page:has(.rv24-playing-grid) #guess{width:100%!important;height:54px!important;min-height:54px!important;font-size:16px!important;padding:12px!important}
+ .game-page:has(.rv24-playing-grid) #guess-form .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important}
+ .game-page:has(.rv24-playing-grid) #guess-form .btn{font-size:11px!important;min-height:46px!important;height:46px!important;padding:8px!important;white-space:normal!important}
+ .game-page:has(.rv24-playing-grid) .guess-suggestions:not([hidden]){max-height:min(22dvh,140px)!important;overflow-y:auto!important;flex-shrink:1!important;margin:0!important}
+ .game-page:has(.rv24-playing-grid) .success-state{margin-top:auto!important;padding:14px!important}
+ body:has(.rv24-playing-grid) .reaction-dock{position:fixed!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;padding:5px 8px!important;z-index:20!important;border-radius:40px!important}
+ body:has(.rv24-playing-grid) .reaction-dock .reaction-label,body:has(.rv24-playing-grid) .reaction-dock .reaction-tip{display:none!important}
+ body:has(.rv24-playing-grid) .reaction-options{gap:3px!important}
+ body:has(.rv24-playing-grid) .reaction-option{font-size:17px!important;min-width:34px!important;min-height:34px!important;padding:5px!important}
+ .game-page:has(.rv24-playing-grid){padding-bottom:calc(env(safe-area-inset-bottom) + 64px)!important}
+}
+@media(max-width:760px) and (max-height:690px){
+ .game-page:has(.rv24-playing-grid) .question h2{font-size:34px!important;margin:6px 0!important}
+ .game-page:has(.rv24-playing-grid) .question>p:not(.rv27-smart-hint):not(.tiny){display:none!important}
+ .game-page:has(.rv24-playing-grid) .category,.game-page:has(.rv24-playing-grid) .rv26-format{font-size:8px!important}
+}
