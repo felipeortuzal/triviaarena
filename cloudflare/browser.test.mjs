@@ -320,5 +320,41 @@ try{
  assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
  console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 107 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
 
+ /* 2.7.1: switching rooms in a single browser must retire the previous socket */
+ const swapping=await browser.newContext({viewport:{width:1150,height:750}});
+ const swapPage=await swapping.newPage();
+ swapPage.on("pageerror",err=>failures.push(err.message));
+ const openedSockets=[];
+ swapPage.on("websocket",sock=>openedSockets.push(sock.url()));
+ await swapPage.goto(base,{waitUntil:"domcontentloaded"});
+ const switchRooms=await swapPage.evaluate(async()=>{
+  const create=async nick=>{
+   const res=await fetch("/api/room",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({nick,mode:"rounds",target:1,gameType:"ranking",categoryIds:["pokemon"]})});
+   return res.json();
+  };
+  return {a:await create("Old Host"),b:await create("New Host")};
+ });
+ const enter=async(code,nick)=>{
+  await swapPage.locator('[data-op="join"]').first().click();
+  await swapPage.locator('#join-form [name="code"]').fill(code);
+  await swapPage.locator('#join-form [name="nick"]').fill(nick);
+  await swapPage.locator('#join-form button[type="submit"]').click();
+  await swapPage.locator(".roomcode").waitFor({state:"visible",timeout:12000});
+  assert.equal((await swapPage.locator(".roomcode").innerText()).trim(),code);
+ };
+ await enter(switchRooms.a.code,"Primeiro amigo");
+ await swapPage.waitForFunction(code=>window.location.search.includes(code),switchRooms.a.code);
+ assert.ok(openedSockets.some(url=>url.includes("/"+switchRooms.a.code+"/ws")),"Socket da primeira sala precisa abrir");
+ await swapPage.locator('.nav-brand').click();
+ await swapPage.locator(".rv-hero").waitFor({state:"visible"});
+ await enter(switchRooms.b.code,"Segundo amigo");
+ await swapPage.waitForFunction(code=>window.location.search.includes(code),switchRooms.b.code);
+ await swapPage.waitForTimeout(350);
+ assert.ok(openedSockets.some(url=>url.includes("/"+switchRooms.b.code+"/ws")),"Trocar de sala deve abrir um novo WebSocket");
+ await swapPage.locator("#net-pill.connected").waitFor({state:"visible",timeout:12000});
+ assert.deepEqual(failures,[],"A troca de salas não deve gerar erros JS");
+ await swapping.close();
+ console.log("BROWSER 2.7.1 OK: troca de sala recicla WebSocket e preserva conexão em tempo real.");
+
  await a.close();await b.close();
 }finally{await browser.close()}

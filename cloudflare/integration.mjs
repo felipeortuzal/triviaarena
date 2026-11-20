@@ -14,7 +14,7 @@ assert.equal(joinStatus,200);
 assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
-assert.equal(info.version,"2.7");
+assert.equal(info.version,"2.7.1");
 assert.equal(info.rankings,107);
 assert.equal(info.entries,12262);
 assert.equal(info.maxRanking,1025);
@@ -93,7 +93,7 @@ assert.equal((await call(roomPath+"/ready","POST",{},visitor.token)).status,200)
 assert.equal((await call(roomPath+"/start","POST",{},owner.token)).status,200);
 for(let n=1;n<=3;n++){
  const state=(await call(roomPath,"GET",null,owner.token)).data;
- assert.equal(state.version,"2.7");
+ assert.equal(state.version,"2.7.1");
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
  assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
@@ -288,7 +288,7 @@ await call(hugePath+"/ready","POST",{},huge.token);
 await call(hugePath+"/ready","POST",{},hugeGuest.token);
 assert.equal((await call(hugePath+"/start","POST",{},huge.token)).status,200);
 const hugeQ=(await call(hugePath,"GET",null,huge.token)).data;
-assert.equal(hugeQ.version,"2.7");
+assert.equal(hugeQ.version,"2.7.1");
 assert.equal(hugeQ.config.rankScale,"extreme");
 assert.ok([100,200,500,1000].includes(hugeQ.question.limit));
 assert.equal(hugeQ.question.options.length,hugeQ.question.limit);

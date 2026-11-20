@@ -436,7 +436,12 @@ function setWizardStep(next){
   }catch{connectionState="offline";updateNetwork();reconnectTimer=setTimeout(connect,4000)}
  }
  async function heartbeat(){if(!session||screen!=="room")return;try{await api("/api/room/"+session.code+"/heartbeat","POST",{});}catch{}}
- function resetSession(){clearTimeout(reconnectTimer);if(ws){const old=ws;ws=null;old.close()}session=null;room=null;lastSignature="";localStorage.removeItem(KEY);history.replaceState({},"",location.pathname);connectionState="offline";}
+ function detachRoomSocket(){
+  clearTimeout(reconnectTimer);
+  if(ws){const previous=ws;ws=null;previous.close()}
+  connectionState="offline";
+ }
+ function resetSession(){detachRoomSocket();session=null;room=null;lastSignature="";lastSubmitted=null;localStorage.removeItem(KEY);history.replaceState({},"",location.pathname);}
  async function sendAction(action,body){
   if(busy)return;
   busy=true;
@@ -576,13 +581,13 @@ function setWizardStep(next){
     const gameType=String(fd.get("gameType")||"ranking");if(gameType==="ranking"&&!categoryIds.length)throw Error("Selecione pelo menos uma categoria.");
     const durationSeconds=Number(fd.get("durationSeconds"))||30,turbo=fd.get("turbo")==="on",autoNext=fd.get("autoNext")==="on",rankScale=String(fd.get("rankScale")||"mix");
     const data=await api("/api/room","POST",{nick,mode,target,categoryIds,durationSeconds,turbo,autoNext,rankScale,gameType,...(clubSession?.token?{clubCode:clubSession.code,clubToken:clubSession.token}:{})});
-    localStorage.setItem(NICK,nick);session=data;localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+data.code);screen="room";lastSignature="";room=null;if(ws){const old=ws;ws=null;old.close()}connect();await sync();
+    localStorage.setItem(NICK,nick);detachRoomSocket();session=data;lastSubmitted=null;localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+data.code);screen="room";lastSignature="";room=null;connect();await sync();
    }
    if(form.id==="join-form"){
     const fd=new FormData(form),code=String(fd.get("code")).trim().toUpperCase(),nick=String(fd.get("nick")).trim();
     if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code))throw Error("Código inválido, confira os seis caracteres");
     const data=await api("/api/room/"+code+"/join","POST",{nick,...(clubSession?.token?{clubToken:clubSession.token}:{})});
-    localStorage.setItem(NICK,nick);session={...data,code};localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+code);screen="room";lastSignature="";room=null;connect();await sync();
+    localStorage.setItem(NICK,nick);detachRoomSocket();session={...data,code};lastSubmitted=null;localStorage.setItem(KEY,JSON.stringify(session));history.replaceState({},"","/?room="+code);screen="room";lastSignature="";room=null;connect();await sync();
    }
    if(form.id==="guess-form"){
     const answer=String(new FormData(form).get("answer")||"").trim();
