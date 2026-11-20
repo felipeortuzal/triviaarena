@@ -1,8 +1,10 @@
+import {normalizeAnswer,normalizeGuess,resolveAnswer,typoDistance} from "../ranking-match.js";
+export {normalizeAnswer,resolveAnswer,typoDistance};
 import sitcoms from "./data/sitcoms.json" with {type:"json"};
 // Riviera Showdown — Cloudflare Workers + SQLite-backed Durable Objects.
 
 // All guesses and scoring are authoritative inside the room object.
-const VERSION = "2.8.0";
+const VERSION = "2.8.1";
 
 export const BANKS = [{"id":"area","title":"Maiores países e territórios","source":"Worldometer — Maiores Países do Mundo","snapshot":"Consulta: novembro de 2026","items":["Rússia","Canadá","China","Estados Unidos","Brasil","Austrália","Índia","Argentina","Cazaquistão","Argélia","RD Congo","Groenlândia","Arábia Saudita","México","Indonésia","Sudão","Líbia","Irã","Mongólia","Peru","Chade","Níger","Angola","Mali","África do Sul","Colômbia","Etiópia","Bolívia","Mauritânia","Egito","Tanzânia","Nigéria","Venezuela","Paquistão","Namíbia","Moçambique","Turquia","Chile","Zâmbia","Mianmar","Afeganistão","Somália","República Centro-Africana","Sudão do Sul","Ucrânia","Madagascar","Botsuana","Quênia","França","Iêmen","Tailândia","Espanha","Turcomenistão","Camarões","Papua-Nova Guiné","Suécia","Uzbequistão","Marrocos","Iraque","Paraguai","Zimbábue","Japão","Alemanha","Filipinas","Congo","Finlândia","Vietnã","Malásia","Noruega","Costa do Marfim","Polônia","Omã","Itália","Equador","Burkina Faso","Nova Zelândia","Gabão","Saara Ocidental","Guiné","Reino Unido","Uganda","Gana","Romênia","Laos","Guiana","Bielorrússia","Quirguistão","Senegal","Síria","Camboja","Uruguai","Suriname","Tunísia","Bangladesh","Nepal","Tajiquistão","Grécia","Nicarágua","Coreia do Norte","Malawi"]},{"id":"population","title":"Mais populosos do planeta","source":"Worldometer — Population by Country 2026","snapshot":"Estimativa 2026","items":["Índia","China","Estados Unidos","Indonésia","Paquistão","Nigéria","Brasil","Bangladesh","Rússia","Etiópia","México","Japão","Egito","Filipinas","RD Congo","Vietnã","Irã","Turquia","Alemanha","Tanzânia","Tailândia","Reino Unido","França","África do Sul","Itália","Quênia","Mianmar","Colômbia","Sudão","Uganda","Coreia do Sul","Argélia","Iraque","Espanha","Argentina","Afeganistão","Iêmen","Canadá","Angola","Ucrânia","Marrocos","Polônia","Uzbequistão","Moçambique","Malásia","Gana","Arábia Saudita","Peru","Madagascar","Costa do Marfim","Camarões","Nepal","Níger","Venezuela","Austrália","Coreia do Norte","Síria","Mali","Burkina Faso","Sri Lanka","Taiwan","Malawi","Zâmbia","Chade","Cazaquistão","Somália","Chile","Senegal","Guatemala","Romênia","Países Baixos","Equador","Camboja","Zimbábue","Guiné","Benim","Ruanda","Burundi","Bolívia","Sudão do Sul","Tunísia","Haiti","Bélgica","República Dominicana","Jordânia","Emirados Árabes Unidos","Honduras","Tajiquistão","Papua-Nova Guiné","Cuba","Suécia","Chéquia","Azerbaijão","Portugal","Togo","Grécia","Israel","Hungria","Áustria","Suíça"]},{"id":"gdp","title":"Maiores economias do mundo","source":"Worldometer / FMI — GDP by Country 2025","snapshot":"FMI WEO outubro de 2026","items":["Estados Unidos","China","Alemanha","Japão","Reino Unido","Índia","França","Rússia","Itália","Canadá","Brasil","Espanha","Coreia do Sul","Austrália","México","Turquia","Indonésia","Países Baixos","Arábia Saudita","Suíça","Polônia","Taiwan","Bélgica","Argentina","Irlanda","Suécia","Israel","Emirados Árabes Unidos","Singapura","Áustria","Tailândia","Noruega","Vietnã","Filipinas","Malásia","Dinamarca","Bangladesh","Colômbia","Romênia","África do Sul","Hong Kong","Paquistão","Chéquia","Irã","Egito","Chile","Portugal","Peru","Finlândia","Cazaquistão","Nigéria","Argélia","Grécia","Iraque","Nova Zelândia","Hungria","Catar","Ucrânia","Cuba","Marrocos","Kuwait","Eslováquia","Uzbequistão","Angola","Quênia","Bulgária","Equador","Porto Rico","República Dominicana","Etiópia","Guatemala","Gana","Omã","Sri Lanka","Croácia","Costa Rica","Venezuela","Luxemburgo","Sérvia","Costa do Marfim","Bielorrússia","Lituânia","RD Congo","Panamá","Tanzânia","Uruguai","Mianmar","Eslovênia","Turcomenistão","Azerbaijão","Uganda","Bolívia","Jordânia","Camarões","Zimbábue","Tunísia","Macau","Camboja","Paraguai","Bahrein"]},{"id":"movies","title":"Filmes mais bem avaliados","source":"IMDb Top 250 — cópia histórica de 01/11/2026","snapshot":"Retrato: 1º de novembro de 2026","items":["The Shawshank Redemption","The Godfather","The Dark Knight","The Godfather: Part II","The Lord of the Rings: The Return of the King","12 Angry Men","Schindler's List","The Lord of the Rings: The Fellowship of the Ring","Pulp Fiction","The Lord of the Rings: The Two Towers","The Good, the Bad and the Ugly","Forrest Gump","Inception","Fight Club","Star Wars: Episode V - The Empire Strikes Back","The Matrix","Interstellar","Goodfellas","One Flew Over the Cuckoo's Nest","Se7en","It's a Wonderful Life","The Silence of the Lambs","Saving Private Ryan","Seven Samurai","The Green Mile","Cidade de Deus","Life Is Beautiful","Terminator 2: Judgment Day","Back to the Future","Star Wars: Episode IV - A New Hope","Spirited Away","Gladiator","The Pianist","Kill Bill: The Whole Bloody Affair","Parasite","Grave of the Fireflies","Harakiri","The Lion King (1994)","Psycho","The Departed","Whiplash","The Prestige","American History X","Spider-Man: Across the Spider-Verse","Cinema Paradiso","Léon: The Professional","Casablanca","The Intouchables","The Usual Suspects","Django Unchained","Alien","Rear Window","Modern Times","Once Upon a Time in the West","WALL-E","City Lights","Apocalypse Now","Avengers: Infinity War","Memento","Dune: Part Two","Raiders of the Lost Ark","Spider-Man: Into the Spider-Verse","The Lives of Others","The Odyssey (2026)","Sunset Boulevard","Witness for the Prosecution","Paths of Glory","Inglourious Basterds","The Shining","The Great Dictator","Aliens","High and Low","12th Fail","Avengers: Endgame","Good Will Hunting","Coco","Toy Story (1995)","The Dark Knight Rises","Amadeus","Your Name","3 Idiots","Braveheart","Das Boot","Princess Mononoke","Oldboy","Dr. Strangelove","American Beauty","Attack on Titan: The Last Attack","Capernaum","Singin' in the Rain","Once Upon a Time in America","Joker (2019)","Toy Story 3","Star Wars: Episode VI - Return of the Jedi","Come and See","Requiem for a Dream","Incendies","Ikiru","The Hunt (2012)","Eternal Sunshine of the Spotless Mind"]}];
 BANKS.push(...[{"id":"br-area","title":"Estados do Brasil por área territorial","source":"IBGE — Áreas Territoriais 2025","snapshot":"IBGE, 2025","sourceUrl":"https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-territoriais.html","items":["Amazonas","Pará","Mato Grosso","Minas Gerais","Bahia","Mato Grosso do Sul","Goiás","Maranhão","Rio Grande do Sul","Tocantins","Piauí","São Paulo","Rondônia","Roraima","Paraná","Acre","Ceará","Amapá","Pernambuco","Santa Catarina","Paraíba","Rio Grande do Norte","Espírito Santo","Rio de Janeiro","Alagoas","Sergipe","Distrito Federal"]},{"id":"br-pop","title":"Estados brasileiros mais populosos","source":"IBGE — Estimativas da População das UFs","snapshot":"IBGE, 2025","sourceUrl":"https://agenciadenoticias.ibge.gov.br/media/com_mediaibge/arquivos/8383bdedce5a6d972e60dd32671e533a.pdf","items":["São Paulo","Minas Gerais","Rio de Janeiro","Bahia","Paraná","Rio Grande do Sul","Pernambuco","Ceará","Pará","Santa Catarina","Goiás","Maranhão","Amazonas","Paraíba","Espírito Santo","Mato Grosso","Rio Grande do Norte","Piauí","Alagoas","Distrito Federal","Mato Grosso do Sul","Sergipe","Rondônia","Tocantins","Acre","Amapá","Roraima"]},{"id":"pokemon","title":"Pokédex Nacional — primeiros 30","source":"The Pokémon Company — National Pokédex","snapshot":"Pokédex Nacional #1–30","sourceUrl":"https://www.pokemon.com/pokedex/","items":["Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran♀","Nidorina"]},{"id":"elementos","title":"Tabela Periódica — ordem atômica","source":"IUPAC — Periodic Table","snapshot":"Números atômicos 1–30","sourceUrl":"https://iupac.org/what-we-do/periodic-table-of-elements/","items":["Hidrogênio","Hélio","Lítio","Berílio","Boro","Carbono","Nitrogênio","Oxigênio","Flúor","Neônio","Sódio","Magnésio","Alumínio","Silício","Fósforo","Enxofre","Cloro","Argônio","Potássio","Cálcio","Escândio","Titânio","Vanádio","Cromo","Manganês","Ferro","Cobalto","Níquel","Cobre","Zinco"]}]);
@@ -28,104 +30,14 @@ for(const b of BANKS){
  }
 }
 
-export function normalizeAnswer(s){return String(s||"").replace(/♀/g," female ").replace(/♂/g," male ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ")}
-
 function safeJson(data,status=200){return new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}})}
 
 function randomToken(){return Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>x.toString(16).padStart(2,"0")).join("")}
 
 function randomCode(){const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",r=crypto.getRandomValues(new Uint8Array(6));return Array.from(r,x=>a[x%a.length]).join("")}
 
-const SYNONYMS={
- "estados unidos":["eua","usa","united states"],"reino unido":["uk","inglaterra","united kingdom"],"rd congo":["rdc","republica democratica do congo"],"paises baixos":["holanda","netherlands"],
- "sao paulo":["sp"],"rio de janeiro":["rj"],"minas gerais":["mg"],"rio grande do sul":["rs"],"mato grosso":["mt"],"mato grosso do sul":["ms"],"distrito federal":["df","brasilia"],"espirito santo":["es"],"parana":["pr"],"bahia":["ba"],"ceara":["ce"],"pernambuco":["pe"],"santa catarina":["sc"],"rio grande do norte":["rn"],"paraiba":["pb"],"maranhao":["ma"],"goias":["go"],"amazonas":["am"],"para":["pa"],"acre":["ac"],"amapa":["ap"],"roraima":["rr"],"rondonia":["ro"],"sergipe":["se"],"alagoas":["al"],"piaui":["pi"],"tocantins":["to"],
- "the godfather":["o poderoso chefao"],"the godfather part ii":["o poderoso chefao 2"],"the shawshank redemption":["um sonho de liberdade"],"the dark knight":["batman o cavaleiro das trevas"],"the matrix":["matrix"],"inception":["a origem"],"interstellar":["interestelar"],"fight club":["clube da luta"],"forrest gump":["forrest gump o contador de historias"],
- "how i met your mother":["himym","como eu conheci sua mae"],"the fresh prince of bel air":["um maluco no pedaco"],"full house":["tres e demais"],"the office":["the office us","the office eua"],"the big bang theory":["a teoria do big bang","tbbt"],
- "bulbasaur":["bulbassauro"],"ivysaur":["ivissauro"],"venusaur":["venussauro"],"nidoran female":["nidoran femea","nidoran f"]
-};
 export function levenshtein(a,b){if(Math.abs(a.length-b.length)>3)return 99;let last=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){const next=[i];for(let j=1;j<=b.length;j++)next[j]=Math.min(next[j-1]+1,last[j]+1,last[j-1]+(a[i-1]===b[j-1]?0:1));last=next;}return last[b.length];}
 
-/* Riviera 2.7: high-confidence, server-authoritative typo resolution.
-   Deliberately not an LLM: no external network, latency, token charges or
-   non-deterministic guessing. Ambiguous guesses are never auto-mapped. */
-function normalizeGuess(raw){
- return normalizeAnswer(String(raw||"").replace(/&/g," and "))
-  .replace(/\b(ur|yr)\b/g,"your")
-  .replace(/\bthru\b/g,"through")
-  .replace(/\btvshow\b/g,"tv show")
-  .replace(/\s+/g," ").trim();
-}
-function matcherCompact(value){return value.replace(/\s+/g,"");}
-function matcherCore(value){
- // Omit only weak articles/connectors, never meaningful distinguishing words.
- return value.split(" ").filter(w=>!["the","a","an","of","and","de","do","da","dos","das","o","os","as","e"].includes(w)).join(" ");
-}
-function matcherAcronym(value){
- return value.split(" ").map(t=>t[0]||"").join("");
-}
-function matcherCity(value){
- // IBGE names in this catalog include " - UF" to disambiguate duplicate cities.
- return value.replace(/\s+(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to)$/,"");
-}
-export function typoDistance(a,b,cap=7){
- if(Math.abs(a.length-b.length)>cap)return cap+1;
- let last2=[],last1=Array.from({length:b.length+1},(_,j)=>j);
- for(let i=1;i<=a.length;i++){
-  const next=[i];
-  for(let j=1;j<=b.length;j++){
-   let d=Math.min(next[j-1]+1,last1[j]+1,last1[j-1]+(a[i-1]===b[j-1]?0:1));
-   if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])d=Math.min(d,last2[j-2]+1);
-   next[j]=d;
-  }
-  last2=last1;last1=next;
- }
- return last1[b.length];
-}
-export function resolveAnswer(raw,options){
- const input=normalizeGuess(raw);
- const failed={index:-1,canonical:null,method:null,corrected:false};
- if(!input||!Array.isArray(options)||!options.length)return failed;
- const candidates=options.map((item,index)=>{
-  const normalized=normalizeGuess(item);
-  return {item,index,normalized};
- });
- const unique=matches=>{
-  if(matches.length!==1)return null;
-  const selected=matches[0];
-  return {index:selected.index,canonical:selected.item,method:selected.method,corrected:normalizeAnswer(raw)!==normalizeAnswer(selected.item)};
- };
- // Exact name or registered translation/alias.
- const exact=candidates.filter(x=>x.normalized===input);
- if(exact.length)return unique(exact.map(x=>({...x,method:"exact"})))||failed;
- const aliases=candidates.filter(x=>(SYNONYMS[normalizeAnswer(x.item)]||[]).some(v=>normalizeGuess(v)===input));
- if(aliases.length)return unique(aliases.map(x=>({...x,method:"alias"})))||failed;
- // Unique compact spelling, shortened city-without-UF, official initials/acronym.
- const compact=matcherCompact(input);
- const inputCore=matcherCore(input);
- const safeVariants=candidates.filter(x=>
-   (compact.length>=6&&matcherCompact(x.normalized)===compact)||
-   (inputCore.length>=8&&matcherCore(x.normalized)===inputCore)||
-   (input.length>=5&&matcherCity(x.normalized)===input&&x.normalized!==input)||
-   (input.length>=4&&input===matcherAcronym(x.normalized)&&x.normalized.split(" ").length>=3)
- );
- if(safeVariants.length)return unique(safeVariants.map(x=>({...x,method:"variant"})))||failed;
- // Damerau–Levenshtein handles accidental swapped letters, missing and
- // repeated letters. Strict edit budget + second-best margin prevent collisions.
- const size=input.length;
- const budget=size<=5?0:size<=8?1:size<=14?2:size<=23?3:size<=34?4:Math.min(6,Math.floor(size*0.12));
- if(!budget)return failed;
- const scores=candidates.map(x=>{
-  const city=matcherCity(x.normalized);
-  const complete=typoDistance(input,x.normalized,budget+2);
-  const shorter=city!==x.normalized?typoDistance(input,city,budget+2):budget+3;
-  return {...x,dist:Math.min(complete,shorter),compared:shorter<complete?city:x.normalized};
- }).sort((a,b)=>a.dist-b.dist);
- const winner=scores[0],runner=scores[1];
- const overlap=winner.dist/Math.max(input.length,winner.compared.length);
- const nearOther=runner&&(runner.dist===winner.dist||(winner.dist>=2&&runner.dist<=winner.dist+1));
- if(winner.dist>budget||overlap>0.21||nearOther)return failed;
- return {...unique([{...winner,method:"typo"}])};
-}
 export function matchAnswer(raw,options){return resolveAnswer(raw,options).index;}
 function suggestAnswer(raw,options){
  const input=normalizeGuess(raw);
@@ -411,7 +323,7 @@ export class ArenaRoom{
  async clubAction(req){
   const path=new URL(req.url).pathname;
   let body={};
-  if(req.method==="POST"){try{body=await req.json()}catch{return safeJson({error:"Requisição inválida"},400)}}
+  if(req.method==="POST"){try{body=await req.json();if(!body||Array.isArray(body)||typeof body!=="object")throw Error()}catch{return safeJson({error:"Requisição inválida"},400)}}
   const token=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"")||body.token||"";
   let output={status:500,error:"Operação não suportada"};
   await this.ctx.storage.transaction(async tx=>{
@@ -479,7 +391,7 @@ export class ArenaRoom{
    return new Response(null,{status:101,webSocket:client});
   }
   let body={};
-  if(req.method==="POST"){try{body=await req.json();if(!body||typeof body!=="object")throw Error()}catch{return safeJson({error:"JSON inválido"},400)}}
+  if(req.method==="POST"){try{body=await req.json();if(!body||Array.isArray(body)||typeof body!=="object")throw Error()}catch{return safeJson({error:"JSON inválido"},400)}}
   const token=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");
   const r=await this.change(room=>{
    const now=Date.now();
@@ -519,6 +431,7 @@ export class ArenaRoom{
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
     return {change:changed,state:room,data:{version:VERSION,roundId:currentRoundId(room),mySubmission,capacity:roomCapacity(room),clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,sourceUrl:bank.sourceUrl||null,rankType:bank.kind||"ranking",tier:q.tier||"CLÁSSICO",position:q.position,limit:q.limit,special:!!room.special,options:alphabeticalOptions(bank,q.limit)}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
+   if(room.phase==="closed")return {error:"Sala encerrada. Solicite outro convite.",status:410};
    if(!isHost&&["start","next","restart","close","kick","handoff","hold-next"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
    // Updated clients bind commands to the view where the player pressed the button.
    // Older open tabs can finish their current game without sending this field.
@@ -590,7 +503,7 @@ export class ArenaRoom{
       if(room.question.type==="phrase"){
         if(raw.length<2)return {error:"Escreva ao menos duas letras da continuação.",status:400};
         const candidate=normalizeAnswer(raw);
-        if(Object.values(room.answers).some(a=>normalizeAnswer(a.answer)===candidate))return {error:"Essa continuação já foi enviada por outra pessoa. Tente uma diferente.",status:409};
+        if(Object.values(room.answers).some(a=>a.passed!==true&&(a.answer!=="Passou"||a.quality>0)&&normalizeAnswer(a.answer)===candidate))return {error:"Essa continuação já foi enviada por outra pessoa. Tente uma diferente.",status:409};
         quality=evaluatePhrase(raw,PHRASES[room.question.index]);answer=raw;
         // Reveal the phrase and its similarity only after the round closes.
       }else{
@@ -601,7 +514,7 @@ export class ArenaRoom{
         if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
       }
     }
-    room.answers[id]={answer,rank,quality,at:now,...(correction?{original:correction.original}:{})};
+    room.answers[id]={answer,rank,quality,at:now,passed:path==="/pass",...(correction?{original:correction.original}:{})};
     finalizeRoom(room,now);
     return {change:true,state:room,data:{ok:true,acceptedAnswer:answer,correction},alarm:room.phase==="playing"?room.deadline:undefined};
    }
@@ -665,12 +578,19 @@ export async function proxyImage(request,env){
 
 async function handleRequest(request,env){
  const url=new URL(request.url),path=url.pathname;
+ const invalidMethod=method=>new Response(JSON.stringify({error:"Método não permitido"}),{status:405,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","allow":method}});
+ async function readBody(){
+  const body=await request.json();
+  if(!body||Array.isArray(body)||typeof body!=="object")throw Error("JSON inválido");
+  return body;
+ }
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
  if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:VERSION,rankings:BANKS.length,phrases:PHRASES.length,entries:BANKS.reduce((sum,bank)=>sum+bank.items.length,0),maxRanking:Math.max(...BANKS.map(bank=>bank.items.length)),rankFormats:[10,20,30,50,100,200,500,1000],features:["custom-rooms","turbo-rounds","group-stats","awards"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null,kind:b.kind||"ranking"}))});
 
- if(path==="/api/club"&&request.method==="POST"){
-  let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+ if(path==="/api/club"){
+  if(request.method!=="POST")return invalidMethod("POST");
+  let body;try{body=await readBody()}catch{return safeJson({error:"JSON inválido"},400)}
   for(let i=0;i<8;i++){
    const code=randomCode(),stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
    const resp=await stub.fetch(new Request("https://club/club-create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}));
@@ -681,13 +601,17 @@ async function handleRequest(request,env){
  }
  const clubMatch=path.match(/^\/api\/club\/([A-HJ-NP-Z2-9]{6})(?:\/(join|state))?$/);
  if(clubMatch){
-  const [_,code,action]=clubMatch,stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
+  const [,code,action]=clubMatch;
+  const method=action==="join"?"POST":"GET";
+  if(request.method!==method)return invalidMethod(method);
+  const stub=env.ARENA.get(env.ARENA.idFromName("club:"+code));
   const headers=new Headers(request.headers);headers.delete("host");
   return stub.fetch(new Request("https://club/club-"+(action==="join"?"join":"state"),{method:request.method,headers,body:request.method==="POST"?request.body:undefined}));
  }
 
- if(path==="/api/room"&&request.method==="POST"){
-  let body;try{body=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+ if(path==="/api/room"){
+  if(request.method!=="POST")return invalidMethod("POST");
+  let body;try{body=await readBody()}catch{return safeJson({error:"JSON inválido"},400)}
   delete body.clubMemberId;
   if(body.clubCode&&body.clubToken){
    const code=String(body.clubCode||"").toUpperCase();
@@ -708,10 +632,13 @@ async function handleRequest(request,env){
  }
  const match=path.match(/^\/api\/room\/([A-HJ-NP-Z2-9]{6})(?:\/(ws|join|start|guess|pass|next|restart|close|heartbeat|ready|kick|handoff|leave|react|hold-next))?$/);
  if(match){
-  const [_,code,action]=match,stub=env.ARENA.get(env.ARENA.idFromName(code));
+  const [,code,action]=match;
+  const method=!action||action==="ws"?"GET":"POST";
+  if(request.method!==method)return invalidMethod(method);
+  const stub=env.ARENA.get(env.ARENA.idFromName(code));
   const suffix=action?"/"+action:"/state",remote=new URL("https://room"+suffix);
   if(action==="join"&&request.method==="POST"){
-    let data;try{data=await request.json()}catch{return safeJson({error:"JSON inválido"},400)}
+    let data;try{data=await readBody()}catch{return safeJson({error:"JSON inválido"},400)}
     delete data.clubMemberId;
     if(data.clubToken){
       const state=await stub.fetch(new Request("https://room/clubmeta"));

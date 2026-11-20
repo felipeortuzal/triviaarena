@@ -1,3 +1,5 @@
+import {resolveAnswer} from "./ranking-match.js";
+
 
 export function normalizeItem(value){
   return String(value??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
@@ -18,7 +20,11 @@ export function resolveGuess(guess,list,limit){
     if([item,...aliases].some(text=>normalizeItem(text)===key))matches.push(index+1);
   });
   if(matches.length>1)return {status:"ambiguous",position:null,label:"Nome ambíguo"};
-  if(matches.length===0)return {status:"unknown",position:null,label:"Não reconhecido"};
+  if(matches.length===0){
+    const match=resolveAnswer(guess,list.items,list.aliases);
+    if(match.index<0)return {status:"unknown",position:null,label:"Não reconhecido"};
+    matches.push(match.index+1);
+  }
   if(matches[0]>limit)return {status:"out-of-cut",position:null,label:"Fora do Top "+limit};
   return {status:"valid",position:matches[0],label:list.items[matches[0]-1]};
 }

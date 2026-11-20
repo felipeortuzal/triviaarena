@@ -337,7 +337,7 @@ function setWizardStep(next){
  function render(){
 
   let content="";
-  if(screen==="home")content=`<div class="rv-home"><section class="rv-hero"><div class="rv-hero-main"><span class="rv-overline">RIVIERA SHOWDOWN — THE SOCIAL GAME CLUB</span><h1>JOGO BOM<br>É JOGO<br><span class="rv-hero-last"><em>COM</em> A TURMA.</span></h1><p>Um sofá, vários celulares e uma disputa que ninguém vai esquecer. Escolha o desafio e veja quem manda na Riviera.</p><div class="rv-hero-actions"><button class="btn lime" data-op="create">CRIAR UMA PARTIDA <span aria-hidden="true">↗</span></button><button class="btn ghost" data-op="join">ENTRAR COM CÓDIGO</button></div><div class="rv-hero-extras"><button class="rv-text-link" data-op="how">COMO FUNCIONA <span>↗</span></button>${session?.token?'<button class="rv-text-link" data-op="resume">RETOMAR MINHA PARTIDA ↗</button>':""}<a class="rv-text-link" href="/offline.html" download="Riviera-Showdown-Offline.html">JOGAR NO MESMO APARELHO ↓</a></div></div><div class="rv-hero-image"><span class="rv-photo-label">A TEMPORADA É DE VOCÊS.</span><span class="rv-photo-number">RS / 26</span><span class="rv-photo-credit">FOTO: LAURENZ KLEINHEIDER / UNSPLASH</span></div></section><section class="rv-games" id="games"><div class="rv-section-heading"><div><span class="section-index">01 / ESCOLHA SEU JOGO</span><h2>HOJE TEM<br><i>REVANCHE.</i></h2></div><p>Duas formas de provar que você conhece mais que os seus amigos. Sem enrolação: criou, convidou, começou.</p></div><div class="rv-game-list"><article class="rv-game rv-game-ranking"><div class="rv-game-number">01</div><div class="rv-game-content"><span class="rv-game-type">ESTRATÉGIA / CONHECIMENTO</span><h3>ESTIMATIVA<br>DE RANKING</h3><p>Quem está na posição certa? Futebol, F1, cinema, geografia entre ${rankings.length||108} rankings e formatos TOP 20, 50, 100 ou 1000.</p><button class="rv-game-cta" data-op="create">JOGAR RANKING <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">#01</span></article><article class="rv-game rv-game-phrases"><div class="rv-game-number">02</div><div class="rv-game-content"><span class="rv-game-type">RACIOCÍNIO / CRIATIVIDADE</span><h3>FRASES &<br>APROXIMAÇÕES</h3><p>Complete ditados populares e ganhe pela resposta mais próxima. Cada palavra conta.</p><button class="rv-game-cta" data-op="create-phrases">JOGAR FRASES <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">“ ”</span></article></div><div class="rv-up-next"><span>EM PRODUÇÃO</span><strong>SEVEN</strong><p>7 suspeitos. 1 verdade. Em breve.</p></div><div class="rv26-release"><span class="rv26-release-kicker">RIVIERA SHOWDOWN / EDIÇÃO 2.8</span><div><strong>DO TOP 10<br>AO TOP 1.000.</strong><p>${rankings.length||108} rankings · Inclui sitcoms por data de estreia, futebol, F1 e cinema. Cada rodada pode ser completamente diferente.</p></div><span class="rv26-release-stamp" aria-hidden="true">1000</span></div></section>${renderClubPanel()}<section class="rv-bottom"><span class="section-index">02 / UMA NOITE. MUITAS HISTÓRIAS.</span><div><strong>VOCÊ TRAZ A TURMA.<br>NÓS TRAZEMOS A DISPUTA.</strong><button class="btn ghost" data-op="create">ABRIR UMA SALA ↗</button></div><details class="rv-rank-details"><summary>CONHEÇA AS ${rankings.length||108} LISTAS DE RANKING <span>+</span></summary><div class="rv-rank-grid">${rankings.map(x=>`<span>${e(x.title)}</span>`).join("")}</div></details></section></div>`;
+  if(screen==="home")content=`<div class="rv-home"><section class="rv-hero"><div class="rv-hero-main"><span class="rv-overline">RIVIERA SHOWDOWN — THE SOCIAL GAME CLUB</span><h1>JOGO BOM<br>É JOGO<br><span class="rv-hero-last"><em>COM</em> A TURMA.</span></h1><p>Um sofá, vários celulares e uma disputa que ninguém vai esquecer. Escolha o desafio e veja quem manda na Riviera.</p><div class="rv-hero-actions"><button class="btn lime" data-op="create">CRIAR UMA PARTIDA <span aria-hidden="true">↗</span></button><button class="btn ghost" data-op="join">ENTRAR COM CÓDIGO</button></div><div class="rv-hero-extras"><button class="rv-text-link" data-op="how">COMO FUNCIONA <span>↗</span></button>${session?.token?'<button class="rv-text-link" data-op="resume">RETOMAR MINHA PARTIDA ↗</button>':""}<a class="rv-text-link" href="/offline.html" download="Riviera-Showdown-Offline.html">JOGAR NO MESMO APARELHO ↓</a></div></div><div class="rv-hero-image"><span class="rv-photo-label">A TEMPORADA É DE VOCÊS.</span><span class="rv-photo-number">RS / 26</span><span class="rv-photo-credit">FOTO: LAURENZ KLEINHEIDER / UNSPLASH</span></div></section><section class="rv-games" id="games"><div class="rv-section-heading"><div><span class="section-index">01 / ESCOLHA SEU JOGO</span><h2>HOJE TEM<br><i>REVANCHE.</i></h2></div><p>Duas formas de provar que você conhece mais que os seus amigos. Sem enrolação: criou, convidou, começou.</p></div><div class="rv-game-list"><article class="rv-game rv-game-ranking"><div class="rv-game-number">01</div><div class="rv-game-content"><span class="rv-game-type">ESTRATÉGIA / CONHECIMENTO</span><h3>ESTIMATIVA<br>DE RANKING</h3><p>Quem está na posição certa? Futebol, F1, cinema, geografia entre ${rankings.length||108} rankings e formatos TOP 20, 50, 100 ou 1000.</p><button class="rv-game-cta" data-op="create">JOGAR RANKING <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">#01</span></article><article class="rv-game rv-game-phrases"><div class="rv-game-number">02</div><div class="rv-game-content"><span class="rv-game-type">RACIOCÍNIO / CRIATIVIDADE</span><h3>FRASES &<br>APROXIMAÇÕES</h3><p>Complete ditados populares e ganhe pela resposta mais próxima. Cada palavra conta.</p><button class="rv-game-cta" data-op="create-phrases">JOGAR FRASES <span>↗</span></button></div><span class="rv-game-watermark" aria-hidden="true">“ ”</span></article></div><div class="rv-up-next"><span>EM PRODUÇÃO</span><strong>SEVEN</strong><p>7 suspeitos. 1 verdade. Em breve.</p></div><div class="rv26-release"><span class="rv26-release-kicker">RIVIERA SHOWDOWN / EDIÇÃO 2.8.1</span><div><strong>DO TOP 10<br>AO TOP 1.000.</strong><p>${rankings.length||108} rankings · Inclui sitcoms por data de estreia, futebol, F1 e cinema. Cada rodada pode ser completamente diferente.</p></div><span class="rv26-release-stamp" aria-hidden="true">1000</span></div></section>${renderClubPanel()}<section class="rv-bottom"><span class="section-index">02 / UMA NOITE. MUITAS HISTÓRIAS.</span><div><strong>VOCÊ TRAZ A TURMA.<br>NÓS TRAZEMOS A DISPUTA.</strong><button class="btn ghost" data-op="create">ABRIR UMA SALA ↗</button></div><details class="rv-rank-details"><summary>CONHEÇA AS ${rankings.length||108} LISTAS DE RANKING <span>+</span></summary><div class="rv-rank-grid">${rankings.map(x=>`<span>${e(x.title)}</span>`).join("")}</div></details></section></div>`;
   if(screen==="create")content=renderCreateWizard();
   if(screen==="join")content=renderJoinPage();
   if(screen==="room"&&!room)content=`<section class="form-page"><h1>CONECTANDO À SALA...</h1><p>Recuperando sua partida.</p></section>`;
@@ -479,17 +479,26 @@ function setWizardStep(next){
   if(ws){const previous=ws;ws=null;previous.close()}
   connectionState="offline";
  }
- function resetSession(){detachRoomSocket();session=null;room=null;lastSignature="";draft="";storage.removeItem(KEY);history.replaceState({},"",location.pathname);}
+ function parkRoom(){
+  detachRoomSocket();
+  history.replaceState({},"",location.pathname);
+ }
+ function resetSession(){
+  parkRoom();session=null;room=null;lastSignature="";draft="";storage.removeItem(KEY);
+ }
+ async function resumeRoom(){
+  history.replaceState({},"","/?room="+session.code);
+  screen="room";render();connect();await sync();
+ }
  async function enterRoom(identity,nick){
   detachRoomSocket();session=identity;room=null;draft="";lastSignature="";seenReactions.clear();
   storage.setItem(NICK,nick);
   const saved=storage.setItem(KEY,JSON.stringify(identity));
-  history.replaceState({},"","/?room="+identity.code);
-  screen="room";render();connect();await sync();
+  await resumeRoom();
   if(!saved)setNotice("Mantenha esta aba aberta. Seu navegador não conseguiu salvar a sessão para depois.");
  }
  async function sendAction(action,body){
-  if(busy)return;
+  if(busy||!session||screen!=="room")return;
   busy=true;
   const owner=session;
   const payload={...body};
@@ -519,16 +528,18 @@ function setWizardStep(next){
  root.addEventListener("click",async event=>{
   const btn=event.target.closest("[data-op]");if(!btn)return;
   const op=btn.dataset.op;
+  if(busy&&["home","leave","resume","create","join","create-phrases","club-jump"].includes(op))return;
   if(op==="home"||op==="leave"){
-    if(op==="leave"&&session){
-      if(room?.phase==="playing"||room?.phase==="reveal"){setNotice("Uma partida está em andamento. Você pode voltar a esta aba depois ou continuar jogando.");return}
+    if(op==="leave"&&session&&["lobby","finished","closed"].includes(room?.phase)){
+      busy=true;
       try{await api("/api/room/"+session.code+"/leave","POST",{})}
       catch(err){if(![403,404,410].includes(err.status)){setNotice("Não foi possível sair agora. Sua sessão continua salva.");return}}
+      finally{busy=false}
       resetSession();
-    }
+    }else{parkRoom()}
     screen="home";render();
   }
-  if(op==="resume"&&session){screen="room";render();connect();sync()}
+  if(op==="resume"&&session){await resumeRoom()}
   if(op==="whatsapp"&&session){const link=location.origin+"/?room="+session.code;window.open("https://wa.me/?text="+encodeURIComponent("🎮 Bora jogar Riviera Showdown! Entra na minha sala: "+link),"_blank","noopener,noreferrer")}
   if(op==="sound"){
    soundEnabled=!soundEnabled;
@@ -559,7 +570,7 @@ function setWizardStep(next){
     await sendAction(op,{playerId});
   }
   if(op==="club-jump"){
-    screen="home";render();if(clubSession)root.querySelector("#social-club")?.scrollIntoView({behavior:"smooth",block:"start"});
+    parkRoom();screen="home";render();if(clubSession)root.querySelector("#social-club")?.scrollIntoView({behavior:"smooth",block:"start"});
     else document.getElementById("club-dialog")?.showModal();
   }
   if(op==="share-open"&&session){document.getElementById("share-dialog")?.showModal()}
@@ -580,7 +591,7 @@ function setWizardStep(next){
   if(op==="club-refresh"){await loadClub();setNotice("Placar atualizado.")}
   if(op==="club-copy"&&clubSession){try{await navigator.clipboard.writeText(clubSession.code);setNotice("Código do clube copiado.")}catch{setNotice("Código do clube: "+clubSession.code)}}
   if(op==="club-leave"){if(!confirm("Sair deste clube neste aparelho? As estatísticas continuarão salvas no servidor."))return;clubSession=null;club=null;storage.removeItem(CLUB_KEY);render()}
-  if(op==="create"||op==="join"||op==="create-phrases"){if(op!=="join")await loadRankings();createStep=0;screen=op==="join"?"join":"create";render();if(op==="create-phrases"){const input=document.getElementById("game-type");if(input){input.value="phrases";updateGameType()}}}
+  if(op==="create"||op==="join"||op==="create-phrases"){if(op!=="join")await loadRankings();parkRoom();createStep=0;screen=op==="join"?"join":"create";render();if(op==="create-phrases"){const input=document.getElementById("game-type");if(input){input.value="phrases";updateGameType()}}}
   if(op==="mode-pick"){
    const form=document.getElementById("create-form");if(form){form.elements.gameType.value=btn.dataset.value;updateGameType()}
   }
@@ -642,7 +653,7 @@ function setWizardStep(next){
    if(form.id==="join-form"){
     const fd=new FormData(form),code=String(fd.get("code")).trim().toUpperCase(),nick=String(fd.get("nick")).trim();
     if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code))throw Error("Código inválido, confira os seis caracteres");
-    if(session?.code===code&&session.token){screen="room";render();connect();await sync();return}
+    if(session?.code===code&&session.token){await resumeRoom();return}
     const data=await api("/api/room/"+code+"/join","POST",{nick,...(clubSession?.token?{clubToken:clubSession.token}:{})});
     await enterRoom({...data,code},nick);
    }

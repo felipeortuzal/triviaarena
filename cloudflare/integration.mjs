@@ -1,6 +1,6 @@
 import {PHRASES} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.8.0";
+const VERSION="2.8.1";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -27,6 +27,9 @@ assert.equal(list.data.rankings.filter(b=>b.count>=1000).length,5);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
 assert.equal(list.data.rankings.some(b=>b.id==="epl-2025-26"),true);
 assert.equal(list.data.rankings.some(b=>b.group==="Geografia"),true);
+assert.equal((await call("/api/room","POST",[])).status,400);
+assert.equal((await call(p+"/join","GET")).status,405);
+assert.equal((await call(p+"/start","GET",null,host.token)).status,405);
 assert.equal((await call(p+"/ready","POST",{},guest.token)).status,200);
 const ready=(await call(p,"GET",null,host.token)).data;
 assert.equal(ready.players.find(q=>q.id===guest.id).ready,true);
@@ -97,7 +100,8 @@ for(let n=1;n<=3;n++){
  assert.equal(state.version,VERSION);
  assert.deepEqual(state.config.categoryIds,["pokemon"]);
  assert.equal(state.config.durationSeconds,20);
- assert.equal(state.question.category,"Pokédex Nacional — primeiros 30");
+ assert.match(state.question.category,/^Pokédex Nacional/);
+ assert.ok([10,20,30].includes(state.question.limit));
  assert.equal(state.question.special,n===3);
  assert.ok(state.deadline-state.serverNow>15000&&state.deadline-state.serverNow<=20000);
  assert.equal(state.players.length,2);
@@ -377,6 +381,8 @@ assert.equal(restarted.round,1);
 assert.notEqual(restarted.roundId,firstRoundId);
 assert.ok(restarted.players.every(p=>p.points===0&&!p.submitted));
 await call(duelPath+"/close","POST",{},duel.token);
+assert.equal((await call(duelPath,"GET",null,duel.token)).data.phase,"closed");
+assert.equal((await call(duelPath+"/handoff","POST",{playerId:rival.id},duel.token)).status,410);
 
 const large=(await call("/api/room","POST",{nick:"Pessoa 1",mode:"rounds",target:1,categoryIds:["movies-1970s","f1-teams-2010"],durationSeconds:45})).data;
 const fullPath="/api/room/"+large.code;

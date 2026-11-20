@@ -107,7 +107,7 @@ try{
  await pa.reload({waitUntil:"domcontentloaded"});
  await pa.locator(".rv27-answer-confirm").waitFor();
  assert.match(await pa.locator(".rv27-answer-confirm").innerText(),/Bulbassaur/);
- await pb.locator('#guess').fill(options[1]);
+ await pb.locator('#guess').fill(options.find(name=>name!=="Bulbasaur"));
  await pb.locator('#guess-form button[type="submit"]').click();
  await pa.getByText("FIM DE JOGO").waitFor({timeout:10000});
  await pb.getByText("FIM DE JOGO").waitFor({timeout:10000});
@@ -352,6 +352,12 @@ try{
  await enter(switchRooms.a.code,"Primeiro amigo");
  await swapPage.waitForFunction(code=>window.location.search.includes(code),switchRooms.a.code);
  assert.ok(openedSockets.some(url=>url.includes("/"+switchRooms.a.code+"/ws")),"Socket da primeira sala precisa abrir");
+ await swapPage.locator('.nav-brand').click();
+ await swapPage.locator(".rv-hero").waitFor({state:"visible"});
+ assert.equal(new URL(swapPage.url()).search,"");
+ await swapPage.locator('[data-op="resume"]').click();
+ await swapPage.locator(".roomcode").waitFor({state:"visible"});
+ assert.equal(new URL(swapPage.url()).searchParams.get("room"),switchRooms.a.code);
  await swapPage.locator('.nav-brand').click();
  await swapPage.locator(".rv-hero").waitFor({state:"visible"});
  await enter(switchRooms.b.code,"Segundo amigo");

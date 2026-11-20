@@ -50,3 +50,10 @@ test("empate integral: todos recebem pontuação de primeiro",()=>{
   assert.deepEqual(["a","b","c"].map(u=>rows[u].place),[1,1,1]);
   assert.deepEqual(["a","b","c"].map(u=>rows[u].points),[5,5,5]);
 });
+
+test("Ranking local corrige erros de digitação e respeita o recorte",()=>{
+  const list={...fixture,items:["How I Met Your Mother",...fixture.items.slice(1,29),"Charmander"]};
+  assert.deepEqual(resolveGuess("How I Met Yor Mother",list,25),{status:"valid",position:1,label:"How I Met Your Mother"});
+  assert.equal(resolveGuess("Charmandre",list,25).status,"out-of-cut");
+  assert.equal(resolveGuess("Charmandre",list,30).position,30);
+});

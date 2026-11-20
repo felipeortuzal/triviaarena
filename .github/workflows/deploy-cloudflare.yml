@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "cloudflare/**"
+      - "ranking-match.js"
       - "wrangler.jsonc"
       - "assets/**"
       - "riviera-showdown.html"
