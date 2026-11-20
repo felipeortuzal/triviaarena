@@ -17,7 +17,13 @@
  if(session?.code&&session?.token&&(!invite||session.code===invite))screen="room";
  try{soundEnabled=storage.getItem("riviera-sound-v1")==="on"}catch{}
  const e=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- function setNotice(message){notice.textContent=message||"";notice.hidden=!message}
+ let noticeTimer=null;
+ function setNotice(message){
+  if(noticeTimer)clearTimeout(noticeTimer);
+  notice.textContent=message||"";
+  notice.hidden=!message;
+  if(message){notice.setAttribute("role","alert");noticeTimer=setTimeout(()=>{notice.hidden=true;notice.textContent="";noticeTimer=null},4500)}
+ }
  function updateNetwork(){const n=document.getElementById("net-pill");if(n){const ok=connectionState==="connected"&&navigator.onLine;n.className="net-pill "+(ok?"connected":"disconnected");n.textContent=ok?"● AO VIVO":"○ RECONECTANDO";}}
  async function loadRankings(){if(rankings.length)return;try{const r=await fetch("/api/rankings",{cache:"no-store"});const v=await r.json();if(r.ok&&Array.isArray(v.rankings)){rankings=v.rankings;if(screen==="home")render()}}catch{}}
 
