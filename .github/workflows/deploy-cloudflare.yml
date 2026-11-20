@@ -71,5 +71,5 @@ jobs:
           if cmp -s cloudflare/public/game.js "$RUNNER_TEMP/riviera-live.js"; then
             node cloudflare/playtest.mjs
           else
-            echo "::notice::O domínio ainda serve outra revisão. Execute o workflow após a publicação para validar a partida pública."
+            echo "::error::O domínio oficial não está servindo a revisão publicada; teste de produção não validado."\n            exit 1
           fi
