@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,chatRoundAwards} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,chatRoundAwards,preparePracticeBots,fillPracticeBots} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -333,4 +333,19 @@ test("2.9: 5 no exato, 2 e 1 divididos por empate, inválido zero, meta 25",()=>
  r.answers={a:{answer:"Exato",rank:50,at:1},b:{answer:"Antes",rank:49,at:3},c:{answer:"Depois",rank:51,at:2},d:{answer:"Fora",rank:null,at:4}};
  assert.equal(finalizeRoom(r,Date.now()),true);assert.equal(r.players.a.points,25);assert.equal(r.players.b.points,1.5);assert.equal(r.players.c.points,1.5);assert.equal(r.players.d.points,0);assert.equal(r.phase,"finished");
  assert.deepEqual([...chatRoundAwards([{pid:"a",distance:2},{pid:"b",distance:2},{pid:"c",distance:5},{pid:"d",distance:7}])],[["a",2.5],["b",2.5],["c",1],["d",0]]);
+});
+
+test("2.10: bots use preplanned guesses, never duplicate player ranks, and award exact answer",()=>{
+ const r=make("race",25);r.practice={difficulty:"normal"};r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["municipios-pop-2022"]});
+ r.players.b.bot=true;r.players.c={nick:"Bot C",points:0,bot:true};r.players.d={nick:"Bot D",points:0,bot:true};
+ chooseQuestion(r);preparePracticeBots(r,()=>.5);
+ assert.equal(r.botPlans.length,3);assert.equal(finalizeRoom(r,Date.now()),false);
+ r.answers.a={answer:"Exato",rank:r.question.position,at:Date.now()};
+ assert.equal(finalizeRoom(r,Date.now()),true);assert.equal(r.players.a.points,5);
+ assert.equal(new Set(Object.values(r.answers).map(x=>x.rank)).size,4);
+ assert.equal(r.phase,"reveal");
+});
+test("2.10: bots finish the round when the human runs out of time",()=>{
+ const r=make("race",25);r.practice={difficulty:"hard"};r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["municipios-pop-2022"]});r.players.b.bot=true;
+ chooseQuestion(r);assert.equal(finalizeRoom(r,r.deadline+1),true);assert.equal(r.players.a.points,0);assert.ok(r.players.b.points>0);
 });
