@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,chatRoundAwards} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -314,4 +314,23 @@ test("a categoria de sitcoms usa datas verificadas e reconhece abreviações e d
  for(const guess of ["How I Meet Ur Mother","HIMYM","Como eu conheci sua mãe"]){
   assert.equal(resolveAnswer(guess,bank.items).canonical,"How I Met Your Mother");
  }
+});
+
+test("2.9: modo da turma limita ao TOP 100 histórico, sem Turbo e sem respostas sugeridas",()=>{
+ const c=normalizeRoomConfig({rankScale:"chat",turbo:true,autoNext:true});
+ assert.equal(c.rankScale,"chat");assert.equal(c.turbo,false);assert.equal(c.autoNext,false);
+ assert.ok(c.categoryIds.length>0);
+ assert.ok(c.categoryIds.every(id=>isChatBank(BANKS.find(b=>b.id===id))));
+ assert.throws(()=>normalizeRoomConfig({rankScale:"chat",categoryIds:["pokemon"]}),/TOP 100/);
+ const r=make("race",25);r.config=c;
+ const used=new Set();
+ for(let n=0;n<40;n++){chooseQuestion(r);assert.equal(r.question.limit,100);assert.ok(r.question.position>=1&&r.question.position<=100);assert.equal(used.has(r.question.key),false);used.add(r.question.key);}
+});
+test("2.9: 5 no exato, 2 e 1 divididos por empate, inválido zero, meta 25",()=>{
+ const r=make("race",25);r.players.c={nick:"C",points:0};r.players.d={nick:"D",points:0};
+ r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["municipios-pop-2022"]});
+ r.players.a.points=20;chooseQuestion(r);r.question.position=50;
+ r.answers={a:{answer:"Exato",rank:50,at:1},b:{answer:"Antes",rank:49,at:3},c:{answer:"Depois",rank:51,at:2},d:{answer:"Fora",rank:null,at:4}};
+ assert.equal(finalizeRoom(r,Date.now()),true);assert.equal(r.players.a.points,25);assert.equal(r.players.b.points,1.5);assert.equal(r.players.c.points,1.5);assert.equal(r.players.d.points,0);assert.equal(r.phase,"finished");
+ assert.deepEqual([...chatRoundAwards([{pid:"a",distance:2},{pid:"b",distance:2},{pid:"c",distance:5},{pid:"d",distance:7}])],[["a",2.5],["b",2.5],["c",1],["d",0]]);
 });
