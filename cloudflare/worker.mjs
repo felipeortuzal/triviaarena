@@ -4,7 +4,7 @@ import sitcoms from "./data/sitcoms.json" with {type:"json"};
 // Riviera Showdown — Cloudflare Workers + SQLite-backed Durable Objects.
 
 // All guesses and scoring are authoritative inside the room object.
-const VERSION = "2.8.1";
+const VERSION = "2.9.0";
 
 export const BANKS = [{"id":"area","title":"Maiores países e territórios","source":"Worldometer — Maiores Países do Mundo","snapshot":"Consulta: novembro de 2026","items":["Rússia","Canadá","China","Estados Unidos","Brasil","Austrália","Índia","Argentina","Cazaquistão","Argélia","RD Congo","Groenlândia","Arábia Saudita","México","Indonésia","Sudão","Líbia","Irã","Mongólia","Peru","Chade","Níger","Angola","Mali","África do Sul","Colômbia","Etiópia","Bolívia","Mauritânia","Egito","Tanzânia","Nigéria","Venezuela","Paquistão","Namíbia","Moçambique","Turquia","Chile","Zâmbia","Mianmar","Afeganistão","Somália","República Centro-Africana","Sudão do Sul","Ucrânia","Madagascar","Botsuana","Quênia","França","Iêmen","Tailândia","Espanha","Turcomenistão","Camarões","Papua-Nova Guiné","Suécia","Uzbequistão","Marrocos","Iraque","Paraguai","Zimbábue","Japão","Alemanha","Filipinas","Congo","Finlândia","Vietnã","Malásia","Noruega","Costa do Marfim","Polônia","Omã","Itália","Equador","Burkina Faso","Nova Zelândia","Gabão","Saara Ocidental","Guiné","Reino Unido","Uganda","Gana","Romênia","Laos","Guiana","Bielorrússia","Quirguistão","Senegal","Síria","Camboja","Uruguai","Suriname","Tunísia","Bangladesh","Nepal","Tajiquistão","Grécia","Nicarágua","Coreia do Norte","Malawi"]},{"id":"population","title":"Mais populosos do planeta","source":"Worldometer — Population by Country 2026","snapshot":"Estimativa 2026","items":["Índia","China","Estados Unidos","Indonésia","Paquistão","Nigéria","Brasil","Bangladesh","Rússia","Etiópia","México","Japão","Egito","Filipinas","RD Congo","Vietnã","Irã","Turquia","Alemanha","Tanzânia","Tailândia","Reino Unido","França","África do Sul","Itália","Quênia","Mianmar","Colômbia","Sudão","Uganda","Coreia do Sul","Argélia","Iraque","Espanha","Argentina","Afeganistão","Iêmen","Canadá","Angola","Ucrânia","Marrocos","Polônia","Uzbequistão","Moçambique","Malásia","Gana","Arábia Saudita","Peru","Madagascar","Costa do Marfim","Camarões","Nepal","Níger","Venezuela","Austrália","Coreia do Norte","Síria","Mali","Burkina Faso","Sri Lanka","Taiwan","Malawi","Zâmbia","Chade","Cazaquistão","Somália","Chile","Senegal","Guatemala","Romênia","Países Baixos","Equador","Camboja","Zimbábue","Guiné","Benim","Ruanda","Burundi","Bolívia","Sudão do Sul","Tunísia","Haiti","Bélgica","República Dominicana","Jordânia","Emirados Árabes Unidos","Honduras","Tajiquistão","Papua-Nova Guiné","Cuba","Suécia","Chéquia","Azerbaijão","Portugal","Togo","Grécia","Israel","Hungria","Áustria","Suíça"]},{"id":"gdp","title":"Maiores economias do mundo","source":"Worldometer / FMI — GDP by Country 2025","snapshot":"FMI WEO outubro de 2026","items":["Estados Unidos","China","Alemanha","Japão","Reino Unido","Índia","França","Rússia","Itália","Canadá","Brasil","Espanha","Coreia do Sul","Austrália","México","Turquia","Indonésia","Países Baixos","Arábia Saudita","Suíça","Polônia","Taiwan","Bélgica","Argentina","Irlanda","Suécia","Israel","Emirados Árabes Unidos","Singapura","Áustria","Tailândia","Noruega","Vietnã","Filipinas","Malásia","Dinamarca","Bangladesh","Colômbia","Romênia","África do Sul","Hong Kong","Paquistão","Chéquia","Irã","Egito","Chile","Portugal","Peru","Finlândia","Cazaquistão","Nigéria","Argélia","Grécia","Iraque","Nova Zelândia","Hungria","Catar","Ucrânia","Cuba","Marrocos","Kuwait","Eslováquia","Uzbequistão","Angola","Quênia","Bulgária","Equador","Porto Rico","República Dominicana","Etiópia","Guatemala","Gana","Omã","Sri Lanka","Croácia","Costa Rica","Venezuela","Luxemburgo","Sérvia","Costa do Marfim","Bielorrússia","Lituânia","RD Congo","Panamá","Tanzânia","Uruguai","Mianmar","Eslovênia","Turcomenistão","Azerbaijão","Uganda","Bolívia","Jordânia","Camarões","Zimbábue","Tunísia","Macau","Camboja","Paraguai","Bahrein"]},{"id":"movies","title":"Filmes mais bem avaliados","source":"IMDb Top 250 — cópia histórica de 01/11/2026","snapshot":"Retrato: 1º de novembro de 2026","items":["The Shawshank Redemption","The Godfather","The Dark Knight","The Godfather: Part II","The Lord of the Rings: The Return of the King","12 Angry Men","Schindler's List","The Lord of the Rings: The Fellowship of the Ring","Pulp Fiction","The Lord of the Rings: The Two Towers","The Good, the Bad and the Ugly","Forrest Gump","Inception","Fight Club","Star Wars: Episode V - The Empire Strikes Back","The Matrix","Interstellar","Goodfellas","One Flew Over the Cuckoo's Nest","Se7en","It's a Wonderful Life","The Silence of the Lambs","Saving Private Ryan","Seven Samurai","The Green Mile","Cidade de Deus","Life Is Beautiful","Terminator 2: Judgment Day","Back to the Future","Star Wars: Episode IV - A New Hope","Spirited Away","Gladiator","The Pianist","Kill Bill: The Whole Bloody Affair","Parasite","Grave of the Fireflies","Harakiri","The Lion King (1994)","Psycho","The Departed","Whiplash","The Prestige","American History X","Spider-Man: Across the Spider-Verse","Cinema Paradiso","Léon: The Professional","Casablanca","The Intouchables","The Usual Suspects","Django Unchained","Alien","Rear Window","Modern Times","Once Upon a Time in the West","WALL-E","City Lights","Apocalypse Now","Avengers: Infinity War","Memento","Dune: Part Two","Raiders of the Lost Ark","Spider-Man: Into the Spider-Verse","The Lives of Others","The Odyssey (2026)","Sunset Boulevard","Witness for the Prosecution","Paths of Glory","Inglourious Basterds","The Shining","The Great Dictator","Aliens","High and Low","12th Fail","Avengers: Endgame","Good Will Hunting","Coco","Toy Story (1995)","The Dark Knight Rises","Amadeus","Your Name","3 Idiots","Braveheart","Das Boot","Princess Mononoke","Oldboy","Dr. Strangelove","American Beauty","Attack on Titan: The Last Attack","Capernaum","Singin' in the Rain","Once Upon a Time in America","Joker (2019)","Toy Story 3","Star Wars: Episode VI - Return of the Jedi","Come and See","Requiem for a Dream","Incendies","Ikiru","The Hunt (2012)","Eternal Sunshine of the Spotless Mind"]}];
 BANKS.push(...[{"id":"br-area","title":"Estados do Brasil por área territorial","source":"IBGE — Áreas Territoriais 2025","snapshot":"IBGE, 2025","sourceUrl":"https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/15761-areas-territoriais.html","items":["Amazonas","Pará","Mato Grosso","Minas Gerais","Bahia","Mato Grosso do Sul","Goiás","Maranhão","Rio Grande do Sul","Tocantins","Piauí","São Paulo","Rondônia","Roraima","Paraná","Acre","Ceará","Amapá","Pernambuco","Santa Catarina","Paraíba","Rio Grande do Norte","Espírito Santo","Rio de Janeiro","Alagoas","Sergipe","Distrito Federal"]},{"id":"br-pop","title":"Estados brasileiros mais populosos","source":"IBGE — Estimativas da População das UFs","snapshot":"IBGE, 2025","sourceUrl":"https://agenciadenoticias.ibge.gov.br/media/com_mediaibge/arquivos/8383bdedce5a6d972e60dd32671e533a.pdf","items":["São Paulo","Minas Gerais","Rio de Janeiro","Bahia","Paraná","Rio Grande do Sul","Pernambuco","Ceará","Pará","Santa Catarina","Goiás","Maranhão","Amazonas","Paraíba","Espírito Santo","Mato Grosso","Rio Grande do Norte","Piauí","Alagoas","Distrito Federal","Mato Grosso do Sul","Sergipe","Rondônia","Tocantins","Acre","Amapá","Roraima"]},{"id":"pokemon","title":"Pokédex Nacional — primeiros 30","source":"The Pokémon Company — National Pokédex","snapshot":"Pokédex Nacional #1–30","sourceUrl":"https://www.pokemon.com/pokedex/","items":["Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran♀","Nidorina"]},{"id":"elementos","title":"Tabela Periódica — ordem atômica","source":"IUPAC — Periodic Table","snapshot":"Números atômicos 1–30","sourceUrl":"https://iupac.org/what-we-do/periodic-table-of-elements/","items":["Hidrogênio","Hélio","Lítio","Berílio","Boro","Carbono","Nitrogênio","Oxigênio","Flúor","Neônio","Sódio","Magnésio","Alumínio","Silício","Fósforo","Enxofre","Cloro","Argônio","Potássio","Cálcio","Escândio","Titânio","Vanádio","Cromo","Manganês","Ferro","Cobalto","Níquel","Cobre","Zinco"]}]);
@@ -49,14 +49,16 @@ function suggestAnswer(raw,options){
 
 
 export const ROUND_DURATIONS=[20,30,45];
+export function isChatBank(bank){return bank.items.length>=100 && bank.kind!=="ordem" && !/games|futebol|fórmula|moda|maquiagem/i.test(bank.group||"") && !/2026/.test(bank.snapshot||"") && !!bank.sourceUrl;}
 export function normalizeRoomConfig(input={}){
  const duration=ROUND_DURATIONS.includes(Number(input.durationSeconds))?Number(input.durationSeconds):30;
- const categoryIds=Array.isArray(input.categoryIds)?
+ let categoryIds=Array.isArray(input.categoryIds)?
  [...new Set(input.categoryIds.filter(id=>typeof id==="string"&&BANKS.some(b=>b.id===id)))]:BANKS.map(b=>b.id);
  if(categoryIds.length===0)throw new Error("Escolha pelo menos uma categoria válida.");
- const rankScale=["mix","classic","extreme"].includes(input.rankScale)?input.rankScale:"mix";
+ const rankScale=["mix","classic","extreme","chat"].includes(input.rankScale)?input.rankScale:"mix";
+ if(rankScale==="chat"){categoryIds=categoryIds.filter(id=>BANKS.some(b=>b.id===id&&isChatBank(b)));if(!categoryIds.length)throw Error("Selecione um ranking TOP 100 histórico elegível para o modo Chat.");}
  if(rankScale==="extreme"&&!categoryIds.some(id=>BANKS.some(bank=>bank.id===id&&bank.items.length>=100)))throw new Error("O modo Extremo precisa de ao menos um ranking TOP 100 ou maior.");
- return {durationSeconds:duration,categoryIds,turbo:input.turbo===true,autoNext:input.autoNext===true,rankScale};
+ return {durationSeconds:duration,categoryIds,turbo:rankScale!=="chat"&&input.turbo===true,autoNext:rankScale!=="chat"&&input.autoNext===true,rankScale};
 }
 export function emptyStats(){return {played:0,valid:0,exact:0,distanceSum:0,first:0,second:0,turboWins:0,fastestExactMs:null,matches:0,wins:0};}
 function ensureStats(p){if(!p.stats)p.stats=emptyStats();if(!p.matchStats)p.matchStats=emptyStats();}
@@ -114,6 +116,7 @@ export function phraseQuestion(room){
 
 export function rankFormats(size){return size<10?(size>0?[size]:[]):[10,20,30,50,100,200,500,1000].filter(n=>n<=size);}
 function roomFormats(size, scale, seats) {
+ if(scale==="chat")return size>=100&&seats<=100?[100]:[];
  const formats = rankFormats(size).filter(n => n >= seats && (scale === "extreme" ? n >= 100 : scale !== "classic" || n <= 50));
  // Some real lists end between the usual cuts, e.g. a championship with 12 teams.
  if (!formats.length && size >= seats && size < 20 && scale !== "extreme") return [size];
@@ -158,7 +161,7 @@ export function chooseQuestion(room){
  const groups=new Map();
  const bankFormats = new Map();
  for(let idx=0;idx<BANKS.length;idx++){
-  const bank=BANKS[idx];if(!allowed.has(bank.id))continue;
+  const bank=BANKS[idx];if(!allowed.has(bank.id)||(room.config?.rankScale==="chat"&&!isChatBank(bank)))continue;
   const formats = roomFormats(bank.items.length, room.config?.rankScale, seats).filter(limit => (counts.get(idx + ":" + limit) || 0) < limit);
   if (!formats.length) continue;
   bankFormats.set(idx, formats);
@@ -186,7 +189,7 @@ export function chooseQuestion(room){
  const formats=bankFormats.get(bi),weights={10:1,20:2.3,30:3.2,50:3.2,100:3.5,200:2.1,500:2,1000:2.3};
  let picked;
  for(let i=0;i<50;i++){
-  const limit=randomWeighted(formats,weights),position=pickTarget(limit),key=bi+":"+limit+":"+position;
+  const limit=randomWeighted(formats,weights),position=room.config?.rankScale==="chat"?1+Math.floor(Math.random()*limit):pickTarget(limit),key=bi+":"+limit+":"+position;
   if(!used.has(key)){picked={bi,limit,position,key};break;}
  }
  if(!picked){
@@ -204,6 +207,14 @@ export function chooseQuestion(room){
  room.phase="playing";room.nextAt=null;room.deadline=Date.now()+(room.config?.durationSeconds||30)*1000;
 }
 
+// Equal distances share the occupied podium points; exact replaces first prize.
+export function chatRoundAwards(scored){
+ const awards=new Map();
+ for(let i=0;i<scored.length;){let j=i+1;while(j<scored.length&&scored[j].distance===scored[i].distance)j++;
+  const pool=Array.from({length:j-i},(_,k)=>i+k===0&&scored[i].distance===0?5:([3,2,1][i+k]||0)).reduce((a,b)=>a+b,0);
+  for(let k=i;k<j;k++)awards.set(scored[k].pid,pool/(j-i));i=j;
+ }return awards;
+}
 export function finalizeRoom(room,now){
  if(room.phase!=="playing")return false;
  const every=Object.keys(room.players).every(pid=>Object.hasOwn(room.answers,pid));
@@ -211,9 +222,10 @@ export function finalizeRoom(room,now){
  const q=room.question,isPhrase=q?.type==="phrase";
  const bank=isPhrase?null:BANKS[q.bi],board=bank?.items;
  const scored=Object.entries(room.answers).filter(([,a])=>isPhrase?(a.quality||0)>=60:a.rank!==null).map(([pid,a])=>({pid,nick:room.players[pid]?.nick||"Jogador",answer:a.answer,rank:a.rank,quality:isPhrase?(a.quality||0):null,distance:isPhrase?100-(a.quality||0):Math.abs(a.rank-q.position),at:a.at})).sort((a,b)=>a.distance-b.distance||a.at-b.at);
+ const chatAwards=!isPhrase&&room.config?.rankScale==="chat"?chatRoundAwards(scored):null;
  const results=Object.entries(room.players).map(([pid,p])=>{
    const a=room.answers[pid],found=scored.find(t=>t.pid===pid),index=scored.findIndex(t=>t.pid===pid);
-   const basePoints=found?(room.mode==="race"?(index===0?1:0):index===0?2:index===1?1:0):0;
+   const basePoints=chatAwards?(chatAwards.get(pid)||0):found?(room.mode==="race"?(index===0?1:0):index===0?2:index===1?1:0):0;
    const earned=basePoints*(room.special?2:1);
    p.points+=earned;
    ensureStats(p);
@@ -237,7 +249,7 @@ export function finalizeRoom(room,now){
  const solution=isPhrase?PHRASES[q.index].answer:board[q.position-1];
  room.lastResults={type:isPhrase?"phrase":"ranking",target:solution,prefix:isPhrase?PHRASES[q.index].lead:null,position:isPhrase?null:q.position,round:room.round,limit:isPhrase?null:q.limit,source:isPhrase?"Sabedoria popular":bank.source,sourceUrl:isPhrase?null:bank.sourceUrl||null,snapshot:isPhrase?null:bank.snapshot,special:!!room.special,results};
  room.history=(room.history||[]).concat({round:room.round,category:isPhrase?"Frases & Aproximações":BANKS[q.bi].title,target:solution,position:isPhrase?null:q.position,special:!!room.special,results:results.map(t=>({pid:t.pid,nick:t.nick,distance:t.distance,quality:t.quality,earned:t.earned}))}).slice(-60);
- room.phase=(room.mode==="race"?Object.values(room.players).some(p=>p.points>=room.target)||room.round>=30:room.round>=room.target)?"finished":"reveal";
+ room.phase=(room.mode==="race"?Object.values(room.players).some(p=>p.points>=room.target)||(room.config?.rankScale!=="chat"&&room.round>=30):room.round>=room.target)?"finished":"reveal";
  room.nextAt=room.phase==="reveal"&&room.config?.autoNext?now+9000:null;
  if(room.phase==="finished"){
    room.matchesPlayed=(room.matchesPlayed||0)+1;
@@ -397,11 +409,11 @@ export class ArenaRoom{
    const now=Date.now();
    if(path==="/create"){
     if(room)return {error:"Código já está em uso",status:409};
-    const nick=String(body.nick||"").trim().slice(0,24),mode=body.mode==="race"?"race":"rounds";
+    const nick=String(body.nick||"").trim().slice(0,24),mode=body.rankScale==="chat"&&body.gameType!=="phrases"?"race":body.mode==="race"?"race":"rounds";
     if(nick.length<2)return {error:"Digite um nome com pelo menos 2 letras",status:400};
-    const target=Math.max(1,Math.min(mode==="race"?15:20,Number.parseInt(body.target)||5));
+    const target=Math.max(1,Math.min(mode==="race"?(body.rankScale==="chat"?100:15):20,Number.parseInt(body.target)||(body.rankScale==="chat"?25:5)));
     let config;
-    try{config=normalizeRoomConfig(body.gameType==="phrases"?{...body,categoryIds:BANKS.map(b=>b.id)}:body)}catch(e){return {error:e.message,status:400};}
+    try{config=normalizeRoomConfig(body.gameType==="phrases"?{...body,rankScale:"mix",categoryIds:BANKS.map(b=>b.id)}:body)}catch(e){return {error:e.message,status:400};}
     const id=crypto.randomUUID(),secret=randomToken(),newRoom={clubCode:body.clubCode||null,matchId:crypto.randomUUID(),gameType:body.gameType==="phrases"?"phrases":"ranking",host:id,players:{[id]:{nick,token:secret,points:0,ready:false,lastSeen:now,clubMemberId:body.clubMemberId||null,stats:emptyStats(),matchStats:emptyStats()}},mode,target,config,round:0,used:[],answers:{},phase:"lobby",created:now,matchesPlayed:0,history:[],awards:[]};
     return {change:true,state:newRoom,data:{id,token:secret}};
    }
@@ -429,7 +441,7 @@ export class ArenaRoom{
     const own=room.phase==="playing"?room.answers[id]:null;
     const mySubmission=own?{answer:own.answer,original:own.original||null}:null;
     const players=Object.entries(room.players).map(([pid,p])=>({id:pid,nick:p.nick,points:p.points,ready:!!p.ready,online:now-(p.lastSeen||room.created||now)<35000,submitted:!!room.answers[pid],stats:getPlayerStats(p)})).sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick));
-    return {change:changed,state:room,data:{version:VERSION,roundId:currentRoundId(room),mySubmission,capacity:roomCapacity(room),clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,sourceUrl:bank.sourceUrl||null,rankType:bank.kind||"ranking",tier:q.tier||"CLÁSSICO",position:q.position,limit:q.limit,special:!!room.special,options:alphabeticalOptions(bank,q.limit)}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
+    return {change:changed,state:room,data:{version:VERSION,roundId:currentRoundId(room),mySubmission,capacity:roomCapacity(room),clubCode:room.clubCode||null,gameType:room.gameType||"ranking",phase:room.phase,code:room.code,host:room.host,me:id,isHost,mode:room.mode,target:room.target,config:room.config||normalizeRoomConfig(),special:!!room.special,matchesPlayed:room.matchesPlayed||0,nextAt:room.phase==="reveal"?room.nextAt||null:null,history:room.history||[],awards:room.phase==="finished"?room.awards||[]:[],round:room.round,deadline:room.deadline||null,serverNow:now,players,question:q?(q.type==="phrase"?{type:"phrase",category:"Ditados populares",lead:PHRASES[q.index].lead,source:"Sabedoria popular · ditados tradicionais",snapshot:"Português brasileiro",special:!!room.special,options:[]}:{type:"ranking",category:bank.title,source:bank.source,snapshot:bank.snapshot,sourceUrl:bank.sourceUrl||null,rankType:bank.kind||"ranking",tier:q.tier||"CLÁSSICO",position:q.position,limit:q.limit,special:!!room.special,options:room.config?.rankScale==="chat"?[]:alphabeticalOptions(bank,q.limit)}):null,lastResults:room.phase==="reveal"||room.phase==="finished"?room.lastResults:null,reactions:(room.reactions||[]).filter(evt=>now-evt.at<8500).map(evt=>({id:evt.id,emoji:evt.emoji,nick:evt.nick,at:evt.at}))}};
    }
    if(room.phase==="closed")return {error:"Sala encerrada. Solicite outro convite.",status:410};
    if(!isHost&&["start","next","restart","close","kick","handoff","hold-next"].includes(path.slice(1)))return {error:"Somente o anfitrião pode fazer isso",status:403};
@@ -508,10 +520,15 @@ export class ArenaRoom{
         // Reveal the phrase and its similarity only after the round closes.
       }else{
         const bank=BANKS[room.question.bi],options=bank.items.slice(0,room.question.limit),matched=resolveAnswer(raw,options),index=matched.index;
-        if(index<0)return {error:"Item não reconhecido. Tente uma sugestão: "+suggestAnswer(raw,options).join(", "),status:422};
-        rank=index+1;answer=bank.items[index];
-        if(matched.corrected)correction={original:raw,canonical:answer,method:matched.method};
-        if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
+        if(index<0){
+          if(room.config?.rankScale!=="chat")return {error:"Item não reconhecido. Confira a grafia e tente novamente.",status:422};
+          answer=raw;
+          if(Object.values(room.answers).some(a=>!a.passed&&normalizeAnswer(a.answer)===normalizeAnswer(raw)))return {error:"Outro jogador já enviou esse palpite. Tente outro.",status:409};
+        }else{
+          rank=index+1;answer=bank.items[index];
+          if(matched.corrected)correction={original:raw,canonical:answer,method:matched.method};
+          if(Object.values(room.answers).some(a=>a.rank===rank))return {error:"Outro jogador já escolheu esse item! Tente outro.",status:409};
+        }
       }
     }
     room.answers[id]={answer,rank,quality,at:now,passed:path==="/pass",...(correction?{original:correction.original}:{})};
