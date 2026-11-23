@@ -1139,3 +1139,15 @@ a{color:inherit}
 @media(max-width:760px){.game-page.rv-live-arena .rv24-playing-grid>.board{display:block!important;min-height:0!important}.game-page.rv-live-arena .board .rv-live-summary{display:flex!important}.game-page.rv-live-arena .question h2{font-size:clamp(35px,10vw,58px)!important}.game-page.rv-live-arena .rv24-playing-grid{min-height:0!important}.game-page.rv-live-arena .question{min-height:0!important}}
 @media(max-width:760px) and (max-height:690px){.game-page.rv-live-arena .question h2{font-size:33px!important}}
 body.rv-keyboard .game-page.rv-live-arena .question h2{font-size:30px!important}
+
+/* 2.10: solo mode and native accessible switches */
+.setup-toggle .toggle-track,.setup-toggle .toggle-copy{pointer-events:none!important}
+.rv-practice-cta{background:#173f43!important;color:#fff9e5!important;border:1px solid #173f43!important;font-weight:900!important}
+.rv-practice-cta:hover{background:#285f5d!important}
+.rv-practice-page{max-width:580px!important;margin:26px auto 45px!important}
+.rv-practice-page>.rv-live-exit{display:block;margin-bottom:18px}
+.rv-practice-page>h1{font-size:clamp(40px,9vw,78px)!important;margin:8px 0 12px!important}
+.rv-practice-page .panel{border-radius:16px!important;padding:20px!important;gap:14px!important}
+.rv-practice-page .panel select,.rv-practice-page .panel input{width:100%;font-size:16px!important}
+.rv-practice-page .panel .btn{border-radius:8px!important}
+@media(max-width:760px){.rv-practice-page{padding:0 16px!important;margin:18px auto 32px!important}.rv-practice-page .panel{padding:15px!important;gap:10px!important}.rv-hero-actions .rv-practice-cta{width:100%;min-height:48px}}
