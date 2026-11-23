@@ -64,7 +64,15 @@ function renderStatsAndAwards(){
 function placeOf(players,player){
  return players.findIndex(p=>p.points===player.points)+1;
 }
+function renderChatResults(){
+ const r=room.lastResults,isFinal=room.phase==="finished",fmt=v=>Number(v||0).toLocaleString("pt-BR",{maximumFractionDigits:2});
+ const lead=Math.max(0,...room.players.map(p=>p.points));
+ const winners=room.players.filter(p=>p.points===lead&&lead>0).map(p=>p.nick);
+ const rows=(r?.results||[]).map(p=>`<div class="rv-chat-result-row result-row"><div><b>${e(p.nick)}${p.pid===room.me?" · VOCÊ":""}</b><small>${e(p.answer)}</small></div><span>${p.rank?p.rank+"º":"—"}</span><span>${p.distance===null?"—":p.distance}</span><strong class="rv-chat-gain ${p.earned?"positive":""}">+${fmt(p.earned)}</strong><b>${fmt(p.points)}</b></div>`).join("");
+ return `<section class="game-page rv-chat-reveal" data-scene="${isFinal?"finished":"reveal"}"><div class="rv-chat-reveal-head"><span>RIVIERA SHOWDOWN · RODADA ${room.round}</span><button type="button" data-op="home" class="rv-live-exit">INÍCIO</button></div><div class="rv-chat-answer"><span>${isFinal?"🏆 "+e(winners.join(" & "))+" venceu!":"🎯 RESPOSTA CERTA · "+r.position+"º LUGAR"}</span><h1>${e(r.target)}</h1><p>${e(r.source)} · ${e(r.snapshot)} ${r.sourceUrl?`<a href="${e(r.sourceUrl)}" target="_blank" rel="noopener noreferrer">Fonte ↗</a>`:""}</p></div><div class="rv-chat-results"><div class="rv-chat-table-head"><span>JOGADOR / PALPITE</span><span>POS.</span><span>Δ</span><span>+PTS</span><span>TOTAL</span></div><div class="rv-chat-rows">${rows}</div></div><div class="rv-chat-next"><span>🏆 ${fmt(lead)} / ${room.target} PTS · LÍDER</span>${room.isHost?`<button class="btn lime" data-op="${isFinal?"restart":"next"}">${isFinal?"REVANCHE":"PRÓXIMA RODADA →"}</button>`:`<div class="rv-chat-wait">Aguardando anfitrião…</div>`}<button class="btn ghost" data-op="share-result">COMPARTILHAR</button></div></section>`;
+}
 function renderResultScene(){
+ if(room.config?.rankScale==="chat"&&room.lastResults)return renderChatResults();
  const r=room.lastResults;
  const isFinal=room.phase==="finished";
  const leaderboard=[...room.players].sort((a,b)=>b.points-a.points||a.nick.localeCompare(b.nick,"pt-BR"));
@@ -100,7 +108,7 @@ function playSound(kind){
 function showRevealCurtain(previous,next){
  if(!previous||previous.phase!=="playing"||!["reveal","finished"].includes(next.phase))return;
  playSound(next.phase==="finished"?"win":"reveal");
- if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
+ if(next.config?.rankScale==="chat"||window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
  document.querySelectorAll(".reveal-curtain").forEach(node=>node.remove());
  const layer=document.createElement("div");
  layer.className="reveal-curtain";layer.setAttribute("aria-hidden","true");
@@ -134,10 +142,10 @@ function categoryPicker(){
  const grouped={};
  for(const b of all){const group=b.group||({area:"Geografia",population:"Geografia",gdp:"Economia",movies:"Cinema","br-area":"Brasil","br-pop":"Brasil",pokemon:"Games",elementos:"Ciência"})[b.id]||"Cultura geral";(grouped[group]??=[]).push(b);}
  return '<div class="category-groups">'+Object.entries(grouped).sort((a,b)=>a[0].localeCompare(b[0],"pt-BR")).map(([group,items])=>
- `<details class="category-group"><summary>${e(group)} <small>${items.length} rankings</small></summary><div class="category-picker">${items.map(r=>`<label class="category-check"><input type="checkbox" name="categoryIds" value="${e(r.id)}" checked><span>${e(r.title)}</span></label>`).join("")}</div></details>`).join("")+'</div>';
+ `<details class="category-group"><summary>${e(group)} <small>${items.length} rankings</small></summary><div class="category-picker">${items.map(r=>`<label class="category-check" data-chat-eligible="${r.chatEligible===true}"><input type="checkbox" name="categoryIds" value="${e(r.id)}" checked><span>${e(r.title)}</span></label>`).join("")}</div></details>`).join("")+'</div>';
 }
 function howToPlayDialog(){
- return `<dialog id="how-dialog" class="how-dialog" aria-labelledby="how-title"><div class="how-panel"><span class="kicker">TUTORIAL DE 1 MINUTO</span><h2 id="how-title">COMO JOGAR</h2><div class="how-steps"><article><span class="step-num">01</span><div><strong>Escolha uma posição</strong><p>O jogo mostra uma categoria e pergunta quem ocupa determinado lugar no ranking. Ex.: qual país aparece em 7º?</p></div></article><article><span class="step-num">02</span><div><strong>Todo mundo responde junto</strong><p>Você tem de 20 a 45 segundos. Cada resposta pertence a um único jogador na rodada; ninguém vê o seu palpite antes do fim.</p></div></article><article><span class="step-num">03</span><div><strong>O mais próximo vence</strong><p>Se o alvo é o 7º e você acertou o 6º, a distância é 1. No modo normal, o 1º ganha 2 pontos e o 2º ganha 1; na corrida até X, só o 1º pontua.</p></div></article></div><p class="how-note">Em <strong>Frases & Aproximações</strong>, todos completam um ditado, sem ver a resposta correta. O servidor aceita aproximações de escrita ou variações cadastradas com nota mínima de 60%. Antes de começar, todos apertam <strong>ESTOU PRONTO</strong>. Turbo opcional dobra os pontos.</p><button type="button" class="btn lime how-close" data-op="close-how">ENTENDI, VAMOS JOGAR</button></div></dialog>`;
+ return `<dialog id="how-dialog" class="how-dialog" aria-labelledby="how-title"><div class="how-panel"><span class="kicker">TUTORIAL DE 1 MINUTO</span><h2 id="how-title">COMO JOGAR</h2><div class="how-steps"><article><span class="step-num">01</span><div><strong>Escolha uma posição</strong><p>O jogo mostra uma categoria e pergunta quem ocupa determinado lugar no ranking. Ex.: qual país aparece em 7º?</p></div></article><article><span class="step-num">02</span><div><strong>Todo mundo responde junto</strong><p>Você tem de 20 a 45 segundos. Cada resposta pertence a um único jogador na rodada; ninguém vê o seu palpite antes do fim.</p></div></article><article><span class="step-num">03</span><div><strong>O mais próximo vence</strong><p>Se o alvo é o 7º e você acertou o 6º, a distância é 1. No modo da turma, o 1º ganha 3, o 2º ganha 2, o 3º ganha 1 e o acerto exato vale 5. Os empates dividem os pontos. Os formatos clássicos têm suas regras próprias.</p></div></article></div><p class="how-note">Em <strong>Frases & Aproximações</strong>, todos completam um ditado, sem ver a resposta correta. O servidor aceita aproximações de escrita ou variações cadastradas com nota mínima de 60%. Antes de começar, todos apertam <strong>ESTOU PRONTO</strong>. Turbo opcional dobra os pontos.</p><button type="button" class="btn lime how-close" data-op="close-how">ENTENDI, VAMOS JOGAR</button></div></dialog>`;
 }
 function applyChatPreset(form){
  if(!form)return;form.elements.gameType.value="ranking";form.elements.rankScale.value="chat";form.elements.mode.value="race";form.elements.target.max="100";form.elements.target.value="25";form.elements.durationSeconds.value="30";form.elements.turbo.checked=false;form.elements.autoNext.checked=false;form.elements.mode.dispatchEvent(new Event("change",{bubbles:true}));
@@ -146,6 +154,10 @@ function applyChatPreset(form){
 function updateGameType(){
  const form=document.getElementById("create-form");if(!form)return;
  const isPhrase=form.elements.gameType.value==="phrases";
+ if(isPhrase&&form.elements.rankScale.value==="chat"){form.elements.rankScale.value="mix";form.elements.mode.value="rounds";form.elements.target.value="5";form.elements.target.max="20";}
+ const chat=!isPhrase&&form.elements.rankScale.value==="chat";form.elements.mode.disabled=chat;form.elements.turbo.disabled=chat;form.elements.autoNext.disabled=chat;
+ for(const label of form.querySelectorAll(".category-check")){label.querySelector("input").disabled=chat&&label.dataset.chatEligible!=="true";}
+ filterCategoryPicker(document.getElementById("category-search")?.value||"");
  for(const b of form.querySelectorAll('[data-op="mode-pick"]')){const on=b.dataset.value===form.elements.gameType.value;b.classList.toggle("is-selected",on);b.setAttribute("aria-pressed",String(on))}
 
  const cat=document.getElementById("rank-categories");if(cat)cat.hidden=isPhrase;
@@ -167,7 +179,7 @@ function reviewSetup(){
 }
 function updateQuickSummary(){
  const form=document.getElementById("create-form"),out=document.getElementById("quick-summary");if(!form||!out)return;
- const n=form.querySelectorAll('[name="categoryIds"]:checked').length;
+ const n=form.querySelectorAll('[name="categoryIds"]:checked:not(:disabled)').length;
  out.textContent=`${form.elements.gameType?.value==="phrases"?"DITADOS":n+" CATEGORIAS"} SELECIONADAS`;reviewSetup();
 }
 function filterCategoryPicker(raw){
@@ -175,7 +187,7 @@ function filterCategoryPicker(raw){
  for(const block of document.querySelectorAll("#rank-categories .category-group")){
   let count=0;
   for(const label of block.querySelectorAll(".category-check")){
-   const match=!q||label.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(q);
+   const match=!label.querySelector("input")?.disabled&&(!q||label.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(q));
    label.hidden=!match;if(match)count++;
   }
   block.hidden=count===0;
@@ -390,7 +402,7 @@ function setWizardStep(next){
      </section>`;
    }else if(room.phase==="playing"){
     const qn=room.question,me=room.players.find(p=>p.id===room.me),submitted=!!me?.submitted;
-    content=`<section class="game-page rv-live-arena" data-scene="playing"><div class="round-head"><div><span class="kicker">PARTIDA AO VIVO / RODADA ${room.round}${room.mode==="rounds"?" DE "+room.target:" • CORRIDA ATÉ "+room.target}${room.special?" • 🚀 TURBO":""}</span><h1>${qn.type==="phrase"?"COMPLETE A FRASE":room.config?.rankScale==="chat"?"RIVIERA · TOP 100":"QUAL É A POSIÇÃO?"}</h1>${room.mode==="rounds"?`<div class="rv25-round-meter" role="progressbar" aria-label="Progresso da partida" aria-valuemin="0" aria-valuemax="${room.target}" aria-valuenow="${room.round}"><span style="width:${Math.min(100,room.round/room.target*100)}%"></span></div>`:""}</div><div class="timer" id="timer"><strong id="seconds">${room.config?.durationSeconds||30}</strong><small>SEGUNDOS</small><span id="timer-progress" class="rv24-timer-progress"></span></div></div><div class="game-grid rv24-playing-grid"><div class="panel question"><div class="rv26-question-meta"><span class="category">${qn.type==="phrase"?"💬":"🎲"} ${e(qn.category)}</span>${qn.type==="phrase"?"":`<span class="rv26-format">${e(qn.tier||"CLÁSSICO")} · ${qn.rankType==="ordem"?"ORDEM":"TOP"} ${Number(qn.limit).toLocaleString("pt-BR")}</span>`}</div>${qn.type==="phrase"?`<h2 class="phrase-prompt">${e(qn.lead)} <strong>...</strong></h2><p>Complete o ditado. Acertos exatos e aproximações reconhecidas valem pontos.</p>`:`<h2>${qn.rankType==="ordem"?"Quem ocupa a":"Quem está na"} <strong>${Number(qn.position).toLocaleString("pt-BR")}ª posição</strong>?</h2><p>${qn.rankType==="ordem"?"Ordem oficial dos itens":"Ranking"} · ${Number(qn.limit).toLocaleString("pt-BR")} opções · ${e(qn.snapshot)}</p>`}${room.special?'<div class="turbo-banner"><strong>🚀 RODADA TURBO</strong><span>Todos os pontos desta rodada valem o DOBRO!</span></div>':""}<div class="separator"></div><div class="rv24-answer-label">SEU PALPITE FICA SECRETO ATÉ A REVELAÇÃO</div><p class="rv27-smart-hint">✳ CORREÇÃO INTELIGENTE ATIVA · Pequenos erros e abreviações são reconhecidos automaticamente, quando não há dúvida.</p>${submitted?`<div class="success-state">✓ PALPITE ENVIADO<p>Seu palpite está guardado até a revelação.</p>${room.mySubmission?`<div class="rv27-answer-confirm"><span>${room.mySubmission.original?"CORREÇÃO AUTOMÁTICA":"RESPOSTA REGISTRADA"}</span><strong>${e(room.mySubmission.answer)}</strong>${room.mySubmission.original?`<small>Você digitou: ${e(room.mySubmission.original)}</small>`:""}</div>`:""}</div>`:`<form id="guess-form" class="stack"><label>${qn.type==="phrase"?"SUA CONTINUAÇÃO":"SEU PALPITE"}<input id="guess" name="answer" autocomplete="off" placeholder="${qn.type==="phrase"?"Complete a frase…":room.config?.rankScale==="chat"?"Digite seu palpite…":/munic|cidad/i.test(qn.category)?"Município e UF":"Digite seu palpite…"}" aria-controls="live-options" required maxlength="${qn.type==="phrase"?160:100}" value="${e(draft)}"></label>${qn.type==="phrase"?"":`<div id="live-options" class="guess-suggestions" role="listbox" hidden></div>`}<div class="actions"><button class="btn lime" type="submit">ENVIAR PALPITE</button><button class="btn ghost" type="button" data-op="pass">NÃO SEI • PASSAR</button></div></form>`}<p class="tiny rv24-game-footnote">${qn.type==="phrase"?"Correção: exato (100%), variação muito próxima (90%), aproximada (75% ou 60%), incorreta (0%). Só respostas com 60% ou mais disputam pontos. Empates são resolvidos pela ordem de envio.":"Aceita variações de nomes, acentos e pequenos erros de digitação. Fonte: "+e(qn.source)+(qn.sourceUrl?` <a href="${e(qn.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver dados ↗</a>`:"")+". A menor distância pontua; no empate, ganha quem enviou antes."}</p></div>${board()}</div></section>`;
+    content=`<section class="game-page rv-live-arena" data-scene="playing"><div class="rv-live-topline"><span>🏝 RIVIERA SHOWDOWN</span><button type="button" data-op="home" class="rv-live-exit">INÍCIO</button></div><div class="round-head"><div><span class="kicker">PARTIDA AO VIVO / RODADA ${room.round}${room.mode==="rounds"?" DE "+room.target:" • CORRIDA ATÉ "+room.target}${room.special?" • 🚀 TURBO":""}</span><h1>${qn.type==="phrase"?"COMPLETE A FRASE":room.config?.rankScale==="chat"?"RIVIERA · TOP 100":"QUAL É A POSIÇÃO?"}</h1>${room.mode==="rounds"?`<div class="rv25-round-meter" role="progressbar" aria-label="Progresso da partida" aria-valuemin="0" aria-valuemax="${room.target}" aria-valuenow="${room.round}"><span style="width:${Math.min(100,room.round/room.target*100)}%"></span></div>`:""}</div><div class="timer" id="timer"><strong id="seconds">${room.config?.durationSeconds||30}</strong><small>SEGUNDOS</small><span id="timer-progress" class="rv24-timer-progress"></span></div></div><div class="game-grid rv24-playing-grid"><div class="panel question"><div class="rv26-question-meta"><span class="category">${qn.type==="phrase"?"💬":"🎲"} ${e(qn.category)}</span>${qn.type==="phrase"?"":`<span class="rv26-format">${room.config?.rankScale==="chat"?"MODO DA TURMA":e(qn.tier||"CLÁSSICO")} · ${qn.rankType==="ordem"?"ORDEM":"TOP"} ${Number(qn.limit).toLocaleString("pt-BR")}</span>`}</div>${qn.type==="phrase"?`<h2 class="phrase-prompt">${e(qn.lead)} <strong>...</strong></h2><p>Complete o ditado. Acertos exatos e aproximações reconhecidas valem pontos.</p>`:`<h2>${qn.rankType==="ordem"?"Quem ocupa a":"Quem está na"} <strong>${Number(qn.position).toLocaleString("pt-BR")}ª posição</strong>?</h2><p>${qn.rankType==="ordem"?"Ordem oficial dos itens":"Ranking"} · ${Number(qn.limit).toLocaleString("pt-BR")} opções · ${e(qn.snapshot)}</p>`}${room.special?'<div class="turbo-banner"><strong>🚀 RODADA TURBO</strong><span>Todos os pontos desta rodada valem o DOBRO!</span></div>':""}<div class="separator"></div><div class="rv24-answer-label">SEU PALPITE FICA SECRETO ATÉ A REVELAÇÃO</div><p class="rv27-smart-hint">✳ CORREÇÃO INTELIGENTE ATIVA · Pequenos erros e abreviações são reconhecidos automaticamente, quando não há dúvida.</p>${submitted?`<div class="success-state">✓ PALPITE ENVIADO<p>Seu palpite está guardado até a revelação.</p>${room.mySubmission?`<div class="rv27-answer-confirm"><span>${room.mySubmission.original?"CORREÇÃO AUTOMÁTICA":"RESPOSTA REGISTRADA"}</span><strong>${e(room.mySubmission.answer)}</strong>${room.mySubmission.original?`<small>Você digitou: ${e(room.mySubmission.original)}</small>`:""}</div>`:""}</div>`:`<form id="guess-form" class="stack"><label>${qn.type==="phrase"?"SUA CONTINUAÇÃO":"SEU PALPITE"}<input id="guess" name="answer" autocomplete="off" placeholder="${qn.type==="phrase"?"Complete a frase…":room.config?.rankScale==="chat"?"Digite seu palpite…":/munic|cidad/i.test(qn.category)?"Município e UF":"Digite seu palpite…"}" aria-controls="live-options" required maxlength="${qn.type==="phrase"?160:100}" value="${e(draft)}"></label>${qn.type==="phrase"?"":`<div id="live-options" class="guess-suggestions" role="listbox" hidden></div>`}<div class="actions"><button class="btn lime" type="submit">ENVIAR PALPITE</button><button class="btn ghost" type="button" data-op="pass">NÃO SEI • PASSAR</button></div></form>`}<p class="tiny rv24-game-footnote">${qn.type==="phrase"?"Correção: exato (100%), variação muito próxima (90%), aproximada (75% ou 60%), incorreta (0%). Só respostas com 60% ou mais disputam pontos. Empates são resolvidos pela ordem de envio.":"Aceita variações de nomes, acentos e pequenos erros de digitação. Fonte: "+e(qn.source)+(qn.sourceUrl?` <a href="${e(qn.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver dados ↗</a>`:"")+". A menor distância pontua; no empate, ganha quem enviou antes."}</p></div>${board()}</div></section>`;
    }else if(room.phase==="reveal"||room.phase==="finished"){
     content=renderResultScene();
    }else content=`<section class="form-page"><h1>SALA ENCERRADA</h1><p>O anfitrião fechou a partida.</p><button data-op="leave" class="btn lime">VOLTAR AO INÍCIO</button></section>`;
@@ -529,7 +541,7 @@ function setWizardStep(next){
  root.addEventListener("change",event=>{
   if(event.target?.closest("#create-form"))updateQuickSummary();
   if(event.target?.id==="game-type"){updateGameType()}
-  if(event.target?.name==="rankScale"&&event.target.value==="chat"){applyChatPreset(event.target.form)}
+  if(event.target?.name==="rankScale"){if(event.target.value==="chat"){applyChatPreset(event.target.form)}else{const f=event.target.form;f.elements.target.max=f.elements.mode.value==="race"?"15":"20";if(Number(f.elements.target.value)>Number(f.elements.target.max))f.elements.target.value="5";updateGameType();}}
   if(event.target?.id==="mode"){
    const label=document.getElementById("target-label");
    if(label){
@@ -542,7 +554,7 @@ function setWizardStep(next){
  root.addEventListener("click",async event=>{
   const btn=event.target.closest("[data-op]");if(!btn)return;
   const op=btn.dataset.op;
-  if(busy&&["home","leave","resume","create","join","create-phrases","club-jump"].includes(op))return;
+  if(busy&&["home","leave","resume","create","create-chat","join","create-phrases","club-jump"].includes(op))return;
   if(op==="home"||op==="leave"){
     if(op==="leave"&&session&&["lobby","finished","closed"].includes(room?.phase)){
       busy=true;
@@ -613,7 +625,7 @@ function setWizardStep(next){
    const form=document.getElementById("create-form");
    if(form&&createStep===0){const nick=form.elements.nick;if(!nick.reportValidity())return;}
    if(form&&createStep===1&&!form.elements.target.reportValidity())return;
-   if(form&&createStep===1&&form.elements.gameType.value==="ranking"&&!form.querySelector('[name="categoryIds"]:checked')){setNotice("Escolha pelo menos uma categoria.");return;}
+   if(form&&createStep===1&&form.elements.gameType.value==="ranking"&&!form.querySelector('[name="categoryIds"]:checked:not(:disabled)')){setNotice("Escolha pelo menos uma categoria.");return;}
    setWizardStep(createStep+1);
   }
   if(op==="wizard-prev"){setWizardStep(createStep-1)}
@@ -629,10 +641,10 @@ function setWizardStep(next){
     if(form.elements.rankScale.value==="chat")form.elements.rankScale.value="mix";form.elements.mode.value=selected.mode;form.elements.target.value=selected.target;
     form.elements.durationSeconds.value=selected.duration;form.elements.turbo.checked=selected.turbo;form.elements.autoNext.checked=selected.autoNext;
     form.elements.mode.dispatchEvent(new Event("change",{bubbles:true}));
-    for(const el of document.querySelectorAll(".preset-btn"))el.classList.toggle("selected",el===btn);updateQuickSummary();
+    for(const el of document.querySelectorAll(".preset-btn"))el.classList.toggle("selected",el===btn);updateGameType();
    }}
   }
-  if(op==="categories-all"||op==="categories-none"){for(const el of document.querySelectorAll('#create-form [name="categoryIds"]'))el.checked=op==="categories-all";updateQuickSummary()}
+  if(op==="categories-all"||op==="categories-none"){for(const el of document.querySelectorAll('#create-form [name="categoryIds"]:not(:disabled)'))el.checked=op==="categories-all";updateQuickSummary()}
 
   if(op==="copy"){
    try{await navigator.clipboard.writeText(location.origin+"/?room="+session.code);setNotice("Link copiado! Compartilhe com seus amigos.")}
@@ -662,7 +674,7 @@ function setWizardStep(next){
     const categoryIds=fd.getAll("categoryIds").map(String);
     const gameType=String(fd.get("gameType")||"ranking");if(gameType==="ranking"&&!categoryIds.length)throw Error("Selecione pelo menos uma categoria.");
     const durationSeconds=Number(fd.get("durationSeconds"))||30,turbo=fd.get("turbo")==="on",autoNext=fd.get("autoNext")==="on",rankScale=gameType==="phrases"?"mix":String(fd.get("rankScale")||"mix");
-    const data=await api("/api/room","POST",{nick,mode,target,categoryIds,durationSeconds,turbo,autoNext,rankScale,gameType,...(clubSession?.token?{clubCode:clubSession.code,clubToken:clubSession.token}:{})});
+    const data=await api("/api/room","POST",{nick,mode:rankScale==="chat"?"race":mode,target,categoryIds,durationSeconds,turbo,autoNext,rankScale,gameType,...(clubSession?.token?{clubCode:clubSession.code,clubToken:clubSession.token}:{})});
     await enterRoom(data,nick);
    }
    if(form.id==="join-form"){
