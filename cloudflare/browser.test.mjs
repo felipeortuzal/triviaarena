@@ -1,4 +1,4 @@
-import {PHRASES} from "./worker.mjs";
+import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
 import {existsSync} from "node:fs";
 import {chromium} from "playwright-core";
@@ -381,5 +381,61 @@ try{
  await swapping.close();
  console.log("BROWSER 2.7.1 OK: troca de sala recicla WebSocket e preserva conexão em tempo real.");
 
+
+ /* 2.9 · chat mode from the homepage, real private guesses and mobile reveal. */
+ const chatA=await browser.newContext({viewport:{width:390,height:844},reducedMotion:"reduce"});
+ const chatB=await browser.newContext({viewport:{width:375,height:812},reducedMotion:"reduce"});
+ const ca=await chatA.newPage(),cb=await chatB.newPage();
+ for(const page of [ca,cb])page.on("pageerror",err=>failures.push(err.message));
+ await ca.goto(base,{waitUntil:"domcontentloaded"});
+ await ca.locator('[data-op="create-chat"]').first().click();
+ await ca.locator('#create-form [name="nick"]').fill("Narrador");
+ await ca.locator('[data-op="wizard-next"]').click();
+ assert.equal(await ca.locator('#create-form [name="target"]').inputValue(),"25");
+ assert.equal(await ca.locator('input[name="rankScale"][value="chat"]').isChecked(),true);
+ await ca.locator("#advanced-options > summary").click();
+ await ca.locator('[data-op="categories-none"]').click();
+ await ca.locator('.category-group:has(input[value="municipios-pop-2022"]) > summary').click();
+ await ca.locator('input[value="municipios-pop-2022"]').check();
+ assert.equal(await ca.locator('input[value="pokemon"]').isDisabled(),true);
+ await ca.locator('[data-op="wizard-next"]').click();
+ assert.match(await ca.locator("#setup-review").innerText(),/25 pontos/);
+ await ca.locator('#create-form button[type="submit"]').click();
+ await ca.locator(".roomcode").waitFor();
+ const inviteCode=(await ca.locator(".roomcode").innerText()).trim();
+ await cb.goto(base+"?room="+inviteCode,{waitUntil:"domcontentloaded"});
+ await cb.locator('#join-form [name="nick"]').fill("Convidado");
+ await cb.locator('#join-form button[type="submit"]').click();
+ await cb.locator(".roomcode").waitFor();
+ await Promise.all([ca,cb].map(p=>p.locator('[data-op="ready"]').click()));
+ await ca.locator('[data-op="start"]:enabled').click();
+ await Promise.all([ca,cb].map(p=>p.locator("#guess").waitFor()));
+ for(const page of [ca,cb]){
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+2),"Chat gameplay must stay within the viewport");
+  assert.ok(await page.locator('#guess-form button[type="submit"]').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1}),"Chat send button visible");
+ }
+ const cq=await ca.evaluate(async()=>{const ss=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));return (await(await fetch("/api/room/"+ss.code,{headers:{authorization:"Bearer "+ss.token}})).json()).question;});
+ assert.equal(cq.limit,100);assert.deepEqual(cq.options,[]);
+ const exact=BANKS.find(b=>b.id==="municipios-pop-2022").items[cq.position-1];
+ await ca.locator("#guess").fill(exact);
+ assert.equal(await ca.locator("#live-options").isVisible(),false);
+ await ca.locator('#guess-form button[type="submit"]').click();
+ await ca.locator(".rv27-answer-confirm").waitFor();
+ await cb.locator("#guess").fill(exact);
+ await cb.locator('#guess-form button[type="submit"]').click();
+ await cb.getByText(/Outro jogador já escolheu/).waitFor();
+ assert.ok(await cb.locator("#notice").evaluate(el=>el.getBoundingClientRect().height<=100),"Error toast must not cover the screen");
+ await cb.locator("#notice").click();
+ assert.equal(await cb.locator("#notice").isVisible(),false);
+ await cb.locator("#guess").fill("zzzz9999 fora da lista");
+ await cb.locator('#guess-form button[type="submit"]').click();
+ await Promise.all([ca,cb].map(p=>p.locator(".rv-chat-reveal").waitFor()));
+ assert.equal(await ca.locator(".rv-chat-result-row").count(),2);
+ assert.match(await ca.locator(".rv-chat-result-row").first().innerText(),/\+5/);
+ assert.equal(await ca.locator('[data-op="next"]').isVisible(),true);
+ assert.ok(await ca.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+2));
+ assert.deepEqual(failures,[]);
+ await chatA.close();await chatB.close();
+ console.log("BROWSER CHAT 2.9 OK: TOP 100 · 25 pontos · palpite privado · erro pequeno e dispensável · arena sem scroll.");
  await a.close();await b.close();
 }finally{await browser.close()}
