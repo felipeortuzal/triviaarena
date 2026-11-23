@@ -1,6 +1,6 @@
-import {PHRASES} from "./worker.mjs";
+import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.8.1";
+const VERSION="2.9.0";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -403,3 +403,25 @@ assert.equal(fullFinal.lastResults.results.length,12);
 assert.equal(fullFinal.players.reduce((sum,p)=>sum+p.points,0),3);
 await call(fullPath+"/close","POST",{},large.token);
 console.log("INTEGRAÇÃO 2.8 OK: corrida real até cinco, confirmação privada recuperada, reenvios atrasados, revanche e 12 palpites simultâneos.");
+
+/* 2.9: a faithful chat-style multiplayer round uses free guesses and no word bank. */
+{
+ const created=await call("/api/room","POST",{nick:"Chat host",rankScale:"chat",mode:"race",target:25,categoryIds:["municipios-pop-2022"],durationSeconds:30});
+ assert.equal(created.status,200);const h=created.data,path="/api/room/"+h.code;
+ const g=(await call(path+"/join","POST",{nick:"Chat guest"})).data;
+ for(const player of [h,g])assert.equal((await call(path+"/ready","POST",{},player.token)).status,200);
+ assert.equal((await call(path+"/start","POST",{},h.token)).status,200);
+ const state=(await call(path,"GET",null,h.token)).data;
+ assert.equal(state.target,25);assert.equal(state.mode,"race");assert.equal(state.question.limit,100);
+ assert.deepEqual(state.question.options,[]);
+ const exact=BANKS.find(b=>b.id==="municipios-pop-2022").items[state.question.position-1];
+ assert.equal((await call(path+"/guess","POST",{answer:exact,roundId:state.roundId},h.token)).status,200);
+ assert.equal((await call(path+"/guess","POST",{answer:exact,roundId:state.roundId},g.token)).status,409);
+ const privateView=(await call(path,"GET",null,g.token)).data;
+ assert.equal(privateView.lastResults,null);assert.equal(privateView.mySubmission,null);
+ assert.equal((await call(path+"/guess","POST",{answer:"zzzz9999 fora da lista",roundId:state.roundId},g.token)).status,200);
+ const reveal=(await call(path,"GET",null,h.token)).data;
+ assert.equal(reveal.phase,"reveal");assert.equal(reveal.lastResults.results.find(x=>x.pid===h.id).earned,5);
+ assert.equal(reveal.lastResults.results.find(x=>x.pid===g.id).earned,0);
+ await call(path+"/close","POST",{},h.token);
+}
