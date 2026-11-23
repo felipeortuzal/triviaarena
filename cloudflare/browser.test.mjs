@@ -102,7 +102,10 @@ try{
  await pa.locator(".rv27-answer-confirm").waitFor({state:"visible",timeout:10000});
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbasaur"),"Autocorreção deve mostrar o nome reconhecido");
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbassaur"),"A resposta original deve ser exibida");
- await pb.locator(".board .sent.yes").first().waitFor();
+ await pb.locator(".board .sent.yes").first().waitFor({state:"attached"});
+ await pb.locator(".rv-live-summary").getByText("1/2 RESPONDERAM").waitFor({state:"visible"});
+ assert.ok(await pb.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+2),"Mobile arena must not scroll vertically");
+ assert.ok(await pb.locator("#guess-form button[type=submit]").evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1}),"Send button must stay in viewport");
  assert.deepEqual(await pb.locator("#guess").evaluate(input=>[input.dataset.typing,document.activeElement===input,input.value,input.selectionStart]),["active",true,"Char",2]);
  await pa.reload({waitUntil:"domcontentloaded"});
  await pa.locator(".rv27-answer-confirm").waitFor();
