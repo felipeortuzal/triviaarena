@@ -415,7 +415,7 @@ export class ArenaRoom{
   if(path.startsWith("/club-"))return this.clubAction(req);
   if(path==="/clubmeta"){const r=await this.ctx.storage.get("room");return safeJson({clubCode:r?.clubCode||null})}
   if(path==="/ws"){
-   const room=await this.ctx.storage.get("room"),p=Object.entries(room?.players||{}).find(([,v])=>v.token===url.searchParams.get("token"));
+   const room=await this.ctx.storage.get("room"),p=Object.entries(room?.players||{}).find(([,v])=>!v.bot&&v.token===url.searchParams.get("token"));
    if(!p)return safeJson({error:"Convite inválido ou sessão expirada"},403);
    if(req.headers.get("Upgrade")!=="websocket")return safeJson({error:"WebSocket necessário"},400);
    const pair=new WebSocketPair();const [client,server]=Object.values(pair);
@@ -631,7 +631,7 @@ async function handleRequest(request,env){
   return body;
  }
  if(RIVIERA_IMAGES.has(path))return proxyImage(request,env);
- if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:VERSION,rankings:BANKS.length,phrases:PHRASES.length,entries:BANKS.reduce((sum,bank)=>sum+bank.items.length,0),maxRanking:Math.max(...BANKS.map(bank=>bank.items.length)),rankFormats:[10,20,30,50,100,200,500,1000],features:["custom-rooms","turbo-rounds","group-stats","awards"]});
+ if(path==="/api/status")return safeJson({app:"Riviera Showdown",online:true,version:VERSION,rankings:BANKS.length,phrases:PHRASES.length,entries:BANKS.reduce((sum,bank)=>sum+bank.items.length,0),maxRanking:Math.max(...BANKS.map(bank=>bank.items.length)),rankFormats:[10,20,30,50,100,200,500,1000],features:["custom-rooms","turbo-rounds","group-stats","awards","chat-mode","practice-bots"]});
  if(path==="/api/rankings")return safeJson({rankings:BANKS.map(b=>({id:b.id,title:b.title,source:b.source,snapshot:b.snapshot,count:b.items.length,group:b.group||null,sourceUrl:b.sourceUrl||null,kind:b.kind||"ranking",chatEligible:isChatBank(b)}))});
 
  if(path==="/api/club"){

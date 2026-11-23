@@ -16,13 +16,13 @@ assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
 assert.equal(info.version,VERSION);
-assert.equal(info.rankings,108);
-assert.equal(info.entries,12282);
+assert.equal(info.rankings,123);
+assert.equal(info.entries,13782);
 assert.equal(info.maxRanking,1025);
 assert.deepEqual(info.rankFormats,[10,20,30,50,100,200,500,1000]);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
-assert.equal(list.data.rankings.length,108);
+assert.equal(list.data.rankings.length,123);
 assert.equal(list.data.rankings.filter(b=>b.count>=1000).length,5);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
 assert.equal(list.data.rankings.some(b=>b.id==="epl-2025-26"),true);
@@ -311,7 +311,7 @@ const newSearch=list.data.rankings.find(x=>x.id==="imdb-1000-historico");
 assert.equal(newSearch.count,1000);
 const newNational=list.data.rankings.find(x=>x.id==="pokedex-nacional-1025");
 assert.equal(newNational.kind,"ordem");
-console.log("INTEGRAÇÃO 2.6 OK: 108 listas, 12.282 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
+console.log("INTEGRAÇÃO 2.6 OK: 123 listas, 13.782 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
 
 
 /* 2.7: Correção automática autoritativa, retorno privado e anti-duplicidade */

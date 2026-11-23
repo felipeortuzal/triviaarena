@@ -282,7 +282,7 @@ try{
  for(const p of [h,g])p.on("pageerror",err=>failures.push(err.message));
  await h.goto(base,{waitUntil:"domcontentloaded"});
  await h.locator(".rv26-release").waitFor({state:"visible"});
- await h.getByText("108 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
+ await h.getByText("123 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
  await h.locator('[data-op="create"]').first().click();
  await h.locator("#create-form [name=nick]").fill("Host Sorteio");
  await h.locator('[data-op="wizard-next"]').click();
@@ -328,7 +328,7 @@ try{
  assert.ok(overflowG<=2,"2.6 mobile giant challenge overflow: "+overflowG);
  await hugeHost.close();await hugeGuest.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
- console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 108 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
+ console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 123 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
 
  /* 2.7.1: switching rooms in a single browser must retire the previous socket */
  const swapping=await browser.newContext({viewport:{width:1150,height:750}});
@@ -437,5 +437,30 @@ try{
  assert.deepEqual(failures,[]);
  await chatA.close();await chatB.close();
  console.log("BROWSER CHAT 2.9 OK: TOP 100 · 25 pontos · palpite privado · erro pequeno e dispensável · arena sem scroll.");
+
+ const practiceContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:"reduce"});
+ const pp=await practiceContext.newPage();pp.on("pageerror",err=>failures.push(err.message));
+ await pp.goto(base,{waitUntil:"domcontentloaded"});
+ await pp.locator('[data-op="practice"]').first().click();
+ await pp.locator('#practice-form [name="nick"]').fill("Treino Solo");
+ await pp.locator('#practice-form [name="botCount"]').selectOption("3");
+ await pp.locator('#practice-form [name="difficulty"]').selectOption("easy");
+ await pp.locator('#practice-form [name="target"]').selectOption("5");
+ await pp.locator('#practice-form button[type="submit"]').click();
+ await pp.locator("#guess").waitFor();
+ assert.match(await pp.locator(".rv-live-topline").innerText(),/TREINO SOLO/);
+ const ps=await pp.evaluate(async()=>{const ss=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));return (await(await fetch("/api/room/"+ss.code,{headers:{authorization:"Bearer "+ss.token}})).json())});
+ assert.equal(ps.players.filter(p=>p.bot).length,3);
+ const pbk=BANKS.find(b=>b.title===ps.question.category);
+ await pp.locator("#guess").fill(pbk.items[ps.question.position-1]);
+ await pp.locator('#guess-form button[type="submit"]').click();
+ await pp.locator(".rv-chat-reveal").waitFor();
+ assert.equal(await pp.locator(".rv-chat-result-row").count(),4);
+ assert.equal(await pp.locator('[data-op="restart"]').isVisible(),true);
+ assert.equal(await pp.locator(".rv-chat-result-row").first().getByText("+5",{exact:true}).count(),1);
+ await pp.locator('[data-op="restart"]').click();await pp.locator("#guess").waitFor();
+ assert.deepEqual(failures,[]);
+ await practiceContext.close();
+ console.log("BROWSER TREINO 2.10 OK: 3 bots, meta, dificuldade, gabarito, revanche.");
  await a.close();await b.close();
 }finally{await browser.close()}

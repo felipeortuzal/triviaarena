@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("108 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,108);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,108);
+test("123 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,123);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,123);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
@@ -144,8 +144,8 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });
 
-test("2.6: catálogo expandido tem 108 fontes e TOP 1000 com posições reais",()=>{
- assert.equal(BANKS.length,108);
+test("2.6: catálogo expandido tem 123 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,123);
  assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
  assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
  assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
@@ -349,3 +349,5 @@ test("2.10: bots finish the round when the human runs out of time",()=>{
  const r=make("race",25);r.practice={difficulty:"hard"};r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["municipios-pop-2022"]});r.players.b.bot=true;
  chooseQuestion(r);assert.equal(finalizeRoom(r,r.deadline+1),true);assert.equal(r.players.a.points,0);assert.ok(r.players.b.points>0);
 });
+
+test("2.10: historical chat catalog rotates geography, economy, music, cinema and Brazil",()=>{const eligible=BANKS.filter(isChatBank);assert.equal(eligible.length,41);assert.ok(["Geografia","Economia","Música","Cinema","Brasil"].every(group=>eligible.some(b=>b.group===group)));assert.ok(eligible.filter(b=>b.id.startsWith("world-")||b.id.startsWith("billboard-")).every(b=>b.items.length===100));});

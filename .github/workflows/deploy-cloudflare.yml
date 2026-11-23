@@ -10,6 +10,9 @@ on:
       - "assets/**"
       - "riviera-showdown.html"
       - ".github/workflows/deploy-cloudflare.yml"
+concurrency:
+  group: riviera-cloudflare-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
