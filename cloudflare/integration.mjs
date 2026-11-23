@@ -1,6 +1,6 @@
 import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.9.0";
+const VERSION="2.10.0";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -424,4 +424,30 @@ console.log("INTEGRAÇÃO 2.8 OK: corrida real até cinco, confirmação privada
  assert.equal(reveal.phase,"reveal");assert.equal(reveal.lastResults.results.find(x=>x.pid===h.id).earned,5);
  assert.equal(reveal.lastResults.results.find(x=>x.pid===g.id).earned,0);
  await call(path+"/close","POST",{},h.token);
+}
+
+/* 2.10: private practice is immediately playable and bots use the same scorer. */
+{
+ const created=await call("/api/room","POST",{nick:"Treino",practice:true,botCount:3,difficulty:"normal",target:25});
+ assert.equal(created.status,200);const h=created.data,path="/api/room/"+h.code;
+ const state=(await call(path,"GET",null,h.token)).data;
+ assert.equal(state.phase,"playing");assert.equal(state.practice.difficulty,"normal");
+ assert.equal(state.players.filter(p=>p.bot).length,3);assert.equal(state.question.limit,100);
+ assert.deepEqual(state.question.options,[]);assert.equal(state.players.every(p=>!Object.hasOwn(p,"token")),true);
+ assert.equal((await call(path+"/join","POST",{nick:"Intruso"})).status,409);
+ const bank=BANKS.find(b=>b.title===state.question.category);
+ assert.ok(bank);
+ const exact=bank.items[state.question.position-1];
+ assert.equal((await call(path+"/guess","POST",{answer:exact,roundId:state.roundId},h.token)).status,200);
+ const result=(await call(path,"GET",null,h.token)).data;
+ assert.equal(result.phase,"reveal");assert.equal(result.lastResults.results.length,4);
+ assert.equal(result.lastResults.results.find(x=>x.pid===h.id).earned,5);
+ assert.equal(new Set(result.lastResults.results.filter(x=>x.rank).map(x=>x.rank)).size,4);
+ assert.equal((await call(path+"/next","POST",{roundId:result.roundId},h.token)).status,200);
+ const second=(await call(path,"GET",null,h.token)).data;
+ assert.equal(second.phase,"playing");assert.equal(second.round,2);
+ assert.equal((await call(path+"/pass","POST",{roundId:second.roundId},h.token)).status,200);
+ assert.equal((await call(path,"GET",null,h.token)).data.phase,"reveal");
+ await call(path+"/close","POST",{},h.token);
+ console.log("INTEGRAÇÃO TREINO 2.10 OK");
 }
