@@ -997,37 +997,37 @@ a{color:inherit}
  body:has(.rv24-playing-grid){overflow:hidden!important}
  body:has(.rv24-playing-grid) .nav,body:has(.rv24-playing-grid) .footer{display:none!important}
  body:has(.rv24-playing-grid) #app{height:100dvh;overflow:hidden}
- .game-page:has(.rv24-playing-grid){position:fixed!important;inset:0!important;margin:0!important;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 12px)!important;width:100%!important;max-width:none!important;height:100dvh!important;display:flex!important;flex-direction:column!important;gap:10px!important;overflow:hidden!important;box-sizing:border-box!important;background:#f1efe6!important;z-index:10}
- .game-page:has(.rv24-playing-grid) .round-head{flex:0 0 auto!important;margin:0!important;gap:8px!important;align-items:center!important}
- .game-page:has(.rv24-playing-grid) .round-head h1{font-size:clamp(29px,8vw,44px)!important;line-height:.95!important;margin:5px 0!important}
- .game-page:has(.rv24-playing-grid) .kicker{font-size:9px!important}
- .game-page:has(.rv24-playing-grid) .timer{min-width:73px!important;padding:8px!important}
- .game-page:has(.rv24-playing-grid) .timer strong{font-size:32px!important}
- .game-page:has(.rv24-playing-grid) .rv24-playing-grid{display:flex!important;flex:1 1 auto!important;min-height:0!important;margin:0!important;gap:0!important}
- .game-page:has(.rv24-playing-grid) .rv24-playing-grid>.board{display:none!important}
- .game-page:has(.rv24-playing-grid) .question{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;padding:clamp(12px,3.5vw,19px)!important;border-radius:12px!important;border-top:5px solid #16494b!important}
- .game-page:has(.rv24-playing-grid) .rv26-question-meta{gap:6px!important}
- .game-page:has(.rv24-playing-grid) .category,.game-page:has(.rv24-playing-grid) .rv26-format{font-size:9px!important;min-height:0!important;padding:7px 9px!important;line-height:1.25!important}
- .game-page:has(.rv24-playing-grid) .question h2{font-size:clamp(37px,10vw,58px)!important;line-height:.93!important;margin:clamp(10px,2vh,20px) 0 8px!important}
- .game-page:has(.rv24-playing-grid) .question>p:not(.rv27-smart-hint):not(.tiny){font-size:11px!important;line-height:1.4!important;margin:4px 0!important}
- .game-page:has(.rv24-playing-grid) .separator,.game-page:has(.rv24-playing-grid) .rv24-answer-label,.game-page:has(.rv24-playing-grid) .rv27-smart-hint,.game-page:has(.rv24-playing-grid) .rv24-game-footnote{display:none!important}
- .game-page:has(.rv24-playing-grid) #guess-form{margin-top:auto!important;display:flex!important;flex-direction:column!important;gap:9px!important;min-height:0!important}
- .game-page:has(.rv24-playing-grid) #guess-form label{font-size:11px!important}
- .game-page:has(.rv24-playing-grid) #guess{width:100%!important;height:54px!important;min-height:54px!important;font-size:16px!important;padding:12px!important}
- .game-page:has(.rv24-playing-grid) #guess-form .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important}
- .game-page:has(.rv24-playing-grid) #guess-form .btn{font-size:11px!important;min-height:46px!important;height:46px!important;padding:8px!important;white-space:normal!important}
- .game-page:has(.rv24-playing-grid) .guess-suggestions:not([hidden]){max-height:min(22dvh,140px)!important;overflow-y:auto!important;flex-shrink:1!important;margin:0!important}
- .game-page:has(.rv24-playing-grid) .success-state{margin-top:auto!important;padding:14px!important}
+ .rv-live-arena{position:fixed!important;inset:0!important;margin:0!important;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 12px)!important;width:100%!important;max-width:none!important;height:100dvh!important;display:flex!important;flex-direction:column!important;gap:10px!important;overflow:hidden!important;box-sizing:border-box!important;background:#f1efe6!important;z-index:10}
+ .rv-live-arena .round-head{flex:0 0 auto!important;margin:0!important;gap:8px!important;align-items:center!important}
+ .rv-live-arena .round-head h1{font-size:clamp(29px,8vw,44px)!important;line-height:.95!important;margin:5px 0!important}
+ .rv-live-arena .kicker{font-size:9px!important}
+ .rv-live-arena .timer{min-width:73px!important;padding:8px!important}
+ .rv-live-arena .timer strong{font-size:32px!important}
+ .rv-live-arena .rv24-playing-grid{display:flex!important;flex:1 1 auto!important;min-height:0!important;margin:0!important;gap:0!important}
+ .rv-live-arena .rv24-playing-grid>.board{display:none!important}
+ .rv-live-arena .question{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;padding:clamp(12px,3.5vw,19px)!important;border-radius:12px!important;border-top:5px solid #16494b!important}
+ .rv-live-arena .rv26-question-meta{gap:6px!important}
+ .rv-live-arena .category,.rv-live-arena .rv26-format{font-size:9px!important;min-height:0!important;padding:7px 9px!important;line-height:1.25!important}
+ .rv-live-arena .question h2{font-size:clamp(37px,10vw,58px)!important;line-height:.93!important;margin:clamp(10px,2vh,20px) 0 8px!important}
+ .rv-live-arena .question>p:not(.rv27-smart-hint):not(.tiny){font-size:11px!important;line-height:1.4!important;margin:4px 0!important}
+ .rv-live-arena .separator,.rv-live-arena .rv24-answer-label,.rv-live-arena .rv27-smart-hint,.rv-live-arena .rv24-game-footnote{display:none!important}
+ .rv-live-arena #guess-form{margin-top:auto!important;display:flex!important;flex-direction:column!important;gap:9px!important;min-height:0!important}
+ .rv-live-arena #guess-form label{font-size:11px!important}
+ .rv-live-arena #guess{width:100%!important;height:54px!important;min-height:54px!important;font-size:16px!important;padding:12px!important}
+ .rv-live-arena #guess-form .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important}
+ .rv-live-arena #guess-form .btn{font-size:11px!important;min-height:46px!important;height:46px!important;padding:8px!important;white-space:normal!important}
+ .rv-live-arena .guess-suggestions:not([hidden]){max-height:min(22dvh,140px)!important;overflow-y:auto!important;flex-shrink:1!important;margin:0!important}
+ .rv-live-arena .success-state{margin-top:auto!important;padding:14px!important}
  body:has(.rv24-playing-grid) .reaction-dock{position:fixed!important;bottom:calc(env(safe-area-inset-bottom) + 8px)!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;padding:5px 8px!important;z-index:20!important;border-radius:40px!important}
  body:has(.rv24-playing-grid) .reaction-dock .reaction-label,body:has(.rv24-playing-grid) .reaction-dock .reaction-tip{display:none!important}
  body:has(.rv24-playing-grid) .reaction-options{gap:3px!important}
  body:has(.rv24-playing-grid) .reaction-option{font-size:17px!important;min-width:34px!important;min-height:34px!important;padding:5px!important}
- .game-page:has(.rv24-playing-grid){padding-bottom:calc(env(safe-area-inset-bottom) + 64px)!important}
+ .rv-live-arena{padding-bottom:calc(env(safe-area-inset-bottom) + 64px)!important}
 }
 @media(max-width:760px) and (max-height:690px){
- .game-page:has(.rv24-playing-grid) .question h2{font-size:34px!important;margin:6px 0!important}
- .game-page:has(.rv24-playing-grid) .question>p:not(.rv27-smart-hint):not(.tiny){display:none!important}
- .game-page:has(.rv24-playing-grid) .category,.game-page:has(.rv24-playing-grid) .rv26-format{font-size:8px!important}
+ .rv-live-arena .question h2{font-size:34px!important;margin:6px 0!important}
+ .rv-live-arena .question>p:not(.rv27-smart-hint):not(.tiny){display:none!important}
+ .rv-live-arena .category,.rv-live-arena .rv26-format{font-size:8px!important}
 }
 
 /* 2.9 / Live arena: the question is the entire experience. */
@@ -1135,3 +1135,7 @@ a{color:inherit}
  .rv-live-arena .question h2{font-size:33px!important}
 }
 @media(prefers-reduced-motion:reduce){.rv-chat-result-row{animation:none!important}}
+
+@media(max-width:760px){.game-page.rv-live-arena .rv24-playing-grid>.board{display:block!important;min-height:0!important}.game-page.rv-live-arena .board .rv-live-summary{display:flex!important}.game-page.rv-live-arena .question h2{font-size:clamp(35px,10vw,58px)!important}.game-page.rv-live-arena .rv24-playing-grid{min-height:0!important}.game-page.rv-live-arena .question{min-height:0!important}}
+@media(max-width:760px) and (max-height:690px){.game-page.rv-live-arena .question h2{font-size:33px!important}}
+body.rv-keyboard .game-page.rv-live-arena .question h2{font-size:30px!important}
