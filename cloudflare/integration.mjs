@@ -1,6 +1,6 @@
 import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.13.0";
+const VERSION="2.14.0";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -16,13 +16,13 @@ assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
 assert.equal(info.version,VERSION);
-assert.equal(info.rankings,234);
-assert.equal(info.entries,19258);
+assert.equal(info.rankings,264);
+assert.equal(info.entries,19874);
 assert.equal(info.maxRanking,1025);
 assert.deepEqual(info.rankFormats,[10,20,30,50,100,200,500,1000]);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
-assert.equal(list.data.rankings.length,234);
+assert.equal(list.data.rankings.length,264);
 assert.equal(list.data.rankings.filter(b=>b.count>=1000).length,5);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
 assert.equal(list.data.rankings.some(b=>b.id==="epl-2025-26"),true);
@@ -311,7 +311,7 @@ const newSearch=list.data.rankings.find(x=>x.id==="imdb-1000-historico");
 assert.equal(newSearch.count,1000);
 const newNational=list.data.rankings.find(x=>x.id==="pokedex-nacional-1025");
 assert.equal(newNational.kind,"ordem");
-console.log("INTEGRAÇÃO 2.6 OK: 234 listas, 19.258 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
+console.log("INTEGRAÇÃO 2.6 OK: 264 listas, 19.258 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
 
 
 /* 2.7: Correção automática autoritativa, retorno privado e anti-duplicidade */
