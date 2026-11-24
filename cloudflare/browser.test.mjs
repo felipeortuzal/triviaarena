@@ -282,7 +282,7 @@ try{
  for(const p of [h,g])p.on("pageerror",err=>failures.push(err.message));
  await h.goto(base,{waitUntil:"domcontentloaded"});
  await h.locator(".rv26-release").waitFor({state:"visible"});
- await h.getByText("199 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
+ await h.getByText("234 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
  await h.locator('[data-op="create"]').first().click();
  await h.locator("#create-form [name=nick]").fill("Host Sorteio");
  await h.locator('[data-op="wizard-next"]').click();
@@ -328,7 +328,7 @@ try{
  assert.ok(overflowG<=2,"2.6 mobile giant challenge overflow: "+overflowG);
  await hugeHost.close();await hugeGuest.close();
  assert.deepEqual(failures,[],"No JavaScript exceptions in 2.6");
- console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 199 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
+ console.log("NAVEGADOR MULTIPLAYER 2.7 OK: 234 rankings, autocorreção visível, modo Extremo, clubes, mobile e fontes.");
 
  /* 2.7.1: switching rooms in a single browser must retire the previous socket */
  const swapping=await browser.newContext({viewport:{width:1150,height:750}});
@@ -397,7 +397,7 @@ try{
  await ca.locator('[data-op="categories-none"]').click();
  await ca.locator('.category-group:has(input[value="municipios-pop-2022"]) > summary').click();
  await ca.locator('input[value="municipios-pop-2022"]').check();
- assert.equal(await ca.locator('input[value="pokemon"]').isDisabled(),true);
+ assert.equal(await ca.locator('input[value="pokemon"]').isDisabled(),false);
  await ca.locator('[data-op="wizard-next"]').click();
  assert.match(await ca.locator("#setup-review").innerText(),/25 pontos/);
  await ca.locator('#create-form button[type="submit"]').click();
