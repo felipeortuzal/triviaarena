@@ -1256,3 +1256,6 @@ body.rv-keyboard .rv-category-banner{min-height:32px;padding:4px 8px}body.rv-key
 .rv-profile-icon{font-size:23px;flex:0 0 auto}
 .rv-profile-picker[hidden]{display:none!important}
 @media(max-width:500px){.rv-profile-picker{grid-template-columns:1fr}.rv-profile-picker label{padding:9px 11px}.rv-profile-picker label:has(input:checked){padding:8px 10px}}
+
+/* 2.16 · catalog browsing */
+.rv-catalog-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:10px 20px;margin:12px 0}.rv-catalog-toolbar label{font-size:13px;color:inherit}.rv-catalog-toolbar select{display:block;width:100%;max-width:280px;margin-top:5px}.rv-catalog-eligible{display:flex;align-items:center;gap:8px;padding:8px 0}.rv-catalog-eligible input{width:auto}.rv-catalog #catalog-count{font-size:12px;font-weight:700}.rv-catalog #catalog-empty{padding:16px;border:1px dashed currentColor;border-radius:8px}.rv-catalog #catalog-empty[hidden]{display:none!important}

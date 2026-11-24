@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,profileGroupWeights,profileGroupChoices,topicBucket,chatRoundAwards,preparePracticeBots,fillPracticeBots} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,sourceBankWeights,profileGroupWeights,profileGroupChoices,topicBucket,chatRoundAwards,preparePracticeBots,fillPracticeBots} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -362,3 +362,5 @@ test("2.14: 30 listas históricas elegíveis e únicas",()=>{for(const id of ["c
 test("2.15: expansão adiciona 236 listas únicas, fontes e grupos variados",()=>{const added=BANKS.slice(264);assert.equal(added.length,236);assert.ok(new Set(added.map(b=>b.group)).size>=8);for(const b of added){assert.ok(isChatBank(b),b.id);assert.ok(b.items.length>=10&&b.items.length<=100,b.id);assert.equal(new Set(b.items).size,b.items.length,b.id);assert.ok(b.sourceUrl&&b.snapshot,b.id);}});
 
 test("2.15.1: general knowledge and all topic families stay eligible in both profiles",()=>{const groups=["Futebol","Games","Cinema","Música","Cotidiano","Gastronomia","Geografia","Natureza"];for(const profile of ["partners","mixed"]){const weights=profileGroupWeights(groups,profile);assert.ok(groups.every(g=>weights[g]>0));assert.equal(Object.values(weights).reduce((a,b)=>a+b,0),100);assert.equal(normalizeRoomConfig({profile}).categoryIds.length,500);}});
+
+test("2.16: source balancing gives all lists a chance without favoring giant source families",()=>{const banks=[...Array.from({length:9},(_,i)=>({id:"a"+i,source:"A"})),{id:"b",source:"B"}];const fresh=sourceBankWeights(banks),recent=sourceBankWeights(banks,["A"]);assert.ok(fresh.every(n=>n>0));assert.ok(fresh[0]<fresh[9]);assert.ok(recent[0]<fresh[0]);assert.equal(recent[9],fresh[9]);assert.ok(Math.abs(fresh.slice(0,9).reduce((a,b)=>a+b,0)-3)<1e-9);});
