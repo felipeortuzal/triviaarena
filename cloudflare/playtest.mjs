@@ -24,6 +24,9 @@ try{
  await host.locator('[data-op="create"]').first().click();
  await host.locator('#create-form [name="nick"]').fill("Mesa de teste");
  await host.locator('[data-op="wizard-next"]').click();
+ await host.locator('[data-preset="classic"]').click();
+ assert.equal(await host.locator('#create-form [name="mode"]').inputValue(),"rounds");
+ assert.equal(await host.locator('#create-form [name="target"]').inputValue(),"5");
  await host.locator("#auto-next").uncheck();
  await host.locator("#advanced-options > summary").click();
  await host.locator('[data-op="categories-none"]').click();
@@ -45,7 +48,8 @@ try{
  await host.locator('[data-op="start"]:enabled').click();
  const answers=["Bulbassaur","Ivysaur","Venusaur","Charmander"];
  for(let round=1;round<=5;round++){
-  await Promise.all(pages.map(page=>page.locator('#guess').waitFor()));
+  console.log("PLAYTEST: aguardando rodada "+round);
+  await Promise.all(pages.map(page=>page.locator('#guess').waitFor({timeout:20000})));
   if(round===1){
    await submit(host,answers[0]);
    await host.locator(".rv27-answer-confirm").waitFor();
@@ -66,7 +70,10 @@ try{
    assert.equal(points.reduce((sum,t)=>sum+parseInt(t,10),0),round*3);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   }));
-  if(round<5)await host.locator('[data-op="next"]').click();
+  if(round<5){
+   await host.locator('[data-op="next"]').click();
+   await Promise.all(pages.map(page=>page.locator(".rv-stage-round-label").getByText("Rodada "+(round+1),{exact:true}).waitFor({timeout:15000})));
+  }
  }
  await host.locator('[data-op="restart"]').click();
  await Promise.all(pages.map(async page=>{

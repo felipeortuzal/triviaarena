@@ -570,9 +570,16 @@ function render(){
   if(!saved)setNotice("Mantenha esta aba aberta. Seu navegador não conseguiu salvar a sessão para depois.");
  }
  async function sendAction(action,body){
-  if(busy||!session||screen!=="room")return;
+  if(!session||screen!=="room")return;
+  const owner=session, requestedRound=room?.roundId;
+  // A reveal can arrive via WebSocket before the host's last guess finishes syncing.
+  // Preserve the host's advance/restart click rather than silently dropping it.
+  if(busy&&["next","restart","start"].includes(action)){
+   for(let attempt=0;busy&&attempt<100;attempt++)await new Promise(resolve=>setTimeout(resolve,50));
+   if(owner!==session||screen!=="room"||requestedRound!==room?.roundId)return;
+  }
+  if(busy){setNotice("Ação anterior em andamento. Tente novamente.");return;}
   busy=true;
-  const owner=session;
   const payload={...body};
   if(["pass","next","hold-next","restart"].includes(action))payload.roundId=room?.roundId;
   try{await api("/api/room/"+owner.code+"/"+action,"POST",payload);if(session===owner)await sync()}
