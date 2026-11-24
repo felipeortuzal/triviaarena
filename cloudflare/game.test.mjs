@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,chatRoundAwards,preparePracticeBots,fillPracticeBots} from "./worker.mjs";
+import {BANKS,PHRASES,evaluatePhrase,normalizeAnswer,chooseQuestion,finalizeRoom,matchAnswer,resolveAnswer,typoDistance,normalizeRoomConfig,getPlayerStats,calculateAwards,rankFormats,pickTarget,isChatBank,profileGroupWeights,topicBucket,chatRoundAwards,preparePracticeBots,fillPracticeBots} from "./worker.mjs";
 const make=(mode="rounds",target=5)=>({players:{a:{nick:"A",points:0},b:{nick:"B",points:0}},answers:{},mode,target,round:0,used:[],phase:"lobby"});
 test("normaliza acentos, espaços e maiúsculas",()=>assert.equal(normalizeAnswer(" SÃO  PAULO! "),"sao paulo"));
 test("perguntas não se repetem",()=>{const r=make();const keys=new Set();for(let i=0;i<20;i++){chooseQuestion(r);assert.ok(!keys.has(r.question.key));keys.add(r.question.key)}});
@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("199 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,199);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,199);
+test("234 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,234);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,234);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
@@ -144,8 +144,8 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });
 
-test("2.6: catálogo expandido tem 199 fontes e TOP 1000 com posições reais",()=>{
- assert.equal(BANKS.length,199);
+test("2.6: catálogo expandido tem 234 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,234);
  assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
  assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
  assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
@@ -321,7 +321,7 @@ test("2.9: modo da turma usa o tamanho histórico real até TOP 100, sem Turbo e
  assert.equal(c.rankScale,"chat");assert.equal(c.turbo,false);assert.equal(c.autoNext,false);
  assert.ok(c.categoryIds.length>0);
  assert.ok(c.categoryIds.every(id=>isChatBank(BANKS.find(b=>b.id===id))));
- assert.throws(()=>normalizeRoomConfig({rankScale:"chat",categoryIds:["pokemon"]}),/TOP 100/);
+ assert.equal(normalizeRoomConfig({rankScale:"chat",categoryIds:["pokemon"]}).categoryIds[0],"pokemon");
  const r=make("race",25);r.config=c;
  const used=new Set();
  for(let n=0;n<40;n++){chooseQuestion(r);assert.equal(r.question.limit,Math.min(100,BANKS[r.question.bi].items.length));assert.ok(r.question.position>=1&&r.question.position<=r.question.limit);assert.equal(used.has(r.question.key),false);used.add(r.question.key);}
@@ -353,3 +353,5 @@ test("2.10: bots finish the round when the human runs out of time",()=>{
 test("2.10: historical chat catalog rotates geography, economy, music, cinema and Brazil",()=>{const eligible=BANKS.filter(isChatBank);assert.ok(eligible.length>100);assert.ok(["Geografia","Economia","Música","Cinema","Brasil","Moda","Beleza","Futebol","Basquete","Hóquei","Vôlei","Tênis"].every(group=>eligible.some(b=>b.group===group)));assert.ok(eligible.filter(b=>b.id.startsWith("world-")||b.id.startsWith("billboard-")).every(b=>b.items.length===100));});
 
 test("2.12: short rankings retain true size and room capacity",()=>{const r=make("race",25);r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["cosmetics-value-2025"]});chooseQuestion(r);assert.equal(r.question.limit,10);assert.ok(r.question.position<=10);});
+
+test("2.13: profiles preserve categories and adjust topic weights",()=>{const groups=["Futebol","Basquete","Games","Música","Cinema","Moda","Beleza","Geografia","Brasil"];for(const [profile,expected] of [["partners",60],["mixed",25]]){const weights=profileGroupWeights(groups,profile);const sum=groups.filter(g=>topicBucket(g)==="sports").reduce((n,g)=>n+weights[g],0);assert.equal(sum,expected);assert.equal(normalizeRoomConfig({profile,rankScale:"chat"}).profile,profile);}assert.equal(normalizeRoomConfig({profile:"invalid"}).profile,"mixed");});
