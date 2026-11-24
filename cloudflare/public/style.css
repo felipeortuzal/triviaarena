@@ -1159,3 +1159,57 @@ body.rv-keyboard .game-page.rv-live-arena .question h2{font-size:30px!important}
 #notice.rv-toast>button{all:unset;box-sizing:border-box;display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;color:inherit;cursor:pointer;font:24px/1 system-ui,sans-serif;border-radius:5px}
 #notice.rv-toast>button:focus-visible{outline:2px solid #eddb75}
 @media(max-width:760px){#notice.rv-toast{inset:max(8px,env(safe-area-inset-top)) 10px auto 10px!important;width:auto!important;max-width:none!important;max-height:86px!important;font-size:13px!important}}
+
+/* 2.11: chat-inspired reading-first arena, independent of landing-page styles */
+body:has(.rv-chat-stage),body:has(.rv-chat-reveal){overflow:hidden!important;overscroll-behavior:none}
+body:has(.rv-chat-stage) .nav,body:has(.rv-chat-stage) .footer,body:has(.rv-chat-stage) .reaction-dock,body:has(.rv-chat-reveal) .nav,body:has(.rv-chat-reveal) .footer,body:has(.rv-chat-reveal) .reaction-dock{display:none!important}
+.game-page.rv-live-arena.rv-chat-stage{position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;height:var(--rv-live-height,100dvh)!important;min-height:0!important;margin:0!important;padding:0!important;display:flex!important;flex-direction:column!important;gap:0!important;overflow:hidden!important;background:#f7f7f5!important;color:#202322!important;border:0!important;z-index:10;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.rv-chat-stage *,.rv-chat-reveal *{box-sizing:border-box}
+.rv-chat-stage .rv-stage-header{flex:0 0 auto;display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:12px clamp(16px,4vw,48px)!important;background:#fff;color:#222!important;border-bottom:1px solid #e4e5e1;font:500 13px/1.3 system-ui,sans-serif!important;letter-spacing:0!important}
+.rv-stage-brand{display:block;font-size:17px;font-weight:700}
+.rv-stage-mode{display:block;color:#666d66;font-size:11px;margin-top:3px}
+.rv-chat-stage .rv-live-exit{border:1px solid #d9dcd6!important;background:#fff!important;color:#444!important;font:500 12px/1.2 system-ui,sans-serif!important;padding:8px 12px!important;border-radius:8px!important;white-space:nowrap;min-height:34px}
+.rv-stage-main{display:flex;flex-direction:column;flex:1;min-height:0;width:min(100%,760px);margin:0 auto;padding:clamp(12px,3vh,30px) 20px 16px;gap:10px;overflow:hidden}
+.rv-stage-round{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}
+.rv-stage-round>div:first-child{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rv-stage-round-label{font-size:17px;font-weight:700}
+.rv-chat-stage .rv26-format{display:inline-block!important;background:#e8ebe5!important;color:#455549!important;border:0!important;border-radius:5px!important;font:600 11px/1.2 system-ui,sans-serif!important;letter-spacing:0!important;padding:5px 8px!important;white-space:nowrap}
+.rv-chat-stage .rv-stage-timer{position:static!important;display:flex!important;align-items:baseline;gap:4px;min-width:0!important;width:auto!important;height:auto!important;padding:5px 10px!important;background:#e8f1e9!important;border:0!important;border-radius:8px!important;box-shadow:none!important;color:#245b42!important}
+.rv-chat-stage .rv-stage-timer strong{font:700 24px/1.2 system-ui,sans-serif!important;color:inherit!important}
+.rv-chat-stage .rv-stage-timer small{font:600 12px/1 system-ui,sans-serif!important;color:inherit!important}
+.rv-chat-stage .rv-stage-timer.urgent{background:#fbe7e3!important;color:#a73b2d!important}
+.rv-stage-progress{height:4px;flex:0 0 4px;background:#e0e5df;border-radius:8px;overflow:hidden}
+.rv-stage-progress #timer-progress{display:block!important;position:static!important;height:100%;width:100%;background:#387a56;transition:width .25s linear}
+.game-page.rv-chat-stage .rv-stage-question{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:clamp(15px,3vw,30px)!important;gap:8px!important;background:#fff!important;border:1px solid #e0e3dc!important;border-radius:16px!important;box-shadow:none!important;color:#202322!important}
+.rv-stage-topic{font-size:12px;color:#55705d;font-weight:700}
+.game-page.rv-live-arena.rv-chat-stage .question h2{font:650 clamp(23px,3.5vw,35px)/1.25 system-ui,sans-serif!important;letter-spacing:-.025em!important;text-transform:none!important;color:#202322!important;margin:2px 0 4px!important;overflow-wrap:anywhere}
+.game-page.rv-chat-stage .question>p.rv-stage-reference,.game-page.rv-chat-stage .question>p.rv-stage-rule{display:block!important;font:400 12px/1.4 system-ui,sans-serif!important;color:#666d66!important;margin:0!important}
+.rv-chat-stage .rv-stage-form{display:flex!important;flex-direction:column!important;gap:8px!important;margin-top:auto!important;min-height:0!important;padding:8px 0 0!important}
+.rv-chat-stage .rv-stage-form label{font:600 13px/1.4 system-ui,sans-serif!important;color:#363d36!important;text-transform:none!important;letter-spacing:0!important}
+.game-page.rv-chat-stage #guess{box-sizing:border-box!important;min-height:46px!important;height:46px!important;width:100%!important;border:1px solid #cdd4ca!important;border-radius:9px!important;background:#fff!important;font:400 16px/1.3 system-ui,sans-serif!important;padding:12px!important;color:#202322!important;box-shadow:none!important}
+.rv-chat-stage #guess::placeholder{font:400 15px/1.2 system-ui,sans-serif!important;color:#858a83!important}
+.rv-chat-stage #guess:focus{outline:2px solid #558168!important;outline-offset:1px!important}
+.rv-chat-stage #guess-form .actions{display:grid!important;grid-template-columns:1fr auto!important;gap:8px!important;margin:0!important}
+.rv-chat-stage #guess-form .btn,.rv-chat-reveal .rv-chat-next .btn{min-height:44px!important;height:44px!important;border-radius:8px!important;font:600 14px/1.2 system-ui,sans-serif!important;text-transform:none!important;letter-spacing:0!important;padding:9px 16px!important;box-shadow:none!important}
+.rv-chat-stage #guess-form .btn.lime,.rv-chat-reveal .rv-chat-next .btn.lime{background:#245c43!important;color:white!important;border:1px solid #245c43!important}
+.rv-chat-stage #guess-form .btn.ghost,.rv-chat-reveal .rv-chat-next .btn.ghost{background:#fff!important;color:#414841!important;border:1px solid #d4dad2!important}
+.rv-stage-private{font:400 11px/1.2 system-ui,sans-serif!important;color:#727971;text-align:center}
+.rv-chat-stage .guess-suggestions:not([hidden]){max-height:90px!important;overflow:auto!important}
+.rv-chat-stage .rv-stage-submitted{margin-top:auto!important;background:#eef5ef!important;color:#245b42!important;padding:12px!important;border-radius:8px!important;font:500 14px/1.35 system-ui,sans-serif!important}
+.rv-chat-stage .rv-stage-main>.board{display:block!important;flex:0 1 auto!important;max-height:26vh!important;min-height:0!important;overflow:auto!important;padding:9px 12px!important;margin:0!important;border:1px solid #e0e3dc!important;background:white!important;border-radius:10px!important;box-shadow:none!important;color:#262c27!important}
+.rv-chat-stage .board-title{display:none!important}
+.rv-chat-stage .board .rv-live-summary{display:flex!important;color:#303831!important;background:transparent!important;gap:8px!important;font:600 12px/1.3 system-ui,sans-serif!important;padding:2px 0!important}
+.rv-chat-stage .rv-live-summary strong{color:#245b42!important}
+.rv-chat-stage .board .player{padding:5px 0!important;min-height:0!important;font:500 12px/1.3 system-ui,sans-serif!important;border-bottom:1px solid #e5e8e3!important}
+.game-page.rv-chat-reveal{position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;height:var(--rv-live-height,100dvh)!important;display:flex!important;flex-direction:column!important;gap:10px!important;overflow:hidden!important;padding:clamp(12px,3vw,24px) max(16px,calc((100vw - 720px)/2))!important;border:0!important;border-radius:0!important;margin:0!important;background:#f7f7f5!important;color:#202322!important;font-family:system-ui,sans-serif!important;z-index:10}
+.rv-chat-reveal .rv-chat-answer{background:#fff!important;color:#202322!important;border:1px solid #dce2d9;border-radius:12px;padding:16px;margin:0}
+.rv-chat-reveal .rv-chat-answer>span{color:#245b42!important;font:600 12px/1.3 system-ui,sans-serif!important}
+.game-page.rv-chat-reveal .rv-chat-answer h1{font:650 clamp(24px,4vw,38px)/1.2 system-ui,sans-serif!important;letter-spacing:-.02em!important;color:#202322!important;text-transform:none!important;margin:6px 0!important}
+.rv-chat-reveal .rv-chat-answer p,.rv-chat-reveal .rv-chat-answer a{color:#5e6b60!important}
+.rv-chat-reveal .rv-chat-results{display:flex;flex-direction:column;flex:1;min-height:0;background:#fff;border:1px solid #dce2d9}
+.rv-chat-reveal .rv-chat-rows{flex:1;min-height:0;overflow:auto}
+.rv-chat-reveal .rv-chat-table-head{background:#edf0eb;color:#384b3e;flex-shrink:0}
+.rv-chat-reveal .rv-chat-next{flex-shrink:0;margin:0}
+@media(max-width:760px){.rv-chat-stage .rv-stage-header{padding:9px 13px!important}.rv-stage-main{padding:10px 12px max(12px,env(safe-area-inset-bottom));gap:8px}.game-page.rv-live-arena.rv-chat-stage .question h2{font-size:clamp(22px,6.1vw,29px)!important}.game-page.rv-chat-stage .rv-stage-question{padding:14px!important;gap:6px!important}.rv-chat-stage .board .player{display:none!important}.rv-chat-stage .rv-stage-main>.board{flex:0 0 auto!important}.rv-chat-stage .rv-stage-timer strong{font-size:22px!important}}
+@media(max-height:620px){.rv-stage-main{padding-top:6px;gap:5px}.game-page.rv-chat-stage .rv-stage-question{padding:10px!important;gap:4px!important}.game-page.rv-live-arena.rv-chat-stage .question h2{font-size:clamp(19px,5.5vw,24px)!important}.rv-chat-stage .question>p.rv-stage-rule,.rv-stage-private{display:none!important}.rv-chat-stage .rv-stage-form{gap:5px!important;padding-top:4px!important}.rv-chat-stage #guess-form .btn{height:40px!important;min-height:40px!important}}
+body.rv-keyboard .rv-chat-stage .rv-stage-header{display:none!important}body.rv-keyboard .rv-chat-stage .rv-stage-main>.board{display:none!important}body.rv-keyboard .game-page.rv-live-arena.rv-chat-stage .question h2{font-size:19px!important}body.rv-keyboard .rv-chat-stage .question>p.rv-stage-reference{display:none!important}

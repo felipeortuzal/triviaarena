@@ -415,7 +415,7 @@ try{
   assert.ok(await page.locator('#guess-form button[type="submit"]').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1}),"Chat send button visible");
  }
  const cq=await ca.evaluate(async()=>{const ss=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));return (await(await fetch("/api/room/"+ss.code,{headers:{authorization:"Bearer "+ss.token}})).json()).question;});
- assert.equal(cq.limit,100);assert.deepEqual(cq.options,[]);
+ assert.equal(cq.limit,100);assert.deepEqual(cq.options,[]);assert.equal(cq.bankId,"municipios-pop-2022");assert.match(await ca.locator("#round-question").innerText(),/município.*populoso.*Brasil.*2022/i);
  const exact=BANKS.find(b=>b.id==="municipios-pop-2022").items[cq.position-1];
  await ca.locator("#guess").fill(exact);
  assert.equal(await ca.locator("#live-options").isVisible(),false);
