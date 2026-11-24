@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("264 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,264);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,264);
+test("500 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,500);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,500);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
@@ -144,8 +144,8 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });
 
-test("2.6: catálogo expandido tem 264 fontes e TOP 1000 com posições reais",()=>{
- assert.equal(BANKS.length,264);
+test("2.6: catálogo expandido tem 500 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,500);
  assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
  assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
  assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
@@ -354,7 +354,9 @@ test("2.10: historical chat catalog rotates geography, economy, music, cinema an
 
 test("2.12: short rankings retain true size and room capacity",()=>{const r=make("race",25);r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["cosmetics-value-2025"]});chooseQuestion(r);assert.equal(r.question.limit,10);assert.ok(r.question.position<=10);});
 
-test("2.13: profiles preserve categories and adjust topic weights",()=>{const groups=["Futebol","Basquete","Games","Música","Cinema","Moda","Beleza","Geografia","Brasil"];for(const [profile,expected] of [["partners",60],["mixed",25]]){const weights=profileGroupWeights(groups,profile);const sum=groups.filter(g=>topicBucket(g)==="sports").reduce((n,g)=>n+weights[g],0);assert.equal(sum,expected);assert.equal(normalizeRoomConfig({profile,rankScale:"chat"}).profile,profile);}assert.equal(normalizeRoomConfig({profile:"invalid"}).profile,"mixed");});
+test("2.13: profiles preserve categories and adjust topic weights",()=>{const groups=["Futebol","Basquete","Games","Música","Cinema","Moda","Beleza","Geografia","Brasil"];for(const [profile,expected] of [["partners",30],["mixed",25]]){const weights=profileGroupWeights(groups,profile);const sum=groups.filter(g=>topicBucket(g)==="sports").reduce((n,g)=>n+weights[g],0);assert.equal(sum,expected);assert.equal(normalizeRoomConfig({profile,rankScale:"chat"}).profile,profile);}assert.equal(normalizeRoomConfig({profile:"invalid"}).profile,"mixed");});
 
-test("2.14: perfis alternam famílias sem ignorar seleção manual",()=>{const groups=["Futebol","Games","Cinema","Moda","Brasil"];assert.deepEqual(profileGroupChoices(groups,["Futebol","Cinema","Moda"],"mixed"),["Brasil"]);assert.deepEqual(profileGroupChoices(groups,["Futebol","Games"],"partners"),["Cinema","Moda","Brasil"]);assert.deepEqual(profileGroupChoices(["Games"],["Futebol","Games"],"partners"),["Games"]);assert.deepEqual(profileGroupChoices(["Cinema"],["Cinema"],"mixed"),["Cinema"]);});
+test("2.15: nenhum perfil impõe uma sequência de famílias",()=>{const groups=["Futebol","Games","Cinema","Moda","Brasil"];for(const profile of ["mixed","partners"]){assert.deepEqual(profileGroupChoices(groups,["Futebol","Cinema","Moda"],profile),groups);const weights=profileGroupWeights(groups,profile);assert.ok(groups.every(g=>weights[g]>0));assert.ok(weights.Brasil>=25);}});
 test("2.14: 30 listas históricas elegíveis e únicas",()=>{for(const id of ["cup-g-2006","cup-w-2006","cup-g-2010","cup-w-2010","cup-g-2014","cup-w-2014","cup-g-2022","cup-w-2022","league-es-1-p-2021-22","league-es-1-g-2021-22","league-it-1-p-2021-22","league-it-1-g-2021-22","league-es-1-p-2022-23","league-es-1-g-2022-23","league-it-1-p-2022-23","league-it-1-g-2022-23","league-es-1-p-2023-24","league-es-1-g-2023-24","league-it-1-p-2023-24","league-it-1-g-2023-24","boxoffice-2010","boxoffice-2015","boxoffice-2019","boxoffice-2022","boxoffice-2023","boxoffice-2024","food-brand-value-2025","dairy-brand-value-2025","brands-kantar-2025","olympics-tokyo-total-2020"]){const bank=BANKS.find(b=>b.id===id);assert.ok(bank&&isChatBank(bank),id);assert.equal(new Set(bank.items.map(normalizeAnswer)).size,bank.items.length,id);}assert.equal(BANKS.find(b=>b.id==="cup-g-2022").items[0],"França");assert.equal(BANKS.find(b=>b.id==="boxoffice-2023").items[0],"Barbie");assert.equal(BANKS.find(b=>b.id==="brands-kantar-2025").items[0],"Apple");assert.equal(topicBucket("Marcas"),"lifestyle");});
+
+test("2.15: expansão adiciona 236 listas únicas, fontes e grupos variados",()=>{const added=BANKS.slice(264);assert.equal(added.length,236);assert.ok(new Set(added.map(b=>b.group)).size>=8);for(const b of added){assert.ok(isChatBank(b),b.id);assert.ok(b.items.length>=10&&b.items.length<=100,b.id);assert.equal(new Set(b.items).size,b.items.length,b.id);assert.ok(b.sourceUrl&&b.snapshot,b.id);}});

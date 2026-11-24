@@ -79,8 +79,8 @@ try{
  await pa.locator('[data-op="start"]:not([disabled])').waitFor({state:"visible",timeout:10000});
  await pa.locator('[data-op="start"]').click();
  await pa.locator('#guess').waitFor({state:"visible"});
- assert.equal(await pa.locator(".rv25-round-meter").count(),1);
- assert.equal(await pa.locator(".rv25-round-meter").getAttribute("aria-valuenow"),"1");
+ assert.equal(await pa.locator(".rv-stage-round-label").count(),1);
+ assert.equal(await pa.locator(".rv-stage-round-label").innerText(),"Rodada 1");
  await pb.locator('#guess').waitFor({state:"visible",timeout:10000});
  const options=await pa.evaluate(async()=>{
   const s=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
@@ -311,7 +311,7 @@ try{
  await h.locator(".rv26-format").waitFor({state:"visible",timeout:12000});
  await g.locator(".rv26-format").waitFor({state:"visible",timeout:12000});
  assert.ok(/TOP (100|200|500|1.000)/.test(await h.locator(".rv26-format").innerText()));
- assert.equal(await h.locator('.rv24-game-footnote a').count(),1);
+ assert.equal(await h.locator('.rv-stage-reference').count(),1);
  const chosen=await h.evaluate(async()=>{
   const sess=JSON.parse(localStorage.getItem("riviera-cloudflare-session-v1"));
   const resp=await fetch("/api/room/"+sess.code,{headers:{authorization:"Bearer "+sess.token}});
