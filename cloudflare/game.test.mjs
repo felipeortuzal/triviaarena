@@ -53,9 +53,9 @@ test("premiações empatadas aceitam múltiplos jogadores",()=>{
  const a=calculateAwards(r);assert.deepEqual(a.find(x=>x.title==="Sniper").nicks,["A","B"]);
 });
 
-test("123 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
- assert.equal(BANKS.length,123);
- assert.equal(new Set(BANKS.map(b=>b.id)).size,123);
+test("199 rankings com fontes, snapshot, perguntas válidas e IDs únicos",()=>{
+ assert.equal(BANKS.length,199);
+ assert.equal(new Set(BANKS.map(b=>b.id)).size,199);
  for(const b of BANKS){assert.ok(b.items.length>=6,b.id+" deve ter ao menos 6 posições");assert.ok(b.title);assert.ok(b.snapshot);assert.ok(b.source);assert.equal(new Set(b.items).size,b.items.length,b.id+" contém respostas repetidas");}
  assert.ok(BANKS.some(b=>b.id==="epl-2025-26"));
  assert.ok(BANKS.some(b=>b.id==="f1-2025"));
@@ -144,8 +144,8 @@ test("2.5: formato manual continua com revelação sem timer automático",()=>{
  assert.equal(r.phase,"reveal");assert.equal(r.nextAt,null);
 });
 
-test("2.6: catálogo expandido tem 123 fontes e TOP 1000 com posições reais",()=>{
- assert.equal(BANKS.length,123);
+test("2.6: catálogo expandido tem 199 fontes e TOP 1000 com posições reais",()=>{
+ assert.equal(BANKS.length,199);
  assert.ok(BANKS.reduce((n,b)=>n+b.items.length,0)>12000);
  assert.equal(new Set(BANKS.map(b=>b.id)).size,BANKS.length);
  assert.equal(BANKS.filter(b=>b.items.length>=1000).length,5);
@@ -316,7 +316,7 @@ test("a categoria de sitcoms usa datas verificadas e reconhece abreviações e d
  }
 });
 
-test("2.9: modo da turma limita ao TOP 100 histórico, sem Turbo e sem respostas sugeridas",()=>{
+test("2.9: modo da turma usa o tamanho histórico real até TOP 100, sem Turbo e sem respostas sugeridas",()=>{
  const c=normalizeRoomConfig({rankScale:"chat",turbo:true,autoNext:true});
  assert.equal(c.rankScale,"chat");assert.equal(c.turbo,false);assert.equal(c.autoNext,false);
  assert.ok(c.categoryIds.length>0);
@@ -324,7 +324,7 @@ test("2.9: modo da turma limita ao TOP 100 histórico, sem Turbo e sem respostas
  assert.throws(()=>normalizeRoomConfig({rankScale:"chat",categoryIds:["pokemon"]}),/TOP 100/);
  const r=make("race",25);r.config=c;
  const used=new Set();
- for(let n=0;n<40;n++){chooseQuestion(r);assert.equal(r.question.limit,100);assert.ok(r.question.position>=1&&r.question.position<=100);assert.equal(used.has(r.question.key),false);used.add(r.question.key);}
+ for(let n=0;n<40;n++){chooseQuestion(r);assert.equal(r.question.limit,Math.min(100,BANKS[r.question.bi].items.length));assert.ok(r.question.position>=1&&r.question.position<=r.question.limit);assert.equal(used.has(r.question.key),false);used.add(r.question.key);}
 });
 test("2.9: 5 no exato, 2 e 1 divididos por empate, inválido zero, meta 25",()=>{
  const r=make("race",25);r.players.c={nick:"C",points:0};r.players.d={nick:"D",points:0};
@@ -350,4 +350,6 @@ test("2.10: bots finish the round when the human runs out of time",()=>{
  chooseQuestion(r);assert.equal(finalizeRoom(r,r.deadline+1),true);assert.equal(r.players.a.points,0);assert.ok(r.players.b.points>0);
 });
 
-test("2.10: historical chat catalog rotates geography, economy, music, cinema and Brazil",()=>{const eligible=BANKS.filter(isChatBank);assert.equal(eligible.length,41);assert.ok(["Geografia","Economia","Música","Cinema","Brasil"].every(group=>eligible.some(b=>b.group===group)));assert.ok(eligible.filter(b=>b.id.startsWith("world-")||b.id.startsWith("billboard-")).every(b=>b.items.length===100));});
+test("2.10: historical chat catalog rotates geography, economy, music, cinema and Brazil",()=>{const eligible=BANKS.filter(isChatBank);assert.ok(eligible.length>100);assert.ok(["Geografia","Economia","Música","Cinema","Brasil","Moda","Beleza","Futebol","Basquete","Hóquei","Vôlei","Tênis"].every(group=>eligible.some(b=>b.group===group)));assert.ok(eligible.filter(b=>b.id.startsWith("world-")||b.id.startsWith("billboard-")).every(b=>b.items.length===100));});
+
+test("2.12: short rankings retain true size and room capacity",()=>{const r=make("race",25);r.config=normalizeRoomConfig({rankScale:"chat",categoryIds:["cosmetics-value-2025"]});chooseQuestion(r);assert.equal(r.question.limit,10);assert.ok(r.question.position<=10);});
