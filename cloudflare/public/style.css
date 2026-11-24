@@ -1245,3 +1245,14 @@ body.rv-keyboard .rv-chat-stage .rv-stage-header{display:none!important}body.rv-
 @media(max-width:760px){.rv-category-banner{min-height:54px;padding:7px 10px}.rv-category-banner strong{font-size:17px}.rv-category-art{flex-basis:39px;width:39px;height:39px;font-size:26px}.rv-catalog-row{padding:10px}.rv-catalog-row strong{font-size:13px}}
 @media(max-height:620px){.rv-category-banner{min-height:42px;padding:5px 9px}.rv-category-art{width:30px;height:30px;flex-basis:30px;font-size:21px}.rv-category-banner strong{font-size:14px}.rv-category-banner small{font-size:9px;margin-bottom:1px}}
 body.rv-keyboard .rv-category-banner{min-height:32px;padding:4px 8px}body.rv-keyboard .rv-category-art{width:26px;height:26px;flex-basis:26px;font-size:18px}body.rv-keyboard .rv-category-banner strong{font-size:13px}
+
+/* 2.13 · party profile cards */
+.rv-profile-picker{margin:12px 0;padding:0;border:0;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rv-profile-picker legend{font:700 14px/1.3 system-ui,sans-serif;color:#24443c;padding:0 0 8px}
+.rv-profile-picker label{position:relative;display:flex!important;align-items:center;gap:9px;border:1px solid #cbd6cd;background:#fff;border-radius:12px;padding:12px;cursor:pointer;min-width:0;letter-spacing:0!important;text-transform:none!important}
+.rv-profile-picker label:has(input:checked){border:2px solid #337454;background:#eaf3e9;padding:11px}
+.rv-profile-picker input{appearance:auto!important;width:17px!important;height:17px!important;min-height:0!important;flex:0 0 17px;accent-color:#337454;margin:0!important}
+.rv-profile-picker strong,.rv-profile-picker small{display:block;letter-spacing:0!important;text-transform:none!important}.rv-profile-picker strong{font:700 14px/1.25 system-ui,sans-serif;color:#24443c}.rv-profile-picker small{font:400 11px/1.35 system-ui,sans-serif;color:#587065;margin-top:4px}
+.rv-profile-icon{font-size:23px;flex:0 0 auto}
+.rv-profile-picker[hidden]{display:none!important}
+@media(max-width:500px){.rv-profile-picker{grid-template-columns:1fr}.rv-profile-picker label{padding:9px 11px}.rv-profile-picker label:has(input:checked){padding:8px 10px}}
