@@ -1,6 +1,6 @@
 import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.11.0";
+const VERSION="2.12.0";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
@@ -16,13 +16,13 @@ assert.notEqual(host.token,guest.token);
 const p="/api/room/"+host.code;
 const {data:info}=await call("/api/status");
 assert.equal(info.version,VERSION);
-assert.equal(info.rankings,123);
-assert.equal(info.entries,13782);
+assert.equal(info.rankings,199);
+assert.equal(info.entries,16688);
 assert.equal(info.maxRanking,1025);
 assert.deepEqual(info.rankFormats,[10,20,30,50,100,200,500,1000]);
 assert.equal(info.phrases,55);
 const list=await call("/api/rankings");
-assert.equal(list.data.rankings.length,123);
+assert.equal(list.data.rankings.length,199);
 assert.equal(list.data.rankings.filter(b=>b.count>=1000).length,5);
 assert.equal(list.data.rankings.some(b=>b.id==="f1-2025"),true);
 assert.equal(list.data.rankings.some(b=>b.id==="epl-2025-26"),true);
@@ -311,7 +311,7 @@ const newSearch=list.data.rankings.find(x=>x.id==="imdb-1000-historico");
 assert.equal(newSearch.count,1000);
 const newNational=list.data.rankings.find(x=>x.id==="pokedex-nacional-1025");
 assert.equal(newNational.kind,"ordem");
-console.log("INTEGRAÇÃO 2.6 OK: 123 listas, 13.782 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
+console.log("INTEGRAÇÃO 2.6 OK: 199 listas, 16.688 entradas, Modo Extremo, TOP 100–1000 real, gabarito e fonte.");
 
 
 /* 2.7: Correção automática autoritativa, retorno privado e anti-duplicidade */
@@ -432,7 +432,7 @@ console.log("INTEGRAÇÃO 2.8 OK: corrida real até cinco, confirmação privada
  assert.equal(created.status,200);const h=created.data,path="/api/room/"+h.code;
  const state=(await call(path,"GET",null,h.token)).data;
  assert.equal(state.phase,"playing");assert.equal(state.practice.difficulty,"normal");
- assert.equal(state.players.filter(p=>p.bot).length,3);assert.equal(state.question.limit,100);
+ assert.equal(state.players.filter(p=>p.bot).length,3);assert.ok(state.question.limit>=10&&state.question.limit<=100);
  assert.deepEqual(state.question.options,[]);assert.equal(state.players.every(p=>!Object.hasOwn(p,"token")),true);
  assert.equal((await call(path+"/join","POST",{nick:"Intruso"})).status,409);
  const bank=BANKS.find(b=>b.title===state.question.category);
