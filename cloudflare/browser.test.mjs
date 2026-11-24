@@ -462,5 +462,14 @@ try{
  assert.deepEqual(failures,[]);
  await practiceContext.close();
  console.log("BROWSER TREINO 2.10 OK: 3 bots, meta, dificuldade, gabarito, revanche.");
+ for(const width of [390,1280]){
+ const expired=await browser.newContext({viewport:{width,height:800},reducedMotion:"reduce"});const ep=await expired.newPage();
+ await ep.addInitScript(()=>localStorage.setItem("riviera-cloudflare-session-v1",JSON.stringify({code:"ZZZZZZ",token:"expired-invalid",id:"old"})));
+ await ep.goto(base,{waitUntil:"domcontentloaded"});await ep.locator("#join-form").waitFor();await ep.locator("#notice:not([hidden])").waitFor();
+ assert.ok(await ep.locator("#notice").evaluate(el=>{const r=el.getBoundingClientRect();return r.height<=86&&r.width<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}));
+ assert.equal(await ep.evaluate(()=>localStorage.getItem("riviera-cloudflare-session-v1")),null);
+ assert.equal(await ep.locator("#join-code").inputValue(),"ZZZZZZ");
+ await ep.getByRole("button",{name:"Fechar aviso"}).click();assert.equal(await ep.locator("#notice").isVisible(),false);await expired.close();
+ }
  await a.close();await b.close();
 }finally{await browser.close()}

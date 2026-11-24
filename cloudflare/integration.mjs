@@ -1,6 +1,6 @@
 import {PHRASES,BANKS} from "./worker.mjs";
 import assert from "node:assert/strict";
-const VERSION="2.10.0";
+const VERSION="2.10.1";
 const base=process.env.RIVIERA_URL||"http://127.0.0.1:8787";
 async function call(path,method="GET",data,token){
  const resp=await fetch(base+path,{method,headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:data?JSON.stringify(data):undefined});
