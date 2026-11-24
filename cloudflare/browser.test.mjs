@@ -98,7 +98,7 @@ try{
  await pb.locator("#guess").evaluate(input=>{input.dataset.typing="active";input.setSelectionRange(2,2)});
  await pa.locator('#guess').fill("Bulbassaur");
  await pa.locator('#guess-form button[type="submit"]').click();
- await pa.getByText("PALPITE ENVIADO").waitFor({timeout:8000});
+ await pa.getByText("Palpite registrado",{exact:false}).waitFor({timeout:8000});
  await pa.locator(".rv27-answer-confirm").waitFor({state:"visible",timeout:10000});
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbasaur"),"Autocorreção deve mostrar o nome reconhecido");
  assert.ok((await pa.locator(".rv27-answer-confirm").innerText()).includes("Bulbassaur"),"A resposta original deve ser exibida");
@@ -166,7 +166,7 @@ try{
  assert.equal(noLeak,false,"Solution is not displayed before reveal");
  await pc.locator('#guess').fill(def.answer);
  await pc.locator('#guess-form button[type="submit"]').click();
- await pc.getByText("PALPITE ENVIADO").waitFor({timeout:10000});
+ await pc.getByText("Palpite registrado",{exact:false}).waitFor({timeout:10000});
  await pd.locator('#guess').fill("resposta sem nenhum nexo");
  await pd.locator('#guess-form button[type="submit"]').click();
  await pc.getByText("FIM DE JOGO").waitFor({timeout:12000});
@@ -282,7 +282,7 @@ try{
  for(const p of [h,g])p.on("pageerror",err=>failures.push(err.message));
  await h.goto(base,{waitUntil:"domcontentloaded"});
  await h.locator(".rv26-release").waitFor({state:"visible"});
- await h.getByText("234 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
+ await h.getByText("500 rankings", {exact:false}).first().waitFor({state:"visible",timeout:15000});
  await h.locator('[data-op="create"]').first().click();
  await h.locator("#create-form [name=nick]").fill("Host Sorteio");
  await h.locator('[data-op="wizard-next"]').click();

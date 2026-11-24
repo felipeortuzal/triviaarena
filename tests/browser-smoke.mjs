@@ -82,7 +82,7 @@ async function browserChecks(){
       const pathname=new URL(req.url,"http://127.0.0.1").pathname;
       if(!pathname.startsWith("/triviaarena/")){res.writeHead(404);res.end();return}
       const relative=pathname.slice("/triviaarena/".length)||"index.html";
-      const allowed=["index.html","app.js","data.json","logo.svg","assets/riviera-reference-beach.jpg","assets/riviera-logo-transparent.png","firebase-config.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js"];
+      const allowed=["index.html","app.js","data.json","logo.svg","assets/riviera-reference-beach.jpg","assets/riviera-logo-transparent.png","firebase-config.js","party-game-v5.js","rank-tools-v5.js","phrase-tools.js","ranking-match.js","rooms-v2.js","phrases-v3.js"];
       if(!allowed.includes(relative)){res.writeHead(404);res.end();return}
       const filename=resolve(ROOT,relative);
       if(relative==="firebase-config.js"&&req.headers["x-test-firebase"]==="configured"){
